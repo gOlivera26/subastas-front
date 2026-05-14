@@ -1,0 +1,44 @@
+<div class="relative flex min-h-[calc(100vh-64px)] flex-col items-center justify-center overflow-hidden px-4 py-12">
+  
+  <div class="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+    <div class="absolute top-1/4 h-[500px] w-[500px] rounded-full bg-[var(--color-aether-blue)] opacity-10 blur-[120px]"></div>
+    <div class="absolute bottom-1/4 h-[400px] w-[400px] rounded-full bg-[var(--color-cyan-spark)] opacity-10 blur-[120px]"></div>
+  </div>
+
+  <div class="relative z-10 w-full max-w-5xl animate-fade-in-up">
+    
+    <div class="mb-10 text-center">
+      <h1 class="mb-3 text-[32px] sm:text-[40px] font-[590] tracking-tight text-[var(--color-porcelain)]">
+        Centro de Comando
+      </h1>
+      <p class="text-[15px] text-[var(--color-storm-cloud)]">
+        Selecciona un módulo operativo para comenzar.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+      
+      @for (modulo of modulosPermitidos(); track modulo.id) {
+        <a [routerLink]="modulo.ruta" 
+           class="group relative flex flex-col justify-between rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-8 shadow-xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-1.5 hover:border-[var(--color-cyan-spark)]/50 hover:bg-[var(--color-deep-slate)] hover:shadow-[0_10px_40px_rgba(2,184,204,0.1)] overflow-hidden">
+          
+          <div class="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[var(--color-cyan-spark)] opacity-0 blur-[80px] transition-opacity duration-700 group-hover:opacity-20 pointer-events-none"></div>
+
+          <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-deep-slate)] ring-1 ring-[var(--color-charcoal-grey)] transition-colors duration-500 group-hover:bg-[var(--color-cyan-spark)]/10 group-hover:ring-[var(--color-cyan-spark)]/30 relative z-10">
+            <lucide-icon [name]="modulo.icono" [size]="24" class="text-[var(--color-storm-cloud)] group-hover:text-[var(--color-cyan-spark)] transition-colors duration-500"></lucide-icon>
+          </div>
+          
+          <div class="relative z-10">
+            <h3 class="mb-2 text-[18px] font-[590] tracking-tight text-[var(--color-porcelain)]">
+              {{ modulo.titulo }}
+            </h3>
+            <p class="text-[14px] leading-[1.6] text-[var(--color-fog-grey)] group-hover:text-[var(--color-light-steel)] transition-colors duration-500">
+              {{ modulo.descripcion }}
+            </p>
+          </div>
+        </a>
+      }
+
+    </div>
+  </div>
+</div>

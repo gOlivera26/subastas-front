@@ -1,0 +1,305 @@
+<header
+  class="fixed top-0 z-50 w-full transition-all duration-300"
+  [ngClass]="isScrolled() 
+    ? 'border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 backdrop-blur-xl py-0 shadow-[0_4px_30px_rgba(0,0,0,0.5)]' 
+    : 'border-transparent bg-transparent py-2'"
+>
+  <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    
+    <a routerLink="/" (click)="closeMenu()" class="flex items-center gap-2.5 transition-opacity hover:opacity-80 z-50 group">
+      <div class="flex size-8 items-center justify-center rounded-lg bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)] group-hover:bg-[var(--color-neon-lime)]/20 transition-colors">
+        <lucide-icon name="gavel" [size]="18"></lucide-icon>
+      </div>
+      <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)] hidden sm:block">
+        Portal de Compraventa Digital InnovaNow
+      </span>
+      <span class="text-[16px] font-[590] tracking-tight text-[var(--color-porcelain)] sm:hidden">
+        InnovaNow
+      </span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-3">
+      <a routerLink="/subastas-activas" class="group flex items-center gap-2 rounded-xl border border-transparent px-4 py-2 text-[13px] font-[510] text-[var(--color-light-steel)] transition-all hover:border-[var(--color-charcoal-grey)] hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="sparkles" [size]="14" class="text-[var(--color-cyan-spark)] transition-transform group-hover:scale-110"></lucide-icon>
+        Subastas Activas
+      </a>
+      
+      @if (authService.isAuthenticated() && user()) {
+        <div class="flex items-center gap-4 ml-2 relative">
+          
+          <a routerLink="/modulos" class="group flex items-center gap-2 rounded-xl border border-transparent px-4 py-2 text-[13px] font-[510] text-[var(--color-porcelain)] transition-all hover:border-[var(--color-charcoal-grey)] hover:bg-[var(--color-deep-slate)]/50">
+            <lucide-icon name="layout-template" [size]="14" class="text-[var(--color-light-steel)] group-hover:text-[var(--color-porcelain)] transition-colors"></lucide-icon>
+            Mi Panel
+          </a>
+          
+          <div>
+            <button id="user-menu-button" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95 ring-2 ring-[var(--color-pitch-black)] uppercase">
+              {{ user()?.nombreUsuario?.charAt(0) || 'U' }}
+            </button>
+
+            <div id="user-dropdown" 
+                 class="absolute right-0 top-12 w-64 rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/95 p-2 shadow-2xl backdrop-blur-xl transition-all duration-200 transform origin-top-right"
+                 [ngClass]="isUserMenuOpen() ? 'scale-100 opacity-100 visible' : 'scale-95 opacity-0 invisible'">
+              
+              <div class="px-4 py-3 border-b border-[var(--color-charcoal-grey)]/60 mb-2">
+                <p class="text-[14px] font-[590] text-[var(--color-porcelain)] truncate">{{ user()?.nombreUsuario }}</p>
+                <p class="text-[12px] text-[var(--color-storm-cloud)] truncate">{{ user()?.email }}</p>
+                <span class="mt-2 inline-block rounded-md bg-[var(--color-deep-slate)] px-2 py-0.5 text-[10px] font-bold tracking-widest text-[var(--color-light-steel)] uppercase">
+                  {{ user()?.rol }}
+                </span>
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <button (click)="openProfile()" class="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+                  <lucide-icon name="user-circle" [size]="16"></lucide-icon>
+                  Mi Perfil
+                </button>
+                <button (click)="openPassword()" class="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+                  <lucide-icon name="key-round" [size]="16"></lucide-icon>
+                  Cambiar Contraseña
+                </button>
+                <button (click)="logout()" class="mt-1 flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-red-400 hover:bg-red-500/10 transition-colors">
+                  <lucide-icon name="log-out" [size]="16"></lucide-icon>
+                  Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <a routerLink="/login" class="inline-flex items-center justify-center rounded-xl bg-[var(--color-neon-lime)] px-5 py-2 text-[13px] font-[590] text-[var(--color-pitch-black)] transition-all hover:shadow-[0_0_15px_rgba(228,242,34,0.3)] active:scale-[0.97] ml-2">
+          Iniciar Sesión
+        </a>
+      }
+    </nav>
+
+    <button (click)="toggleMenu()" class="md:hidden flex items-center justify-center p-2 rounded-lg border border-transparent text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)]/50 hover:border-[var(--color-charcoal-grey)] z-50 transition-all active:scale-95">
+      <lucide-icon [name]="isMobileMenuOpen() ? 'x' : 'menu'" [size]="22"></lucide-icon>
+    </button>
+  </div>
+
+  <div 
+    class="absolute top-0 left-0 w-full h-screen bg-[var(--color-pitch-black)]/98 backdrop-blur-3xl border-b border-[var(--color-charcoal-grey)] transition-all duration-300 md:hidden overflow-y-auto flex flex-col shadow-2xl"
+    [ngClass]="isMobileMenuOpen() ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
+  >
+    <div class="flex flex-col gap-3 px-6 pt-24 pb-8">
+      
+      <a routerLink="/subastas-activas" (click)="closeMenu()" class="flex items-center gap-3 w-full rounded-2xl bg-[var(--color-deep-slate)]/40 border border-[var(--color-charcoal-grey)]/60 p-4 transition-all hover:bg-[var(--color-deep-slate)] active:scale-[0.98]">
+        <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+          <lucide-icon name="sparkles" [size]="20"></lucide-icon>
+        </div>
+        <div class="flex flex-col text-left">
+          <span class="text-[15px] font-[590] text-[var(--color-porcelain)] leading-none mb-1">Subastas Activas</span>
+          <span class="text-[12px] text-[var(--color-storm-cloud)] leading-none">Explora el catálogo en vivo</span>
+        </div>
+        <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
+      </a>
+      @if (authService.isAuthenticated() && user()) {
+        <div class="mb-4 flex items-center gap-4 rounded-3xl border border-[var(--color-charcoal-grey)]/80 bg-[var(--color-graphite)] p-5">
+          <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[20px] font-bold text-[var(--color-pitch-black)] uppercase">
+            {{ user()?.nombreUsuario?.charAt(0) || 'U' }}
+          </div>
+          <div class="flex flex-col overflow-hidden text-left">
+            <span class="text-[16px] font-[590] text-[var(--color-porcelain)] truncate">{{ user()?.nombreUsuario }}</span>
+            <span class="text-[13px] text-[var(--color-storm-cloud)] truncate">{{ user()?.email }}</span>
+          </div>
+        </div>
+
+        <a routerLink="/modulos" (click)="closeMenu()" class="flex items-center gap-3 w-full rounded-2xl bg-[var(--color-deep-slate)]/40 border border-[var(--color-charcoal-grey)]/60 p-4 transition-all active:bg-[var(--color-deep-slate)]">
+          <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-light-steel)]/10 text-[var(--color-porcelain)]">
+            <lucide-icon name="layout-template" [size]="20"></lucide-icon>
+          </div>
+          <span class="text-[15px] font-[590] text-[var(--color-porcelain)]">Mi Panel</span>
+          <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
+        </a>
+
+        <button (click)="openProfile()" class="flex items-center gap-3 w-full rounded-2xl bg-[var(--color-deep-slate)]/40 border border-[var(--color-charcoal-grey)]/60 p-4 transition-all active:bg-[var(--color-deep-slate)]">
+          <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-aether-blue)]/10 text-[var(--color-aether-blue)]">
+            <lucide-icon name="user-circle" [size]="20"></lucide-icon>
+          </div>
+          <span class="text-[15px] font-[590] text-[var(--color-porcelain)]">Mi Perfil</span>
+          <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
+        </button>
+
+        <button (click)="openPassword()" class="flex items-center gap-3 w-full rounded-2xl bg-[var(--color-deep-slate)]/40 border border-[var(--color-charcoal-grey)]/60 p-4 transition-all active:bg-[var(--color-deep-slate)]">
+          <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+            <lucide-icon name="key-round" [size]="20"></lucide-icon>
+          </div>
+          <span class="text-[15px] font-[590] text-[var(--color-porcelain)]">Cambiar Contraseña</span>
+          <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
+        </button>
+
+        <div class="my-4 h-px w-full bg-[var(--color-charcoal-grey)]/50"></div>
+
+        <button (click)="logout()" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-[15px] font-[590] text-red-400 transition-all active:scale-[0.97]">
+          <lucide-icon name="log-out" [size]="18"></lucide-icon>
+          Cerrar Sesión
+        </button>
+      } @else {
+        <a routerLink="/login" (click)="closeMenu()" class="mt-2 inline-flex w-full items-center justify-center rounded-2xl bg-[var(--color-neon-lime)] px-5 py-4 text-[15px] font-[590] text-[var(--color-pitch-black)] transition-all active:scale-[0.97] shadow-lg shadow-[var(--color-neon-lime)]/10">
+          Iniciar Sesión
+        </a>
+      }
+    </div>
+  </div>
+</header>
+
+@if (isProfileModalOpen() && user()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      
+      <div class="absolute right-6 top-6 flex items-center gap-3 z-10">
+        @if (!isLoadingProfile() && profileData()) {
+          <button (click)="toggleEditProfile()" class="text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] transition-colors active:scale-95" title="Editar Perfil">
+            <lucide-icon name="pencil" [size]="20"></lucide-icon>
+          </button>
+        }
+        <button (click)="closeProfile()" class="text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors active:scale-95">
+          <lucide-icon name="x" [size]="24"></lucide-icon>
+        </button>
+      </div>
+
+      <h2 class="text-[24px] font-[590] text-[var(--color-porcelain)] mb-6">Mi Perfil</h2>
+      
+      @if (isLoadingProfile()) {
+        <div class="flex py-10 items-center justify-center text-[var(--color-cyan-spark)]">
+          <lucide-icon name="loader-2" [size]="32" class="animate-spin"></lucide-icon>
+        </div>
+      } @else if (profileData()) {
+        
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[24px] font-bold text-[var(--color-pitch-black)] uppercase shrink-0 transition-all duration-300">
+              {{ (isEditingProfile() ? profileForm.get('nombre')?.value?.charAt(0) : profileData()?.nombre?.charAt(0)) || 'U' }}
+            </div>
+            <div class="w-full">
+              @if (isEditingProfile()) {
+                <div class="flex gap-3 mb-1">
+                  <input formControlName="nombre" type="text" class="w-full border-b border-[var(--color-cyan-spark)] bg-transparent text-[18px] font-[590] text-[var(--color-porcelain)] focus:outline-none" placeholder="Nombre">
+                  <input formControlName="apellido" type="text" class="w-full border-b border-[var(--color-cyan-spark)] bg-transparent text-[18px] font-[590] text-[var(--color-porcelain)] focus:outline-none" placeholder="Apellido">
+                </div>
+              } @else {
+                <p class="text-[18px] font-[590] text-[var(--color-porcelain)]">{{ profileData()?.nombre }} {{ profileData()?.apellido }}</p>
+              }
+              <span class="mt-1 inline-block rounded-md bg-[var(--color-deep-slate)] px-2 py-0.5 text-[10px] font-bold tracking-widest text-[var(--color-neon-lime)] uppercase">
+                {{ profileData()?.rol }}
+              </span>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="mb-1 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Correo Electrónico</label>
+              <div class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/50 px-4 py-3 text-[14px] text-[var(--color-fog-grey)] cursor-not-allowed">
+                {{ profileData()?.email }}
+              </div>
+            </div>
+            <div>
+              <label class="mb-1 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Documento / CUIT</label>
+              <div class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/50 px-4 py-3 text-[14px] text-[var(--color-fog-grey)] cursor-not-allowed">
+                {{ profileData()?.nroDocumento }}
+              </div>
+            </div>
+            <div>
+              <label class="mb-1 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Teléfono</label>
+              @if (isEditingProfile()) {
+                <input formControlName="telefono" type="text" placeholder="+54 9 11 2345 6789" class="w-full rounded-xl border border-[var(--color-cyan-spark)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:outline-none shadow-[0_0_10px_rgba(2,184,204,0.15)] transition-all">
+              } @else {
+                <div class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/50 px-4 py-3 text-[14px] text-[var(--color-fog-grey)] cursor-not-allowed">
+                  {{ profileData()?.telefono }}
+                </div>
+              }
+            </div>
+          </div>
+
+          @if (isEditingProfile()) {
+            <div class="mt-8 flex gap-3">
+              <button type="button" (click)="toggleEditProfile()" class="w-1/3 rounded-xl bg-[var(--color-deep-slate)] py-3.5 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] active:scale-95">
+                Cancelar
+              </button>
+              <button type="submit" [disabled]="isSubmittingProfile()" class="flex w-2/3 items-center justify-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] py-3.5 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 active:scale-95 disabled:opacity-70">
+                @if (isSubmittingProfile()) {
+                  <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+                } @else {
+                  Guardar Cambios
+                }
+              </button>
+            </div>
+          } @else {
+            <button type="button" (click)="closeProfile()" class="mt-8 w-full rounded-xl bg-[var(--color-deep-slate)] py-3.5 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] active:scale-95">
+              Cerrar
+            </button>
+          }
+        </form>
+
+      }
+    </div>
+  </div>
+}
+
+@if (isPasswordModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      
+      <button (click)="closePassword()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+
+      <h2 class="text-[24px] font-[590] text-[var(--color-porcelain)] mb-2">Cambiar Contraseña</h2>
+      <p class="text-[14px] text-[var(--color-storm-cloud)] mb-6">Ingresa tu contraseña actual y la nueva para actualizar tus credenciales.</p>
+      
+      @if (passwordError()) {
+        <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-left animate-fade-in">
+          <lucide-icon name="lock" [size]="18" class="mt-0.5 shrink-0 text-red-400"></lucide-icon>
+          <p class="text-[13px] font-[510] text-red-400">{{ passwordError() }}</p>
+        </div>
+      }
+
+      @if (passwordSuccess()) {
+        <div class="mb-6 flex items-start gap-3 rounded-xl border border-[var(--color-neon-lime)]/20 bg-[var(--color-neon-lime)]/10 p-4 text-left animate-fade-in">
+          <lucide-icon name="shield-check" [size]="18" class="mt-0.5 shrink-0 text-[var(--color-neon-lime)]"></lucide-icon>
+          <p class="text-[13px] font-[510] text-[var(--color-neon-lime)]">{{ passwordSuccess() }}</p>
+        </div>
+      }
+
+      <form [formGroup]="passwordForm" (ngSubmit)="changePasswordSubmit()" class="space-y-4">
+        <div>
+          <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Contraseña Actual</label>
+          <div class="relative">
+            <lucide-icon name="lock" [size]="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-fog-grey)]"></lucide-icon>
+            <input formControlName="passwordActual" type="password" placeholder="••••••••" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)] transition-all">
+          </div>
+        </div>
+        
+        <div>
+          <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Nueva Contraseña</label>
+          <div class="relative">
+            <lucide-icon name="key-round" [size]="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-fog-grey)]"></lucide-icon>
+            <input formControlName="nuevaPassword" type="password" placeholder="••••••••" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)] transition-all" [ngClass]="{'border-red-500/50 focus:border-red-500 focus:ring-red-500': passwordForm.hasError('mismatch') && passwordForm.get('nuevaPassword')?.touched}">
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Confirmar Nueva Contraseña</label>
+          <div class="relative">
+            <lucide-icon name="key-round" [size]="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-fog-grey)]"></lucide-icon>
+            <input formControlName="confirmarPassword" type="password" placeholder="••••••••" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)] transition-all" [ngClass]="{'border-red-500/50 focus:border-red-500 focus:ring-red-500': passwordForm.hasError('mismatch') && passwordForm.get('confirmarPassword')?.touched}">
+          </div>
+          @if (passwordForm.hasError('mismatch') && passwordForm.get('confirmarPassword')?.touched) {
+            <p class="mt-1.5 text-[11px] text-red-400">Las contraseñas no coinciden.</p>
+          }
+        </div>
+
+        <button type="submit" [disabled]="isSubmittingPassword()" class="group relative mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] py-3.5 text-[15px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none shadow-[0_0_15px_rgba(2,184,204,0.2)]">
+          @if (isSubmittingPassword()) {
+            <lucide-icon name="loader-2" [size]="18" class="animate-spin"></lucide-icon>
+            Procesando...
+          } @else {
+            Actualizar Contraseña
+          }
+        </button>
+      </form>
+
+    </div>
+  </div>
+}

@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-pitch-black: #08090a;
+    --color-graphite: #0f1011;
+    --color-deep-slate: #161718;
+    --color-charcoal-grey: #23252a;
+    --color-muted-ash: #323334;
+    --color-gunmetal: #383b3f;
+    --color-porcelain: #f7f8f8;
+    --color-light-steel: #d0d6e0;
+    --color-storm-cloud: #8a8f98;
+    --color-fog-grey: #62666d;
+    --color-alabaster: #e5e5e6;
+    --color-neon-lime: #e4f222;
+    --color-aether-blue: #5e6ad2;
+    --color-cyan-spark: #02b8cc;
+
+    --font-inter-variable: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    
+    --radius-pill: 9999px;
+    --radius-buttons: 6px;
+    --shadow-subtle-2: rgba(0, 0, 0, 0.4) 0px 4px 12px 0px;
+    --shadow-md: rgba(0, 0, 0, 0.4) 0px 2px 4px 0px;
+    --shadow-sm: rgba(0, 0, 0, 0.4) 0px 2px 4px 0px;
+  }
+
+  @layer utilities {
+  .animate-float-fast { animation: float 4s ease-in-out infinite 2s; }
+
+  .animate-marquee {
+    animation: marquee 35s linear infinite;
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+  html {
+    color-scheme: dark;
+    /* ESTO HACE QUE EL SCROLL SE ENGANCHE AUTOMÁTICAMENTE */
+    scroll-snap-type: y proximity; 
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-inter-variable);
+    background-color: var(--color-pitch-black);
+    color: var(--color-porcelain);
+  }
+}

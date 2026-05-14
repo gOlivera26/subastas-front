@@ -1,0 +1,121 @@
+<div class="relative flex min-h-[calc(100vh-64px)] flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+    <div class="absolute top-1/4 h-[500px] w-[500px] rounded-full bg-[var(--color-aether-blue)] opacity-5 blur-[120px]"></div>
+  </div>
+
+  <div class="relative z-10 w-full max-w-6xl animate-fade-in-up">
+    
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <a routerLink="/modulos" class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+            <lucide-icon name="arrow-left" [size]="18"></lucide-icon>
+          </a>
+          <h1 class="text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Administración de Usuarios</h1>
+        </div>
+        <p class="text-[14px] text-[var(--color-storm-cloud)] ml-11">Gestiona los accesos y aprueba nuevos registros en la plataforma.</p>
+      </div>
+    </div>
+
+    @if (successMessage()) {
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-[var(--color-neon-lime)]/20 bg-[var(--color-neon-lime)]/10 p-4 animate-fade-in">
+        <lucide-icon name="shield-check" [size]="18" class="text-[var(--color-neon-lime)] shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-[var(--color-neon-lime)]">{{ successMessage() }}</p>
+      </div>
+    }
+    @if (errorMessage()) {
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 animate-fade-in">
+        <lucide-icon name="alert-triangle" [size]="18" class="text-red-400 shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-red-400">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-1 shadow-2xl backdrop-blur-xl overflow-hidden">
+      
+      <div class="px-6 py-5 border-b border-[var(--color-charcoal-grey)] flex justify-between items-center bg-[var(--color-pitch-black)]/30 rounded-t-[1.8rem]">
+        <h2 class="text-[16px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2">
+          <lucide-icon name="users" [size]="18" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+          Bandeja de Aprobación Pendiente
+        </h2>
+        <span class="bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] text-[12px] font-[590] px-3 py-1 rounded-full border border-[var(--color-charcoal-grey)]">
+          {{ pendingUsers().length }} solicitudes
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-[14px]">
+          <thead class="bg-[var(--color-pitch-black)]/50 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+            <tr>
+              <th class="px-6 py-4 font-medium">Usuario / Contacto</th>
+              <th class="px-6 py-4 font-medium">Documento</th>
+              <th class="px-6 py-4 font-medium">Rol / Entidad Representada</th>
+              <th class="px-6 py-4 font-medium">Fecha Solicitud</th>
+              <th class="px-6 py-4 font-medium text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+            
+            @if (isLoading()) {
+              <tr>
+                <td colspan="5" class="px-6 py-12 text-center text-[var(--color-storm-cloud)]">
+                  <lucide-icon name="loader-2" [size]="32" class="animate-spin mx-auto mb-3 text-[var(--color-cyan-spark)]"></lucide-icon>
+                  Cargando solicitudes...
+                </td>
+              </tr>
+            } @else if (pendingUsers().length === 0) {
+              <tr>
+                <td colspan="5" class="px-6 py-16 text-center">
+                  <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)]">
+                    <lucide-icon name="shield-check" [size]="32"></lucide-icon>
+                  </div>
+                  <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">Todo al día</p>
+                  <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">No hay usuarios pendientes de aprobación en este momento.</p>
+                </td>
+              </tr>
+            } @else {
+              @for (user of pendingUsers(); track user.idUsuario) {
+                <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/50 group">
+                  <td class="px-6 py-4">
+                    <p class="font-[590] text-[var(--color-porcelain)]">{{ user.nombreCompleto }}</p>
+                    <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5">{{ user.email }}</p>
+                  </td>
+                  <td class="px-6 py-4 text-[var(--color-fog-grey)] font-mono text-[13px]">
+                    {{ user.documento }}
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span [class]="user.tipoUsuario === 'Proveedor Directo' ? 'text-[var(--color-neon-lime)] bg-[var(--color-neon-lime)]/10' : 'text-[var(--color-cyan-spark)] bg-[var(--color-cyan-spark)]/10'" 
+                            class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                        {{ user.tipoUsuario }}
+                      </span>
+                    </div>
+                    <p class="text-[13px] text-[var(--color-porcelain)] truncate max-w-[200px]" [title]="user.entidadRepresentada">
+                      {{ user.entidadRepresentada }}
+                    </p>
+                  </td>
+                  <td class="px-6 py-4 text-[13px] text-[var(--color-storm-cloud)]">
+                    {{ user.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <button 
+                      (click)="approveUser(user.idUsuario, user.nombreCompleto)"
+                      [disabled]="processingId() === user.idUsuario"
+                      class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-neon-lime)]/10 px-4 py-2 text-[13px] font-[590] text-[var(--color-neon-lime)] hover:bg-[var(--color-neon-lime)] hover:text-[var(--color-pitch-black)] transition-all disabled:opacity-50 border border-[var(--color-neon-lime)]/20">
+                      @if (processingId() === user.idUsuario) {
+                        <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+                      } @else {
+                        <lucide-icon name="check-circle" [size]="16"></lucide-icon>
+                        Aprobar
+                      }
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

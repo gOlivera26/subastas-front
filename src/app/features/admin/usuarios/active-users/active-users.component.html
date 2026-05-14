@@ -1,0 +1,454 @@
+<div class="relative flex min-h-[calc(100vh-64px)] flex-col py-8 px-4 sm:px-6 lg:px-8">
+  <div class="relative z-10 w-full animate-fade-in-up max-w-[1400px] mx-auto">
+    
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Gestión de Usuarios</h1>
+        <p class="text-[14px] text-[var(--color-storm-cloud)]">Listado maestro de cuentas empadronadas.</p>
+      </div>
+
+      <div class="relative w-full sm:w-80">
+        <lucide-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+        <input 
+          [formControl]="searchControl"
+          type="text" 
+          placeholder="Buscar por DNI, Nombre o Email..." 
+          class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 pl-10 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors"
+        >
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 animate-fade-in">
+        <lucide-icon name="alert-triangle" [size]="18" class="text-red-400 shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-red-400">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-1 shadow-2xl backdrop-blur-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-[14px] whitespace-nowrap">
+          <thead class="bg-[var(--color-pitch-black)]/50 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+            <tr>
+              <th class="px-6 py-4 font-medium">Estado</th>
+              <th class="px-6 py-4 font-medium">Usuario / Contacto</th>
+              <th class="px-6 py-4 font-medium">Documento</th>
+              <th class="px-6 py-4 font-medium">Rol del Sistema</th>
+              <th class="px-6 py-4 font-medium">Tipo / Entidad</th>
+              <th class="px-6 py-4 font-medium text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+            
+            @if (isLoading()) {
+              <tr>
+                <td colspan="6" class="px-6 py-16 text-center text-[var(--color-storm-cloud)]">
+                  <lucide-icon name="loader-2" [size]="32" class="animate-spin mx-auto mb-3 text-[var(--color-cyan-spark)]"></lucide-icon>
+                  Cargando padrón...
+                </td>
+              </tr>
+            } @else if (activeUsers().length === 0) {
+              <tr>
+                <td colspan="6" class="px-6 py-16 text-center">
+                  <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)]">
+                    <lucide-icon name="search" [size]="32"></lucide-icon>
+                  </div>
+                  <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">No se encontraron resultados</p>
+                  <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Intenta con otros términos de búsqueda.</p>
+                </td>
+              </tr>
+            } @else {
+              @for (user of activeUsers(); track user.idUsuario) {
+                <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/50 group">
+                  <td class="px-6 py-4">
+                    <span [ngClass]="{
+                            'bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]': user.estado === 'ACTIVO',
+                            'bg-red-500/10 text-red-400': user.estado === 'BAJA' || user.estado === 'INACTIVO',
+                            'bg-amber-500/10 text-amber-400': user.estado === 'BLOQUEADO'
+                          }" 
+                          class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border border-transparent"
+                          [class.border-[var(--color-neon-lime)]]="user.estado === 'ACTIVO'">
+                      {{ user.estado }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <p class="font-[590] text-[var(--color-porcelain)]">{{ user.nombreCompleto }}</p>
+                    <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5">{{ user.email }}</p>
+                  </td>
+                  <td class="px-6 py-4 text-[var(--color-fog-grey)] font-mono text-[13px]">
+                    {{ user.documento }}
+                  </td>
+                  <td class="px-6 py-4 text-[13px] text-[var(--color-porcelain)]">
+                    <span class="bg-[var(--color-pitch-black)] border border-[var(--color-charcoal-grey)] px-2 py-1 rounded text-[11px] font-[510]">
+                      {{ user.rol }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <p class="text-[11px] uppercase tracking-widest font-bold text-[var(--color-cyan-spark)] mb-0.5">{{ user.tipoUsuario }}</p>
+                    <p class="text-[13px] text-[var(--color-porcelain)] truncate max-w-[200px]" [title]="user.entidadRepresentada">
+                      {{ user.entidadRepresentada }}
+                    </p>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                      
+                      <button (click)="linkEntity(user)" title="Vincular a Entidad (Proveedor/Org)" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+                        <lucide-icon name="handshake" [size]="16"></lucide-icon>
+                      </button>
+
+                      <button (click)="manageRoles(user)" title="Gestionar Rol y Módulos" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-aether-blue)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+                        <lucide-icon name="users" [size]="16"></lucide-icon>
+                      </button>
+
+                      <button (click)="viewAccessLogs(user)" title="Ver Historial de Accesos" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+                        <lucide-icon name="mouse-pointer-click" [size]="16"></lucide-icon>
+                      </button>
+
+                      <button (click)="openResetModal(user)" title="Blanquear Contraseña" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-neon-lime)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+                        <lucide-icon name="unlock" [size]="16"></lucide-icon>
+                      </button>
+
+                      @if (user.tipoUsuario !== 'Independiente' && user.tipoUsuario !== 'Sin Asignar') {
+                        <button (click)="openUnlinkModal(user)" title="Desvincular Entidad" class="p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)] transition-colors ml-1 border border-red-500/20">
+                          <lucide-icon name="user-minus" [size]="16"></lucide-icon>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalRows() > 0) {
+        <div class="px-6 py-4 border-t border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 flex items-center justify-between">
+          <p class="text-[12px] text-[var(--color-storm-cloud)]">
+            Mostrando pág. {{ currentPage() }} de {{ Math.ceil(totalRows() / pageSize()) }} 
+            (Total: {{ totalRows() }})
+          </p>
+          <div class="flex items-center gap-2">
+            <button 
+              [disabled]="currentPage() === 1"
+              (click)="changePage(currentPage() - 1)"
+              class="p-1 rounded bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] disabled:opacity-30 disabled:cursor-not-allowed">
+              <lucide-icon name="chevron-left" [size]="18"></lucide-icon>
+            </button>
+            <button 
+              [disabled]="currentPage() === Math.ceil(totalRows() / pageSize())"
+              (click)="changePage(currentPage() + 1)"
+              class="p-1 rounded bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] disabled:opacity-30 disabled:cursor-not-allowed">
+              <lucide-icon name="chevron-right" [size]="18"></lucide-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (isResetModalOpen() && selectedUser()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeResetModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-2">Blanquear Contraseña</h2>
+      
+      @if (!newTempPassword()) {
+        <p class="text-[14px] text-[var(--color-storm-cloud)] mb-6 leading-relaxed">
+          Estás a punto de generar una nueva contraseña temporal para <strong class="text-[var(--color-porcelain)]">{{ selectedUser()?.nombreCompleto }}</strong>. 
+          La contraseña anterior dejará de funcionar inmediatamente.
+        </p>
+        <div class="mt-8 flex gap-3">
+          <button (click)="closeResetModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+            Cancelar
+          </button>
+          <button (click)="confirmResetPassword()" [disabled]="isResetting()" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-70">
+            @if (isResetting()) {
+              <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+            } @else {
+              Generar Clave
+            }
+          </button>
+        </div>
+      } @else {
+        <div class="my-6 p-5 rounded-xl border border-[var(--color-neon-lime)]/30 bg-[var(--color-neon-lime)]/5 text-center">
+          <p class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-2">Nueva Clave Temporal</p>
+          <p class="text-[32px] font-mono font-bold text-[var(--color-neon-lime)] tracking-widest">{{ newTempPassword() }}</p>
+        </div>
+        <p class="text-[13px] text-[var(--color-storm-cloud)] text-center mb-6">Copia esta clave y entrégasela al usuario. Se le pedirá que la cambie al ingresar.</p>
+        <button (click)="closeResetModal()" class="w-full rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          Cerrar
+        </button>
+      }
+    </div>
+  </div>
+}
+
+@if (isUnlinkModalOpen() && selectedUser()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-red-500/20 bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+        <lucide-icon name="user-minus" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-2 text-center">¿Desvincular Usuario?</h2>
+      <p class="text-[14px] text-[var(--color-storm-cloud)] mb-6 text-center leading-relaxed">
+        Estás a punto de desvincular a <strong class="text-[var(--color-porcelain)]">{{ selectedUser()?.nombreCompleto }}</strong> 
+        de <strong class="text-red-400">{{ selectedUser()?.entidadRepresentada }}</strong>. El usuario perderá acceso a las subastas de esta entidad.
+      </p>
+      <div class="flex gap-3">
+        <button (click)="closeUnlinkModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          Cancelar
+        </button>
+        <button (click)="confirmUnlink()" [disabled]="isUnlinking()" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-red-500 py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:bg-red-400 disabled:opacity-70">
+          @if (isUnlinking()) {
+            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+          } @else {
+            Desvincular
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isRoleModalOpen() && selectedUser()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeRoleModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-aether-blue)]/10 text-[var(--color-aether-blue)]">
+        <lucide-icon name="shield" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Modificar Accesos</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">
+        Actualiza el rol del sistema para <strong class="text-[var(--color-porcelain)]">{{ selectedUser()?.nombreCompleto }}</strong>.
+      </p>
+      <div class="mb-6 p-4 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50">
+        <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-1">Rol Actual</p>
+        <p class="text-[14px] font-[510] text-[var(--color-light-steel)]">{{ selectedUser()?.rol }}</p>
+      </div>
+      <div class="mb-8">
+        <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Nuevo Rol *</label>
+        <select 
+          [value]="selectedRoleId()"
+          (change)="selectedRoleId.set($any($event.target).value)"
+          class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          <option value="" disabled>-- Seleccionar Rol --</option>
+          @for (rol of roles(); track rol.id) {
+            <option [value]="rol.id">{{ rol.nombre }}</option>
+          }
+        </select>
+      </div>
+      <div class="flex gap-3">
+        <button (click)="closeRoleModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          Cancelar
+        </button>
+        <button 
+          (click)="confirmRoleUpdate()" 
+          [disabled]="isUpdatingRole() || selectedRoleId() === ''" 
+          class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-aether-blue)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed">
+          @if (isUpdatingRole()) {
+            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+          } @else {
+            Guardar Cambios
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isLinkModalOpen() && selectedUser()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-lg rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      
+      <button (click)="closeLinkModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+
+      <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]">
+        <lucide-icon name="handshake" [size]="28"></lucide-icon>
+      </div>
+
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Vincular Entidad</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">
+        Asociar al usuario <strong class="text-[var(--color-porcelain)]">{{ selectedUser()?.nombreCompleto }}</strong> a una Organización o Proveedor.
+      </p>
+
+      @if (linkErrorMessage()) {
+        <div class="mb-5 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3 animate-fade-in">
+          <lucide-icon name="alert-triangle" [size]="16" class="text-red-400 shrink-0 mt-0.5"></lucide-icon>
+          <p class="text-[13px] font-[510] text-red-400">{{ linkErrorMessage() }}</p>
+        </div>
+      }
+
+      <div class="flex flex-col sm:flex-row gap-2 mb-6 bg-[var(--color-pitch-black)]/50 p-1 rounded-xl border border-[var(--color-charcoal-grey)]">
+        <button type="button" 
+                (click)="setLinkType('GESTOR')"
+                class="flex-1 py-2.5 px-4 rounded-lg text-[13px] font-[590] transition-all duration-300"
+                [class]="linkType() === 'GESTOR' ? 'bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] shadow-md border border-[var(--color-charcoal-grey)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/30'">
+          Gestor (Organización)
+        </button>
+        <button type="button" 
+                (click)="setLinkType('PROVEEDOR')"
+                class="flex-1 py-2.5 px-4 rounded-lg text-[13px] font-[590] transition-all duration-300"
+                [class]="linkType() === 'PROVEEDOR' ? 'bg-[var(--color-deep-slate)] text-[var(--color-neon-lime)] shadow-md border border-[var(--color-charcoal-grey)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/30'">
+          Proveedor Directo
+        </button>
+      </div>
+
+      <div class="min-h-[120px] mb-6">
+        @if (linkType() === 'GESTOR') {
+          <div class="animate-fade-in">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Seleccionar Organización *</label>
+            <select 
+              [value]="selectedOrgId()" 
+              (change)="selectedOrgId.set($any($event.target).value)"
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+              <option value="" disabled>-- Seleccionar Organización --</option>
+              @for (org of organizations(); track org.idOrganizacion) {
+                <option [value]="org.idOrganizacion">{{ org.nombre }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @if (linkType() === 'PROVEEDOR') {
+          <div class="animate-fade-in">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Buscar CUIT del Proveedor *</label>
+            <div class="flex gap-2">
+              <div class="relative flex-1">
+                <lucide-icon name="search" [size]="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-fog-grey)]"></lucide-icon>
+                <input [formControl]="cuitSearchControl" type="text" placeholder="Ej: 30123456789" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 pl-10 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-neon-lime)] outline-none transition-all">
+              </div>
+              <button type="button" (click)="verifyCuit()" [disabled]="isVerifyingCuit()" class="px-5 rounded-xl bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] hover:bg-[var(--color-charcoal-grey)] transition-colors text-[var(--color-porcelain)] disabled:opacity-50 flex items-center justify-center shrink-0">
+                @if (isVerifyingCuit()) {
+                  <lucide-icon name="loader-2" [size]="18" class="animate-spin"></lucide-icon>
+                } @else {
+                  Buscar
+                }
+              </button>
+            </div>
+
+            @if (verifiedProvider()) {
+              <div class="mt-4 flex items-center gap-3 p-3 rounded-lg bg-[var(--color-neon-lime)]/10 border border-[var(--color-neon-lime)]/20 animate-fade-in">
+                <lucide-icon name="check-circle" [size]="18" class="text-[var(--color-neon-lime)] shrink-0"></lucide-icon>
+                <div>
+                  <p class="text-[13px] font-[590] text-[var(--color-porcelain)] leading-none mb-1">{{ verifiedProvider()?.razonSocial }}</p>
+                  <p class="text-[11px] text-[var(--color-neon-lime)] opacity-80 leading-none">Proveedor válido</p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="flex gap-3">
+        <button (click)="closeLinkModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          Cancelar
+        </button>
+        <button 
+          (click)="confirmLink()" 
+          [disabled]="isLinking() || (linkType() === 'GESTOR' && selectedOrgId() === '') || (linkType() === 'PROVEEDOR' && !verifiedProvider())" 
+          class="flex w-1/2 items-center justify-center gap-2 rounded-xl py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+          [ngClass]="linkType() === 'GESTOR' ? 'bg-[var(--color-cyan-spark)]' : 'bg-[var(--color-neon-lime)]'">
+          @if (isLinking()) {
+            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+          } @else {
+            Vincular Usuario
+          }
+        </button>
+      </div>
+      
+    </div>
+  </div>
+}
+
+@if (isAuditModalOpen() && selectedUser()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-lg rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      
+      <button (click)="closeAuditModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-porcelain)]/10 text-[var(--color-porcelain)]">
+        <lucide-icon name="activity" [size]="28"></lucide-icon>
+      </div>
+
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Registro de Auditoría</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-8 text-center">
+        Información de accesos y modificaciones para <strong class="text-[var(--color-porcelain)]">{{ selectedUser()?.nombreCompleto }}</strong>.
+      </p>
+
+      @if (isLoadingAudit()) {
+        <div class="flex justify-center py-8">
+          <lucide-icon name="loader-2" [size]="32" class="animate-spin text-[var(--color-cyan-spark)]"></lucide-icon>
+        </div>
+      } @else if (auditData(); as audit) {
+        
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          
+          <div class="col-span-2 p-4 rounded-xl border border-[var(--color-cyan-spark)]/30 bg-[var(--color-cyan-spark)]/5 flex items-center gap-4">
+            <div class="p-2 rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+              <lucide-icon name="log-in" [size]="20"></lucide-icon>
+            </div>
+            <div>
+              <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-0.5">Último Inicio de Sesión</p>
+              @if (audit.ultimoAcceso) {
+                <p class="text-[15px] font-[510] text-[var(--color-porcelain)]">{{ audit.ultimoAcceso | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+              } @else {
+                <p class="text-[15px] font-[510] text-[var(--color-fog-grey)]">Nunca inició sesión</p>
+              }
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50">
+            <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-1 flex items-center gap-1.5"><lucide-icon name="user-plus" [size]="12"></lucide-icon> Registro Original</p>
+            <p class="text-[13px] text-[var(--color-porcelain)] mb-1">{{ audit.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p class="text-[11px] text-[var(--color-fog-grey)] truncate" title="{{ audit.creadoPor }}">Por: {{ audit.creadoPor }}</p>
+          </div>
+
+          <div class="p-4 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50">
+            <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-1 flex items-center gap-1.5"><lucide-icon name="shield-check" [size]="12"></lucide-icon> Aprobación</p>
+            @if (audit.fechaAprobacion) {
+              <p class="text-[13px] text-[var(--color-porcelain)] mb-1">{{ audit.fechaAprobacion | date:'dd/MM/yyyy HH:mm' }}</p>
+              @if (audit.aprobadoPorNombre && audit.aprobadoPorNombre !== '-') {
+                <p class="text-[11px] text-[var(--color-fog-grey)] truncate" title="{{ audit.aprobadoPorNombre }}">Por: {{ audit.aprobadoPorNombre }}</p>
+              }
+            } @else {
+              <p class="text-[13px] text-[var(--color-fog-grey)]">Pendiente/Automática</p>
+            }
+          </div>
+          <div class="col-span-2 p-4 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 flex justify-between items-center">
+            <div>
+              <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-1 flex items-center gap-1.5"><lucide-icon name="pencil" [size]="12"></lucide-icon> Última Modificación del Perfil</p>
+              @if (audit.fechaModificacion) {
+                <p class="text-[13px] text-[var(--color-porcelain)]">{{ audit.fechaModificacion | date:'dd/MM/yyyy HH:mm' }}</p>
+              } @else {
+                <p class="text-[13px] text-[var(--color-fog-grey)]">Sin modificaciones registradas</p>
+              }
+            </div>
+            @if (audit.modificadoPor && audit.modificadoPor !== '-') {
+              <div class="text-right">
+                <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-1">Modificado por</p>
+                <p class="text-[12px] text-[var(--color-fog-grey)] truncate max-w-[120px]" title="{{ audit.modificadoPor }}">{{ audit.modificadoPor }}</p>
+              </div>
+            }
+          </div>
+
+        </div>
+
+      }
+
+      <button (click)="closeAuditModal()" class="w-full rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+        Cerrar
+      </button>
+      
+    </div>
+  </div>
+}

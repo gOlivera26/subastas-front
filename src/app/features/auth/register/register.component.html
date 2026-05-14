@@ -1,0 +1,152 @@
+<div class="relative flex min-h-[calc(100vh-64px)] flex-col items-center justify-center overflow-hidden px-4 py-12">
+  <div class="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+    <div class="absolute top-1/4 h-[400px] w-[400px] rounded-full bg-[var(--color-aether-blue)] opacity-5 blur-[120px]"></div>
+  </div>
+
+  <div class="relative z-10 w-full max-w-[600px] animate-fade-in-up">
+    <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
+      
+      @if (!isSuccess()) {
+        <div class="mb-8 text-center">
+          <h1 class="mb-2 text-[24px] font-[590] tracking-tight text-[var(--color-porcelain)]">Registro de Usuario</h1>
+          <p class="text-[14px] text-[var(--color-storm-cloud)]">Seleccione el motivo por el que quiere registrarse</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 mb-8 bg-[var(--color-pitch-black)]/50 p-1.5 rounded-xl border border-[var(--color-charcoal-grey)]">
+          <button type="button" 
+                  (click)="setRegistrationType('GESTOR')"
+                  class="flex-1 py-3 px-4 rounded-lg text-[13px] font-[590] transition-all duration-300"
+                  [class]="registrationType() === 'GESTOR' ? 'bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] shadow-md border border-[var(--color-charcoal-grey)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/30'">
+            Usuario Subasta Inversa / Licitación
+          </button>
+          <button type="button" 
+                  (click)="setRegistrationType('PROVEEDOR')"
+                  class="flex-1 py-3 px-4 rounded-lg text-[13px] font-[590] transition-all duration-300"
+                  [class]="registrationType() === 'PROVEEDOR' ? 'bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] shadow-md border border-[var(--color-charcoal-grey)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/30'">
+            Usuario Subasta Directa (Proveedor)
+          </button>
+        </div>
+
+        @if (errorMessage()) {
+          <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 animate-fade-in">
+            <lucide-icon name="lock" [size]="18" class="text-red-400 shrink-0 mt-0.5"></lucide-icon>
+            <p class="text-[13px] text-red-400">{{ errorMessage() }}</p>
+          </div>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          
+          @if (registrationType() === 'GESTOR') {
+            <div class="animate-fade-in p-5 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30">
+              <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Organización *</label>
+              <select formControlName="idOrganizacion" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+                <option value="">-- Seleccionar Organización --</option>
+                @for (org of organizations(); track org.idOrganizacion) {
+                  <option [value]="org.idOrganizacion">{{ org.nombre }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (registrationType() === 'PROVEEDOR') {
+            <div class="animate-fade-in p-5 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30">
+              <p class="text-[13px] text-[var(--color-storm-cloud)] mb-4 text-center">
+                Ingrese el número de CUIT de la empresa/persona humana a la que representa.
+              </p>
+              
+              <div class="flex gap-3">
+                <div class="relative flex-1">
+                  <input formControlName="cuitSearch" type="text" placeholder="CUIT (Ej: 30123456789)" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-neon-lime)] outline-none transition-all">
+                </div>
+                <button type="button" (click)="verifyCuit()" [disabled]="isVerifyingCuit()" class="px-5 rounded-xl bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] hover:bg-[var(--color-charcoal-grey)] transition-colors text-[var(--color-porcelain)] disabled:opacity-50 flex items-center justify-center">
+                  @if (isVerifyingCuit()) {
+                    <lucide-icon name="loader-2" [size]="18" class="animate-spin"></lucide-icon>
+                  } @else {
+                    <lucide-icon name="search" [size]="18"></lucide-icon>
+                  }
+                </button>
+              </div>
+
+              @if (verifiedProvider()) {
+                <div class="mt-4 flex items-center gap-3 p-3 rounded-lg bg-[var(--color-neon-lime)]/10 border border-[var(--color-neon-lime)]/20 animate-fade-in">
+                  <lucide-icon name="check-circle" [size]="18" class="text-[var(--color-neon-lime)] shrink-0"></lucide-icon>
+                  <div>
+                    <p class="text-[13px] font-[590] text-[var(--color-porcelain)] leading-none mb-1">{{ verifiedProvider()?.razonSocial }}</p>
+                    <p class="text-[11px] text-[var(--color-neon-lime)] opacity-80 leading-none">Proveedor empadronado válido</p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="h-px w-full bg-gradient-to-r from-transparent via-[var(--color-charcoal-grey)] to-transparent my-6"></div>
+
+          <div class="space-y-5 transition-opacity duration-300"
+               [class.opacity-50]="registrationType() === 'PROVEEDOR' && !verifiedProvider()"
+               [class.pointer-events-none]="registrationType() === 'PROVEEDOR' && !verifiedProvider()">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Nombre</label>
+                <input formControlName="nombre" type="text" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none">
+              </div>
+              <div>
+                <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Apellido</label>
+                <input formControlName="apellido" type="text" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none">
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Correo Electrónico</label>
+              <input formControlName="email" type="email" placeholder="ejemplo@correo.com" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">DNI / Documento</label>
+                <input formControlName="nroDocumento" type="text" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none">
+              </div>
+              <div>
+                <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Contraseña</label>
+                <input formControlName="password" type="password" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none">
+              </div>
+            </div>
+
+            <button type="submit" [disabled]="isLoading() || (registrationType() === 'PROVEEDOR' && !verifiedProvider())" class="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-4 text-[15px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+              @if (isLoading()) {
+                <lucide-icon name="loader-2" [size]="18" class="animate-spin"></lucide-icon>
+                Procesando...
+              } @else {
+                Grabar Registro
+              }
+            </button>
+          </div>
+        </form>
+
+      } @else {
+        <div class="text-center py-6 animate-fade-in">
+          <div class="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)] ring-8 ring-[var(--color-neon-lime)]/5">
+            <lucide-icon name="shield-check" [size]="48"></lucide-icon>
+          </div>
+          <h2 class="text-[26px] font-[590] text-[var(--color-porcelain)] mb-4">¡Registro Exitoso!</h2>
+          <p class="text-[var(--color-storm-cloud)] text-[15px] leading-relaxed mb-10">
+            Hola <span class="text-[var(--color-porcelain)] font-bold">{{ registerForm.get('nombre')?.value }}</span>, tu solicitud ha sido enviada.<br><br>
+            Como medida de seguridad, un administrador debe <strong>validar tu identidad</strong> antes de habilitar tu acceso al sistema. Te notificaremos por correo electrónico.
+          </p>
+          <button routerLink="/login" class="w-full py-4 bg-[var(--color-deep-slate)] rounded-xl text-[15px] font-[590] hover:bg-[var(--color-charcoal-grey)] transition-colors border border-[var(--color-charcoal-grey)] text-[var(--color-porcelain)]">
+            Entendido, volver al inicio
+          </button>
+        </div>
+      }
+
+    </div>
+
+    <div class="mt-8 text-center">
+      <p class="text-[13px] text-[var(--color-storm-cloud)]">
+        ¿Ya tienes cuenta? 
+        <a routerLink="/login" class="font-[510] text-[var(--color-neon-lime)] hover:underline">Inicia sesión</a>
+      </p>
+    </div>
+
+  </div>
+</div>
