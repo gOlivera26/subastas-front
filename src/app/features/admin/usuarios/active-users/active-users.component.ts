@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren, Directive, Input } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -7,12 +7,22 @@ import { ActiveUser, UserAudit, UserService } from '../../../../core/services/us
 import { Role, RoleService } from '../../../../core/services/role.service';
 import { Organization, OrganizationService } from '../../../../core/services/organization.service';
 import { ProviderService, ProviderResponse } from '../../../../core/services/provider.service';
+import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table';
+
+@Directive({
+  selector: 'ng-template[cellKey]',
+  standalone: true,
+})
+export class CellTemplateDirective {
+  @Input({ required: true }) cellKey!: string;
+  constructor(public templateRef: TemplateRef<any>) {}
+}
 
 
 @Component({
   selector: 'app-active-users',
   standalone: true,
-  imports: [LucideAngularModule, ReactiveFormsModule, NgClass, DatePipe],
+  imports: [LucideAngularModule, ReactiveFormsModule, NgClass, DatePipe, DataTableComponent, CellTemplateDirective],
   templateUrl: './active-users.component.html'
 })
 export class ActiveUsersComponent implements OnInit {
@@ -30,6 +40,40 @@ export class ActiveUsersComponent implements OnInit {
   pageSize = signal(10);
   totalRows = signal(0);
   Math = Math;
+
+  columns: TableColumn[] = [
+    { key: 'estado', label: 'Estado', sortable: true, width: '100px' },
+    { key: 'nombreCompleto', label: 'Usuario / Contacto', sortable: true },
+    { key: 'documento', label: 'Documento', sortable: true, width: '120px' },
+    { key: 'rol', label: 'Rol del Sistema', width: '120px' },
+    { key: 'tipoUsuario', label: 'Tipo / Entidad' },
+    { key: 'acciones', label: 'Acciones', align: 'right', width: '160px' },
+  ];
+
+  cellTemplateDirectives = viewChildren(CellTemplateDirective);
+  cellTemplatesMap = computed(() => {
+    const map: Record<string, TemplateRef<any>> = {};
+    this.cellTemplateDirectives().forEach(d => {
+      map[d.cellKey] = d.templateRef;
+    });
+    return map;
+  });
+
+  sortKey = signal<string>('nombreCompleto');
+  sortDirection = signal<'asc' | 'desc'>('asc');
+
+  onSort(event: { key: string; direction: 'asc' | 'desc' }) {
+    this.sortKey.set(event.key);
+    this.sortDirection.set(event.direction);
+    this.currentPage.set(1);
+    this.loadUsers();
+  }
+
+  onPageChange(event: { page: number; pageSize: number }) {
+    this.currentPage.set(event.page);
+    this.pageSize.set(event.pageSize);
+    this.loadUsers();
+  }
 
   // ESTADOS COMUNES PARA MODALES
   selectedUser = signal<ActiveUser | null>(null);
@@ -95,7 +139,7 @@ export class ActiveUsersComponent implements OnInit {
     this.isLoading.set(true);
     const term = this.searchControl.value || '';
     
-    this.userService.getActiveUsers(this.currentPage(), this.pageSize(), term).subscribe({
+    this.userService.getActiveUsers(this.currentPage(), this.pageSize(), term, this.sortKey(), this.sortDirection()).subscribe({
       next: (res) => {
         this.isLoading.set(false);
         if (res.success && res.data) {

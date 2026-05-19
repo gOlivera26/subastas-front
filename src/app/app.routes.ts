@@ -9,6 +9,10 @@ import { RegisterComponent } from './features/auth/register/register.component';
 import { AdminLayoutComponent } from './features/admin/admin-layout/admin-layout.component';
 import { AdminUsuariosComponent } from './features/admin/usuarios/pending-users/pending-users';
 import { ActiveUsersComponent } from './features/admin/usuarios/active-users/active-users.component';
+import { ProveedoresLayoutComponent } from './features/proveedores/proveedores-layout/proveedores-layout.component';
+import { ProveedoresComponent } from './features/proveedores/proveedores-layout/proveedores.component';
+import { RubrosListComponent } from './features/proveedores/rubros-list/rubros-list.component';
+import { RubrosTreeComponent } from './features/proveedores/rubros-tree/rubros-tree.component';
 
 export const routes: Routes = [
   {
@@ -30,11 +34,22 @@ export const routes: Routes = [
     children: [
       { path: 'usuarios/pendientes', component: AdminUsuariosComponent }, 
       
-       { path: 'usuarios/activos', component: ActiveUsersComponent }, // Lo activaremos en el próximo paso
-      
-      { path: '', redirectTo: 'usuarios/pendientes', pathMatch: 'full' }
-    ]
-  },
+       { path: 'usuarios/activos', component: ActiveUsersComponent },
+       
+       { path: '', redirectTo: 'usuarios/pendientes', pathMatch: 'full' }
+     ]
+   },
+
+   {
+     path: 'proveedores',
+     component: ProveedoresLayoutComponent,
+     canActivate: [authGuard],
+     children: [
+       { path: '', component: ProveedoresComponent },
+       { path: 'rubros', component: RubrosListComponent },
+       { path: 'rubros/arbol', component: RubrosTreeComponent },
+     ]
+   },
 
   { path: '**', redirectTo: '' },
 ];

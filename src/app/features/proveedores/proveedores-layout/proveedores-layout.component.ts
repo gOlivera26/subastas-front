@@ -5,12 +5,12 @@ import { NgClass } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-admin-layout',
+  selector: 'app-proveedores-layout',
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, NgClass],
-  templateUrl: './admin-layout.component.html',
+  templateUrl: './proveedores-layout.component.html',
 })
-export class AdminLayoutComponent {
+export class ProveedoresLayoutComponent {
   private authService = inject(AuthService);
 
   isSidebarOpen = signal(false);

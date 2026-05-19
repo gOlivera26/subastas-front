@@ -50,7 +50,7 @@ export class UserService {
     return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/${userId}/approve`, {});
   }
 
-  getActiveUsers(page: number = 1, pageSize: number = 10, searchTerm: string = ''): Observable<OperationResponse<ActiveUser[]>> {
+  getActiveUsers(page: number = 1, pageSize: number = 10, searchTerm: string = '', sortBy?: string, sortDirection?: string): Observable<OperationResponse<ActiveUser[]>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
@@ -58,8 +58,9 @@ export class UserService {
     if (searchTerm) {
       params = params.set('searchTerm', searchTerm);
     }
+    if (sortBy) params = params.set('sortBy', sortBy);
+    if (sortDirection) params = params.set('sortDirection', sortDirection);
     
-
     return this.http.get<OperationResponse<ActiveUser[]>>(`${this.apiUrl}/active`, { params });
   }
 

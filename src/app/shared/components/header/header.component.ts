@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal, computed } from '@angular/core';
+import { Component, HostListener, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgClass } from '@angular/common';
@@ -12,7 +12,7 @@ import { ProfileResponse } from '../../../core/models/auth.model';
   imports: [RouterLink, LucideAngularModule, NgClass, ReactiveFormsModule],
   templateUrl: './header.component.html',
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   authService = inject(AuthService);
   private fb = inject(FormBuilder);
   
@@ -21,6 +21,7 @@ export class HeaderComponent {
   isUserMenuOpen = signal(false); 
   isProfileModalOpen = signal(false);
   isPasswordModalOpen = signal(false);
+  isDarkMode = signal(true);
 
   user = computed(() => this.authService.currentUser());
 
@@ -48,6 +49,30 @@ export class HeaderComponent {
       apellido: ['', Validators.required],
       telefono: ['']
     });
+  }
+
+  ngOnInit() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      this.isDarkMode.set(true);
+      document.documentElement.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      this.isDarkMode.set(false);
+      document.documentElement.classList.remove('dark');
+    } else {
+      this.isDarkMode.set(document.documentElement.classList.contains('dark'));
+    }
+  }
+
+  toggleTheme() {
+    this.isDarkMode.update(v => !v);
+    if (this.isDarkMode()) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
   }
 
   passwordsMatchValidator(g: FormGroup) {

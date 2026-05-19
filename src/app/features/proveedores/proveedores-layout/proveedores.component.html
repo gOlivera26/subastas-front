@@ -1,0 +1,420 @@
+<div class="relative flex min-h-[calc(100vh-64px)] flex-col py-8 px-4 sm:px-6 lg:px-8">
+  <div class="relative z-10 w-full animate-fade-in-up max-w-[1400px] mx-auto">
+
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Proveedores</h1>
+        <p class="text-[14px] text-[var(--color-storm-cloud)]">Gestión de proveedores del portal.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button (click)="openAfipModal()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] px-4 py-2.5 text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          <lucide-icon name="search" [size]="16"></lucide-icon>
+          Verificar AFIP
+        </button>
+        <button (click)="openCreateModal()" class="flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+          Nuevo Proveedor
+        </button>
+      </div>
+    </div>
+
+    <div class="relative w-full sm:w-80 mb-6">
+      <lucide-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+      <input
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="search()"
+        type="text"
+        placeholder="Buscar por razón social, CUIT o CUP..."
+        class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 pl-10 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors"
+      >
+    </div>
+
+    @if (error()) {
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 animate-fade-in">
+        <lucide-icon name="alert-triangle" [size]="18" class="text-red-400 shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-red-400">{{ error() }}</p>
+        <button (click)="clearMessages()" class="ml-auto text-red-400 hover:text-red-300"><lucide-icon name="x" [size]="16"></lucide-icon></button>
+      </div>
+    }
+
+    @if (success()) {
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-[var(--color-neon-lime)]/20 bg-[var(--color-neon-lime)]/10 p-4 animate-fade-in">
+        <lucide-icon name="check-circle" [size]="18" class="text-[var(--color-neon-lime)] shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-[var(--color-neon-lime)]">{{ success() }}</p>
+        <button (click)="clearMessages()" class="ml-auto text-[var(--color-neon-lime)] hover:text-[var(--color-neon-lime)]/80"><lucide-icon name="x" [size]="16"></lucide-icon></button>
+      </div>
+    }
+
+    <app-data-table
+      [columns]="columns"
+      [data]="providers()"
+      [totalRows]="totalRows()"
+      [loading]="loading()"
+      [currentPage]="currentPage()"
+      [pageSize]="pageSize()"
+      [cellTemplates]="cellTemplatesMap()"
+      (sortChange)="onSort($event)"
+      (pageChange)="onPageChange($event)">
+
+      <ng-template cellKey="razonSocial" let-row>
+        <p class="font-[590] text-[var(--color-porcelain)]">{{ row.razonSocial }}</p>
+      </ng-template>
+
+      <ng-template cellKey="cuit" let-row>
+        <span class="font-mono text-[13px] text-[var(--color-fog-grey)]">{{ row.cuit }}</span>
+      </ng-template>
+
+      <ng-template cellKey="cup" let-row>
+        <span class="text-[var(--color-fog-grey)] text-[13px]">{{ row.cup || '—' }}</span>
+      </ng-template>
+
+      <ng-template cellKey="tipoPersona" let-row>
+        <span class="bg-[var(--color-pitch-black)] border border-[var(--color-charcoal-grey)] px-2 py-1 rounded text-[11px] font-[510] text-[var(--color-porcelain)]">
+          {{ row.tipoPersona }}
+        </span>
+      </ng-template>
+
+      <ng-template cellKey="rubrosCount" let-row>
+        <span class="text-[var(--color-fog-grey)] text-[13px]">{{ row.rubrosCount }}</span>
+      </ng-template>
+
+      <ng-template cellKey="hasConstanciaAfip" let-row>
+        @if (row.hasConstanciaAfip) {
+          <span class="flex items-center justify-center gap-1.5 text-[var(--color-neon-lime)]">
+            <lucide-icon name="check-circle" [size]="16"></lucide-icon>
+            <span class="text-[13px]">Sí</span>
+          </span>
+        } @else {
+          <span class="text-[var(--color-storm-cloud)] text-[13px]">No</span>
+        }
+      </ng-template>
+
+      <ng-template cellKey="acciones" let-row>
+        <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+          <button (click)="openEditModal(row)" title="Editar" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+            <lucide-icon name="pencil" [size]="16"></lucide-icon>
+          </button>
+          <button (click)="openRubrosModal(row)" title="Rubros" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-aether-blue)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+            <lucide-icon name="tags" [size]="16"></lucide-icon>
+          </button>
+          <button (click)="openDomiciliosModal(row)" title="Domicilios" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+            <lucide-icon name="map-pin" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>
+
+@if (isCreateModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-lg rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon name="building-2" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Nuevo Proveedor</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">Registra un nuevo proveedor en el portal.</p>
+
+      <form (ngSubmit)="createProvider()">
+        <div class="grid grid-cols-2 gap-4 mb-5">
+          <div class="col-span-2">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Razón Social *</label>
+            <input [(ngModel)]="createForm.razonSocial" name="createRazonSocial" type="text" required
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">CUIT *</label>
+            <input [(ngModel)]="createForm.cuit" name="createCuit" type="text" required
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">CUP</label>
+            <input [(ngModel)]="createForm.cup" name="createCup" type="text"
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+          </div>
+          <div class="col-span-2">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Email Institucional *</label>
+            <input [(ngModel)]="createForm.emailInstitucional" name="createEmail" type="email" required
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+          </div>
+          <div class="col-span-2">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Email Alternativo</label>
+            <input [(ngModel)]="createForm.emailAlternativo" name="createEmailAlt" type="email"
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button type="button" (click)="closeModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="loadingAction() !== null" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-50">
+            @if (loadingAction()) {
+              <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+              {{ loadingAction() }}
+            } @else {
+              Crear Proveedor
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (isEditModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-lg rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon name="building-2" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Editar Proveedor</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">Modifica los datos del proveedor seleccionado.</p>
+
+      <form (ngSubmit)="updateProvider()">
+        <div class="grid grid-cols-2 gap-4 mb-5">
+          <div class="col-span-2">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Razón Social *</label>
+            <input [(ngModel)]="editForm.razonSocial" name="editRazonSocial" type="text" required
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">CUIT *</label>
+            <input [(ngModel)]="editForm.cuit" name="editCuit" type="text" required
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">CUP</label>
+            <input [(ngModel)]="editForm.cup" name="editCup" type="text"
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div class="col-span-2">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Email Institucional *</label>
+            <input [(ngModel)]="editForm.emailInstitucional" name="editEmail" type="email" required
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div class="col-span-2">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Email Alternativo</label>
+            <input [(ngModel)]="editForm.emailAlternativo" name="editEmailAlt" type="email"
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button type="button" (click)="closeModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="loadingAction() !== null" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-50">
+            @if (loadingAction()) {
+              <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+              {{ loadingAction() }}
+            } @else {
+              Guardar Cambios
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (isRubrosModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-2xl rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8 max-h-[85vh] overflow-y-auto">
+      <button (click)="closeModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon name="tags" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Rubros</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">{{ selectedProvider()?.razonSocial }}</p>
+
+      <div class="mb-6">
+        <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3">Rubros asignados</p>
+        <div class="flex flex-wrap gap-2">
+          @for (r of providerRubros(); track r.idRubro) {
+            <span class="flex items-center gap-2 rounded-lg bg-[var(--color-pitch-black)]/60 border border-[var(--color-charcoal-grey)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]">
+              <span class="font-mono text-[var(--color-fog-grey)]">{{ r.codigo }}</span>
+              {{ r.descripcion }}
+              <button (click)="unlinkRubro(r.idRubro)" class="text-[var(--color-storm-cloud)] hover:text-red-400 transition-colors">
+                <lucide-icon name="x" [size]="12"></lucide-icon>
+              </button>
+            </span>
+          } @empty {
+            <span class="text-[13px] text-[var(--color-storm-cloud)]">Sin rubros asignados</span>
+          }
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3">Agregar rubros</p>
+        <div class="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/40 p-3">
+          @for (node of rubrosTree(); track node.id) {
+            <div class="text-[13px]">
+              <label class="flex items-center gap-2 py-1.5 px-2 rounded-lg text-[var(--color-light-steel)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/50 cursor-pointer transition-colors">
+                <input type="checkbox" [checked]="selectedRubros().includes(node.id)" (change)="toggleRubro(node.id)" class="rounded border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] focus:ring-0">
+                <span class="font-mono text-[var(--color-fog-grey)]">{{ node.codigo }}</span>
+                {{ node.descripcion }}
+              </label>
+              @for (child of node.children; track child.id) {
+                <label class="flex items-center gap-2 py-1.5 px-2 pl-8 rounded-lg text-[var(--color-light-steel)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/50 cursor-pointer transition-colors">
+                  <input type="checkbox" [checked]="selectedRubros().includes(child.id)" (change)="toggleRubro(child.id)" class="rounded border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] focus:ring-0">
+                  <span class="font-mono text-[var(--color-fog-grey)]">{{ child.codigo }}</span>
+                  {{ child.descripcion }}
+                </label>
+                @for (grandchild of child.children; track grandchild.id) {
+                  <label class="flex items-center gap-2 py-1.5 px-2 pl-12 rounded-lg text-[var(--color-light-steel)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/50 cursor-pointer transition-colors">
+                    <input type="checkbox" [checked]="selectedRubros().includes(grandchild.id)" (change)="toggleRubro(grandchild.id)" class="rounded border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] focus:ring-0">
+                    <span class="font-mono text-[var(--color-fog-grey)]">{{ grandchild.codigo }}</span>
+                    {{ grandchild.descripcion }}
+                  </label>
+                }
+              }
+            </div>
+          }
+        </div>
+        <button (click)="linkRubros()" [disabled]="selectedRubros().length === 0 || loadingAction() !== null"
+          class="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-50">
+          @if (loadingAction()) {
+            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+            {{ loadingAction() }}
+          } @else {
+            Vincular seleccionados
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isDomiciliosModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-3xl rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8 max-h-[85vh] overflow-y-auto">
+      <button (click)="closeModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon name="map-pin" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Domicilios</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">{{ selectedProvider()?.razonSocial }}</p>
+
+      <div class="mb-6 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/40 p-5">
+        <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-4">Nuevo domicilio</p>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Tipo</label>
+            <select [(ngModel)]="domicilioForm.idTipoDomicilio" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+              <option [value]="0">Seleccionar tipo</option>
+              @for (t of tiposDomicilio(); track t.id) { <option [value]="t.id">{{ t.descripcion }}</option> }
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Provincia</label>
+            <select [(ngModel)]="domicilioForm.idProvincia" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+              <option [value]="0">Seleccionar provincia</option>
+              @for (p of provincias(); track p.id) { <option [value]="p.id">{{ p.nombre }}</option> }
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Calle</label>
+            <input [(ngModel)]="domicilioForm.calle" placeholder="Calle" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Número</label>
+            <input [(ngModel)]="domicilioForm.numero" placeholder="Número" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Barrio</label>
+            <input [(ngModel)]="domicilioForm.barrio" placeholder="Barrio" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Ciudad</label>
+            <input [(ngModel)]="domicilioForm.ciudad" placeholder="Ciudad" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Código Postal</label>
+            <input [(ngModel)]="domicilioForm.codigoPostal" placeholder="CP" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Teléfono</label>
+            <input [(ngModel)]="domicilioForm.telefono" placeholder="Teléfono" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+        </div>
+        <button (click)="createDomicilio()" class="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110">
+          Agregar domicilio
+        </button>
+      </div>
+
+      <div>
+        <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3">Domicilios existentes</p>
+        @for (d of domicilios(); track d.id) {
+          <div class="flex items-center justify-between rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/40 px-5 py-4 mb-2">
+            <div>
+              <p class="text-[14px] font-[590] text-[var(--color-porcelain)]">{{ d.tipoDomicilio }} — {{ d.calle }} {{ d.numero }}</p>
+              <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5">{{ d.barrio }}, {{ d.ciudad }} — {{ d.provincia }}</p>
+            </div>
+            <button (click)="deleteDomicilio(d.id)" class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)] transition-colors border border-red-500/20">
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+            </button>
+          </div>
+        } @empty {
+          <p class="text-[13px] text-[var(--color-storm-cloud)]">Sin domicilios registrados</p>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+@if (isAfipModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon name="search" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Verificar CUIT en AFIP</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">Consulta el estado de un CUIT en el padrón de AFIP.</p>
+
+      <div class="flex gap-3 mb-6">
+        <input [(ngModel)]="afipCuit" type="text" placeholder="Ingrese CUIT" class="flex-1 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-neon-lime)] outline-none transition-all">
+        <button (click)="verifyAfip()" [disabled]="loadingAction() !== null" class="flex items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] px-5 py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-50">
+          @if (loadingAction()) {
+            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+          } @else {
+            Verificar
+          }
+        </button>
+      </div>
+
+      @if (afipData()) {
+        <div class="rounded-xl border border-[var(--color-neon-lime)]/30 bg-[var(--color-neon-lime)]/5 p-5 space-y-3">
+          <div class="flex justify-between">
+            <span class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Nombre</span>
+            <span class="text-[14px] font-[510] text-[var(--color-porcelain)]">{{ afipData()?.nombre }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Tipo</span>
+            <span class="text-[14px] font-[510] text-[var(--color-porcelain)]">{{ afipData()?.tipoPersona }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Estado</span>
+            <span class="text-[14px] font-[510] text-[var(--color-neon-lime)]">{{ afipData()?.estadoClave }}</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Domicilio fiscal</span>
+            <p class="text-[14px] font-[510] text-[var(--color-porcelain)] mt-1">{{ afipData()?.domicilioFiscal }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
