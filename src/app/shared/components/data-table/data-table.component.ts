@@ -1,6 +1,7 @@
 import { Component, input, output, computed, signal, TemplateRef, ContentChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 
 export interface TableColumn {
   key: string;
@@ -23,7 +24,7 @@ export interface PageEvent {
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, LoadingSpinnerComponent],
   templateUrl: './data-table.component.html',
 })
 export class DataTableComponent<T = any> {

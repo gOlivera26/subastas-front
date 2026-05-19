@@ -1,9 +1,10 @@
 import { Component, OnInit, signal, inject, computed, TemplateRef, viewChildren, Directive, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProviderService, ProviderListDto, CreateProviderDto, UpdateProviderDto, RubroTreeDto, DomicilioDto, CreateDomicilioDto, UpdateDomicilioDto, TipoDomicilioDto, ProvinciaDto, AfipPersonDataDto } from '../../../core/services/provider.service';
 import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Directive({
   selector: 'ng-template[cellKey]',
@@ -17,7 +18,7 @@ export class CellTemplateDirective {
 @Component({
   selector: 'app-proveedores',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective, LoadingSpinnerComponent],
   templateUrl: './proveedores.component.html',
 })
 export class ProveedoresComponent implements OnInit {
@@ -62,10 +63,14 @@ export class ProveedoresComponent implements OnInit {
   };
 
   rubrosTree = signal<RubroTreeDto[]>([]);
+  rubrosLoading = signal(false);
   selectedRubros = signal<number[]>([]);
   providerRubros = signal<{ idRubro: number; codigo: string; descripcion: string }[]>([]);
+  expandedRubros = signal<Set<number>>(new Set());
+  rubroSearch = signal('');
 
   domicilios = signal<DomicilioDto[]>([]);
+  domiciliosLoading = signal(false);
   tiposDomicilio = signal<TipoDomicilioDto[]>([]);
   provincias = signal<ProvinciaDto[]>([]);
   domicilioForm = {
@@ -106,6 +111,47 @@ export class ProveedoresComponent implements OnInit {
 
   sortKey = signal<string>('razonSocial');
   sortDirection = signal<'asc' | 'desc'>('asc');
+
+  filteredRubrosTree = computed(() => {
+    const search = this.rubroSearch().toLowerCase().trim();
+    if (!search) return this.rubrosTree();
+    
+    const filterNode = (node: RubroTreeDto): RubroTreeDto | null => {
+      const matches = node.codigo.toLowerCase().includes(search) || node.descripcion.toLowerCase().includes(search);
+      const filteredChildren = node.children
+        .map(child => {
+          const childMatches = child.codigo.toLowerCase().includes(search) || child.descripcion.toLowerCase().includes(search);
+          const filteredGrandchildren = (child.children || [])
+            .filter(gc => gc.codigo.toLowerCase().includes(search) || gc.descripcion.toLowerCase().includes(search));
+          if (childMatches || filteredGrandchildren.length > 0) {
+            return { ...child, children: childMatches ? child.children : filteredGrandchildren };
+          }
+          return null;
+        })
+        .filter((c): c is RubroTreeDto => c !== null);
+      
+      if (matches || filteredChildren.length > 0) {
+        return { ...node, children: matches ? node.children : filteredChildren };
+      }
+      return null;
+    };
+    
+    return this.rubrosTree().map(filterNode).filter((n): n is RubroTreeDto => n !== null);
+  });
+
+  isRubroExpanded(rubroId: number): boolean {
+    return this.expandedRubros().has(rubroId);
+  }
+
+  toggleRubroExpand(rubroId: number) {
+    const expanded = new Set(this.expandedRubros());
+    if (expanded.has(rubroId)) {
+      expanded.delete(rubroId);
+    } else {
+      expanded.add(rubroId);
+    }
+    this.expandedRubros.set(expanded);
+  }
 
   onSort(event: { key: string; direction: 'asc' | 'desc' }) {
     this.sortKey.set(event.key);
@@ -234,16 +280,21 @@ export class ProveedoresComponent implements OnInit {
     this.selectedProvider.set(provider);
     this.selectedRubros.set([]);
     this.providerRubros.set([]);
+    this.expandedRubros.set(new Set());
+    this.rubroSearch.set('');
     this.loadRubrosTree();
     this.loadProviderRubros(provider.id);
     this.isRubrosModalOpen.set(true);
   }
 
   loadRubrosTree() {
+    this.rubrosLoading.set(true);
     this.providerService.getRubroTree().subscribe({
       next: (res) => {
         if (res.success && res.data) this.rubrosTree.set(res.data);
-      }
+        this.rubrosLoading.set(false);
+      },
+      error: () => this.rubrosLoading.set(false),
     });
   }
 
@@ -310,10 +361,13 @@ export class ProveedoresComponent implements OnInit {
   }
 
   loadDomicilios(personaId: number) {
+    this.domiciliosLoading.set(true);
     this.providerService.getDomiciliosByPersona(personaId).subscribe({
       next: (res) => {
         if (res.success && res.data) this.domicilios.set(res.data);
-      }
+        this.domiciliosLoading.set(false);
+      },
+      error: () => this.domiciliosLoading.set(false),
     });
   }
 

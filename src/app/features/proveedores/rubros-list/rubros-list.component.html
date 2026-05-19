@@ -7,14 +7,14 @@
         <p class="text-[14px] text-[var(--color-storm-cloud)]">Administración de la jerarquía de rubros del portal.</p>
       </div>
 
-      <div class="flex items-center gap-3">
-        <button (click)="goToTreeView()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] px-4 py-2.5 text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+      <div class="flex items-center gap-3 flex-wrap">
+        <button (click)="goToTreeView()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
           <lucide-icon name="folder-tree" [size]="16"></lucide-icon>
-          Ver Árbol
+          <span class="hidden sm:inline">Ver Árbol</span>
         </button>
-        <button (click)="openCreateModal()" class="flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110">
+        <button (click)="openCreateModal()" class="flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-3 sm:px-5 py-2.5 text-[13px] sm:text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110">
           <lucide-icon name="plus" [size]="16"></lucide-icon>
-          Nuevo Rubro
+          <span class="hidden sm:inline">Nuevo Rubro</span>
         </button>
       </div>
     </div>
@@ -38,9 +38,9 @@
     }
 
     @if (success()) {
-      <div class="mb-6 flex items-center gap-3 rounded-xl border border-[var(--color-neon-lime)]/20 bg-[var(--color-neon-lime)]/10 p-4 animate-fade-in">
-        <lucide-icon name="check-circle" [size]="18" class="text-[var(--color-neon-lime)] shrink-0"></lucide-icon>
-        <p class="text-[14px] font-[510] text-[var(--color-neon-lime)]">{{ success() }}</p>
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-green-500/20 bg-green-500/10 p-4 animate-fade-in">
+        <lucide-icon name="check-circle" [size]="18" class="text-green-400 shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-green-400">{{ success() }}</p>
       </div>
     }
 
@@ -155,7 +155,7 @@
           <button type="button" (click)="closeModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
             Cancelar
           </button>
-          <button type="submit" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110">
+          <button type="submit" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:bg-green-400">
             Crear Rubro
           </button>
         </div>
@@ -220,7 +220,7 @@
           <button type="button" (click)="closeModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
             Cancelar
           </button>
-          <button type="submit" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110">
+          <button type="submit" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:bg-green-400">
             Guardar Cambios
           </button>
         </div>

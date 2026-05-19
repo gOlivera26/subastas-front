@@ -13,18 +13,26 @@ import { AuthService } from '../../../core/services/auth.service';
 export class AdminLayoutComponent {
   private authService = inject(AuthService);
 
-  isSidebarOpen = signal(false);
+  isSidebarOpen = signal(localStorage.getItem('sidebar-admin') !== 'false');
   isUserMenuOpen = signal(false);
   isDarkMode = signal(document.documentElement.classList.contains('dark'));
 
   user = computed(() => this.authService.currentUser());
 
   toggleSidebar() {
-    this.isSidebarOpen.update(v => !v);
+    this.isSidebarOpen.update(v => {
+      localStorage.setItem('sidebar-admin', String(!v));
+      return !v;
+    });
   }
 
   closeSidebar() {
     this.isSidebarOpen.set(false);
+    localStorage.setItem('sidebar-admin', 'false');
+  }
+
+  closeSidebarOnMobile() {
+    if (window.innerWidth < 1024) this.closeSidebar();
   }
 
   toggleUserMenu() {
