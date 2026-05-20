@@ -1,0 +1,250 @@
+<div class="mx-auto max-w-[1200px]">
+
+  <!-- HEADER -->
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Unidades Administrativas</h1>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de áreas y oficinas dependientes de una vigencia.</p>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <!-- SELECT VIGENCIA -->
+      <div class="relative">
+        <select class="appearance-none rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] pl-4 pr-10 py-2 text-[13px] font-[510] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)]/30"
+                [ngModel]="selectedVigenciaId()" (change)="onVigenciaChange($event)"
+                [disabled]="isLoading() && vigencias().length === 0">
+          @if (vigencias().length === 0) {
+            <option [value]="null">Cargando vigencias...</option>
+          } @else {
+            @for (v of vigencias(); track v.idVigencia) {
+              <option [value]="v.idVigencia">Ejercicio {{ v.ejercicio }} {{ v.activoEjecucion ? '(Activo)' : '' }}</option>
+            }
+          }
+        </select>
+        <lucide-icon name="chevron-down" [size]="14" class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)] pointer-events-none"></lucide-icon>
+      </div>
+
+      <button (click)="openCreateModal()" [disabled]="!selectedVigenciaId()"
+              class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[var(--color-cyan-spark)]/50 hover:shadow-[0_0_20px_rgba(2,184,204,0.08)] disabled:opacity-50 disabled:cursor-not-allowed">
+        <lucide-icon name="plus" [size]="16"></lucide-icon>
+        Nueva UA
+      </button>
+    </div>
+  </div>
+
+  <!-- BANNERS -->
+  @if (successMessage(); as msg) {
+    <div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] font-[510] text-emerald-400 backdrop-blur-sm animate-slide-up">
+      <lucide-icon name="check-circle" [size]="18"></lucide-icon>
+      {{ msg }}
+    </div>
+  }
+
+  @if (errorMessage(); as msg) {
+    <div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] font-[510] text-red-400 backdrop-blur-sm animate-slide-up">
+      <lucide-icon name="alert-circle" [size]="18"></lucide-icon>
+      {{ msg }}
+    </div>
+  }
+
+  <!-- TABLE -->
+  <div class="overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 backdrop-blur-sm">
+    @if (isLoading() && unidades().length === 0) {
+      <div class="flex items-center justify-center py-20">
+        <div class="flex items-center gap-3 text-[13px] text-[var(--color-storm-cloud)]">
+          <lucide-icon name="loader-2" [size]="20" class="animate-spin text-[var(--color-cyan-spark)]"></lucide-icon>
+          Cargando unidades...
+        </div>
+      </div>
+    } @else if (vigencias().length === 0) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <div class="mb-4 flex size-14 items-center justify-center rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]">
+          <lucide-icon name="calendar" [size]="24" class="text-[var(--color-storm-cloud)]"></lucide-icon>
+        </div>
+        <p class="text-[14px] font-[510] text-[var(--color-storm-cloud)]">No hay vigencias creadas</p>
+        <p class="mt-1 text-[12px] text-[var(--color-fog-grey)]">Primero debe crear una vigencia.</p>
+      </div>
+    } @else if (unidades().length === 0) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <div class="mb-4 flex size-14 items-center justify-center rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]">
+          <lucide-icon name="building-2" [size]="24" class="text-[var(--color-storm-cloud)]"></lucide-icon>
+        </div>
+        <p class="text-[14px] font-[510] text-[var(--color-storm-cloud)]">No hay unidades en esta vigencia</p>
+        <p class="mt-1 text-[12px] text-[var(--color-fog-grey)]">Creá la primera para comenzar.</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full whitespace-nowrap">
+          <thead>
+            <tr class="border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30">
+              <th class="px-6 py-4 text-left text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)] w-24">Nro</th>
+              <th class="px-6 py-4 text-left text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Nombre / Descripción</th>
+              <th class="px-6 py-4 text-left text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Email Contacto</th>
+              <th class="px-6 py-4 text-left text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Servicio / Org.</th>
+              <th class="px-6 py-4 text-right text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-charcoal-grey)]/50">
+            @for (u of unidades(); track u.idUnidadAdm) {
+              <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/40 group">
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center justify-center rounded-lg bg-[var(--color-deep-slate)] px-2 py-1 text-[12px] font-[590] text-[var(--color-storm-cloud)] border border-[var(--color-charcoal-grey)]">
+                    #{{ u.numeroUnidadAdm }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="text-[14px] font-[510] text-[var(--color-porcelain)]">{{ u.nombreUnidadAdm }}</span>
+                </td>
+                <td class="px-6 py-4 text-[13px] text-[var(--color-storm-cloud)]">
+                  {{ u.mail || 'No configurado' }}
+                </td>
+                <td class="px-6 py-4 text-[13px]">
+                  <div class="flex flex-col gap-1">
+                    @if (u.nroServicioAdm) {
+                      <span class="text-[var(--color-light-steel)]">Srv: {{ u.nroServicioAdm }}</span>
+                    }
+                    @if (u.organizacionNombre) {
+                      <span class="text-[var(--color-fog-grey)] text-[11px]">Org: {{ u.organizacionNombre }}</span>
+                    }
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button (click)="openEditModal(u)"
+                            title="Editar"
+                            class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-cyan-spark)]">
+                      <lucide-icon name="pencil" [size]="16"></lucide-icon>
+                    </button>
+                    <button (click)="confirmDelete(u)"
+                            title="Eliminar"
+                            class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-red-400">
+                      <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- MODAL -->
+@if (isModalOpen()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
+    <div class="relative w-full max-w-2xl rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[90vh]">
+      
+      <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5 shrink-0">
+        <div>
+          <h3 class="text-[18px] font-[590] text-[var(--color-porcelain)]">
+            {{ isEditing() ? 'Editar Unidad Administrativa' : 'Nueva Unidad Administrativa' }}
+          </h3>
+          <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">
+            {{ isEditing() ? 'Modificá los datos de la UA.' : 'Registrá una nueva unidad para esta vigencia.' }}
+          </p>
+        </div>
+        <button (click)="closeModal()" class="rounded-xl p-2.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
+          <lucide-icon name="x" [size]="20"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto p-6 custom-scrollbar">
+        <form #f="ngForm" (ngSubmit)="save()" class="space-y-8">
+          
+          <!-- SECCIÓN BÁSICA -->
+          <section>
+            <h4 class="text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-4 flex items-center gap-2">
+              <lucide-icon name="info" [size]="14"></lucide-icon> Datos Principales
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Número UA <span class="text-red-400">*</span></label>
+                <input type="number" [(ngModel)]="form.numeroUnidadAdm" name="num" required
+                       class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)]/30 transition-colors" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Servicio Adm.</label>
+                <input type="number" [(ngModel)]="form.nroServicioAdm" name="srv"
+                       class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
+              </div>
+              <div class="sm:col-span-2">
+                <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nombre / Descripción <span class="text-red-400">*</span></label>
+                <input type="text" [(ngModel)]="form.nombreUnidadAdm" name="nom" required
+                       class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Organización</label>
+                <div class="relative">
+                  <select [(ngModel)]="form.idOrganizacion" name="org"
+                          class="w-full appearance-none rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] pl-4 pr-10 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors">
+                    <option [ngValue]="undefined">Ninguna / Global</option>
+                    @for (org of organizaciones(); track org.idOrganizacion) {
+                      <option [ngValue]="org.idOrganizacion">{{ org.nombre }}</option>
+                    }
+                  </select>
+                  <lucide-icon name="chevron-down" [size]="14" class="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)] pointer-events-none"></lucide-icon>
+                </div>
+              </div>
+              <div>
+                <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">ID Proveedor</label>
+                <input type="number" [(ngModel)]="form.idProveedor" name="prov"
+                       class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
+              </div>
+            </div>
+          </section>
+
+          <!-- SECCIÓN CONFIG EMAIL -->
+          <section>
+            <h4 class="text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-4 flex items-center gap-2">
+              <lucide-icon name="mail" [size]="14"></lucide-icon> Configuración SMTP
+            </h4>
+            <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="sm:col-span-2">
+                  <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Casilla de Correo</label>
+                  <input type="email" [(ngModel)]="form.mail" name="mail"
+                         class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Alias (Nombre a mostrar)</label>
+                  <input type="text" [(ngModel)]="form.alias" name="alias"
+                         class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Servidor SMTP</label>
+                  <input type="text" [(ngModel)]="form.smtp" name="smtp"
+                         class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Puerto</label>
+                  <input type="number" [(ngModel)]="form.puerto" name="puerto"
+                         class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Submit oculto para permitir submit con Enter -->
+          <button type="submit" class="hidden"></button>
+        </form>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-5 shrink-0 bg-[var(--color-graphite)] rounded-b-[2rem]">
+        <button (click)="closeModal()"
+                class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] font-[590] text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
+          Cancelar
+        </button>
+        <button (click)="save()" [disabled]="isSaving() || !form.nombreUnidadAdm || !form.numeroUnidadAdm"
+                class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-6 py-2.5 text-[13px] font-[590] text-black transition-all hover:bg-[var(--color-cyan-spark)]/90 disabled:opacity-50 disabled:cursor-not-allowed">
+          @if (isSaving()) {
+            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+          }
+          {{ isSaving() ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

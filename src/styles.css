@@ -18,6 +18,9 @@
     --color-neon-lime: #e4f222;
     --color-aether-blue: #5e6ad2;
     --color-cyan-spark: #02b8cc;
+    --color-forest-green: #22a85a;
+    --color-emerald: #10b981;
+    --color-warning-red: #ef4444;
 
     --font-inter-variable: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
     
@@ -28,22 +31,8 @@
     --shadow-sm: rgba(0, 0, 0, 0.4) 0px 2px 4px 0px;
   }
 
-  @layer utilities {
-  .animate-float-fast { animation: float 4s ease-in-out infinite 2s; }
-
-  .animate-marquee {
-    animation: marquee 35s linear infinite;
-  }
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
-}
-
   html {
     color-scheme: dark;
-    /* ESTO HACE QUE EL SCROLL SE ENGANCHE AUTOMÁTICAMENTE */
     scroll-snap-type: y proximity; 
     scroll-behavior: smooth;
   }
@@ -52,5 +41,66 @@
     font-family: var(--font-inter-variable);
     background-color: var(--color-pitch-black);
     color: var(--color-porcelain);
+    @apply antialiased h-screen overflow-hidden;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full transition-colors;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20;
+  }
+}
+
+@layer components {
+  .loader {
+    @apply border-2 border-white/5 border-t-brand-500 rounded-full w-6 h-6 animate-spin;
+  }
+}
+
+@layer utilities {
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.95) translateY(4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes scale-out {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to { opacity: 0; transform: scale(0.95) translateY(4px); }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slide-down {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(12px); }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 200ms ease-out both;
+  }
+  .animate-scale-in {
+    animation: scale-in 200ms ease-out both;
+  }
+  .animate-slide-up {
+    animation: slide-up 250ms ease-out both;
   }
 }

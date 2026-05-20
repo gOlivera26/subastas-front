@@ -1,0 +1,31 @@
+@if (isOpen) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+
+      <div class="backdrop-layer fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity animate-fade-in"
+           (click)="onBackdropClick($event)">
+      </div>
+
+      <div class="relative bg-white dark:bg-[#1c2128] rounded-xl shadow-2xl w-full min-w-0 overflow-hidden transform transition-all animate-scale-in flex flex-col border border-gray-100 dark:border-white/10 max-h-[90vh]"
+           [ngClass]="maxWidthClass">
+
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-white dark:bg-[#1c2128] flex-shrink-0 min-w-0">
+            <div class="min-w-0">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-6 truncate">{{ title }}</h3>
+                @if (subtitle) { <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{{ subtitle }}</p> }
+            </div>
+            <button (click)="close.emit()" class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-300 transition-colors focus:outline-none p-1 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 flex-shrink-0 ml-4">
+              <lucide-icon name="x" class="w-6 h-6"></lucide-icon>
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto flex-1 min-w-0">
+           <ng-content></ng-content>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 dark:bg-white/5 border-t border-gray-200 dark:border-white/10 flex justify-end gap-3 shrink-0 min-w-0">
+           <ng-content select="[footer]"></ng-content>
+        </div>
+
+      </div>
+  </div>
+}
