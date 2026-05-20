@@ -11,9 +11,9 @@
     <div class="flex h-16 shrink-0 items-center justify-between px-6 border-b border-[var(--color-charcoal-grey)]">
       <a routerLink="/modulos" class="flex items-center gap-3 transition-opacity hover:opacity-80">
         <div class="flex size-8 items-center justify-center rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
-          <lucide-icon name="shield" [size]="18"></lucide-icon>
+          <lucide-icon name="building-2" [size]="18"></lucide-icon>
         </div>
-        <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)]">Administración</span>
+        <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)]">Proveedores</span>
       </a>
       <button (click)="closeSidebar()" class="lg:hidden text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]">
         <lucide-icon name="x" [size]="20"></lucide-icon>
@@ -21,26 +21,24 @@
     </div>
 
     <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Gestión de Accesos</p>
+      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Gestión</p>
       
-      <a routerLink="/admin/usuarios/activos" 
+      <a routerLink="/proveedores" 
          routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
          [routerLinkActiveOptions]="{exact: true}"
          (click)="closeSidebarOnMobile()"
          class="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="users" [size]="18"></lucide-icon>
-        Usuarios Activos
+        <lucide-icon name="list" [size]="18"></lucide-icon>
+        Listado de Proveedores
       </a>
-
-      <a routerLink="/admin/usuarios/pendientes" 
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-neon-lime)] border-[var(--color-charcoal-grey)] shadow-sm"
+      
+      <a routerLink="/proveedores/rubros" 
+         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center justify-between rounded-xl border border-transparent px-4 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <div class="flex items-center gap-3">
-          <lucide-icon name="user-plus" [size]="18"></lucide-icon>
-          Aprobaciones
-        </div>
-        </a>
+         class="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="folder-tree" [size]="18"></lucide-icon>
+        Gestión de Rubros
+      </a>
       
       <div class="my-6 border-t border-[var(--color-charcoal-grey)] mx-3"></div>
       <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Sistema</p>
@@ -90,15 +88,7 @@
       </div>
     </header>
 
-    <main [@routeFade]="routeState()"
-          class="flex-1 overflow-y-auto bg-[var(--color-pitch-black)] relative">
-      @if (pageTitle()) {
-        <div class="flex items-center gap-2 border-b border-[var(--color-charcoal-grey)] px-4 sm:px-6 lg:px-8 py-3">
-          <a routerLink="/admin" class="text-[13px] font-[510] text-[var(--color-storm-cloud)] transition-colors hover:text-[var(--color-porcelain)]">Administración</a>
-          <lucide-icon name="chevron-right" [size]="14" class="text-[var(--color-storm-cloud)]"></lucide-icon>
-          <span class="text-[13px] font-[590] text-[var(--color-porcelain)]">{{ pageTitle() }}</span>
-        </div>
-      }
+    <main class="flex-1 overflow-y-auto bg-[var(--color-pitch-black)] relative">
       <div class="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
         <div class="absolute top-0 right-0 h-[600px] w-[600px] rounded-full bg-[var(--color-aether-blue)] opacity-[0.03] blur-[150px]"></div>
       </div>

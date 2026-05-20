@@ -1,0 +1,230 @@
+<div class="relative flex min-h-[calc(100vh-64px)] flex-col py-8 px-4 sm:px-6 lg:px-8">
+  <div class="relative z-10 w-full animate-fade-in-up max-w-[1400px] mx-auto">
+
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Gestión de Rubros</h1>
+        <p class="text-[14px] text-[var(--color-storm-cloud)]">Administración de la jerarquía de rubros del portal.</p>
+      </div>
+
+      <div class="flex items-center gap-3 flex-wrap">
+        <button (click)="goToTreeView()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          <lucide-icon name="folder-tree" [size]="16"></lucide-icon>
+          <span class="hidden sm:inline">Ver Árbol</span>
+        </button>
+        <button (click)="openCreateModal()" class="flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-3 sm:px-5 py-2.5 text-[13px] sm:text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+          <span class="hidden sm:inline">Nuevo Rubro</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="relative w-full sm:w-80 mb-6">
+      <lucide-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+      <input
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="search()"
+        type="text"
+        placeholder="Buscar por código o descripción..."
+        class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 pl-10 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors"
+      >
+    </div>
+
+    @if (error()) {
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 animate-fade-in">
+        <lucide-icon name="alert-triangle" [size]="18" class="text-red-400 shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-red-400">{{ error() }}</p>
+      </div>
+    }
+
+    @if (success()) {
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-green-500/20 bg-green-500/10 p-4 animate-fade-in">
+        <lucide-icon name="check-circle" [size]="18" class="text-green-400 shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-green-400">{{ success() }}</p>
+      </div>
+    }
+
+    <app-data-table
+      [columns]="columns"
+      [data]="rubros()"
+      [totalRows]="totalRows()"
+      [loading]="loading()"
+      [currentPage]="currentPage()"
+      [pageSize]="pageSize()"
+      [cellTemplates]="cellTemplatesMap()"
+      (sortChange)="onSort($event)"
+      (pageChange)="onPageChange($event)">
+
+      <ng-template cellKey="codigo" let-row>
+        <span class="font-mono text-[13px] text-[var(--color-fog-grey)]">{{ row.codigo }}</span>
+      </ng-template>
+
+      <ng-template cellKey="descripcion" let-row>
+        <p class="font-[590] text-[var(--color-porcelain)] truncate max-w-[300px]" [title]="row.descripcion">{{ row.descripcion }}</p>
+      </ng-template>
+
+      <ng-template cellKey="rubroPadre" let-row>
+        <span class="text-[var(--color-fog-grey)] text-[13px] truncate max-w-[200px] block" [title]="row.rubroPadre || ''">{{ row.rubroPadre || '—' }}</span>
+      </ng-template>
+
+      <ng-template cellKey="imputable" let-row>
+        <span [ngClass]="row.imputable
+          ? 'bg-[var(--color-aether-blue)]/10 text-[var(--color-aether-blue)] border-[var(--color-aether-blue)]'
+          : 'bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] border-[var(--color-charcoal-grey)]'"
+          class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border">
+          {{ row.imputable ? 'Sí' : 'No' }}
+        </span>
+      </ng-template>
+
+      <ng-template cellKey="activo" let-row>
+        <span [ngClass]="row.activo
+          ? 'bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)] border-[var(--color-neon-lime)]'
+          : 'bg-red-500/10 text-red-400 border-red-500'"
+          class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border">
+          {{ row.activo ? 'Activo' : 'Inactivo' }}
+        </span>
+      </ng-template>
+
+      <ng-template cellKey="acciones" let-row>
+        <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+          <button (click)="openEditModal(row)" title="Editar" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+            <lucide-icon name="pencil" [size]="16"></lucide-icon>
+          </button>
+          <button (click)="deleteRubro(row.id)" title="Eliminar" class="p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)] transition-colors border border-red-500/20">
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>
+
+@if (isCreateModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon name="folder-plus" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Nuevo Rubro</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">Agrega un nuevo rubro a la jerarquía del portal.</p>
+
+      <form (ngSubmit)="createRubro()">
+        <div class="mb-5">
+          <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Código *</label>
+          <input type="text" [(ngModel)]="createForm.codigo" name="codigo" required
+            class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+        </div>
+        <div class="mb-5">
+          <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Descripción *</label>
+          <input type="text" [(ngModel)]="createForm.descripcion" name="descripcion" required
+            class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+        </div>
+        <div class="mb-6">
+          <label class="mb-3 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Imputable</label>
+          <div class="flex gap-2">
+            <button type="button" (click)="createForm.imputable = true"
+              [class]="createForm.imputable
+                ? 'bg-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] border-[var(--color-cyan-spark)]'
+                : 'bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] border-[var(--color-charcoal-grey)]'"
+              class="flex-1 rounded-xl border py-2.5 text-[13px] font-[590] transition-all">
+              Sí
+            </button>
+            <button type="button" (click)="createForm.imputable = false"
+              [class]="!createForm.imputable
+                ? 'bg-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] border-[var(--color-cyan-spark)]'
+                : 'bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] border-[var(--color-charcoal-grey)]'"
+              class="flex-1 rounded-xl border py-2.5 text-[13px] font-[590] transition-all">
+              No
+            </button>
+          </div>
+        </div>
+        <div class="mb-8">
+          <app-searchable-select
+            [options]="rubroOptions()"
+            label="Rubro Padre (opcional)"
+            placeholder="Buscar por código o descripción..."
+            [value]="createForm.idRubroPadre"
+            (valueChange)="createForm.idRubroPadre = $event"
+            nullLabel="— Sin rubro padre (raíz) —">
+          </app-searchable-select>
+        </div>
+        <div class="flex gap-3">
+          <button type="button" (click)="closeModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+            Cancelar
+          </button>
+          <button type="submit" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:bg-green-400">
+            Crear Rubro
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (isEditModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon name="folder-pen" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Editar Rubro</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">Modifica los datos del rubro seleccionado.</p>
+
+      <form (ngSubmit)="updateRubro()">
+        <div class="mb-5">
+          <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Código *</label>
+          <input type="text" [(ngModel)]="editForm.codigo" name="editCodigo" required
+            class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+        </div>
+        <div class="mb-5">
+          <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Descripción *</label>
+          <input type="text" [(ngModel)]="editForm.descripcion" name="editDescripcion" required
+            class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+        </div>
+        <div class="mb-6">
+          <label class="mb-3 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Imputable</label>
+          <div class="flex gap-2">
+            <button type="button" (click)="editForm.imputable = true"
+              [class]="editForm.imputable
+                ? 'bg-[var(--color-aether-blue)] text-[var(--color-porcelain)] border-[var(--color-aether-blue)]'
+                : 'bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] border-[var(--color-charcoal-grey)]'"
+              class="flex-1 rounded-xl border py-2.5 text-[13px] font-[590] transition-all">
+              Sí
+            </button>
+            <button type="button" (click)="editForm.imputable = false"
+              [class]="!editForm.imputable
+                ? 'bg-[var(--color-aether-blue)] text-[var(--color-porcelain)] border-[var(--color-aether-blue)]'
+                : 'bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] border-[var(--color-charcoal-grey)]'"
+              class="flex-1 rounded-xl border py-2.5 text-[13px] font-[590] transition-all">
+              No
+            </button>
+          </div>
+        </div>
+        <div class="mb-8">
+          <app-searchable-select
+            [options]="rubroOptions()"
+            label="Rubro Padre (opcional)"
+            placeholder="Buscar por código o descripción..."
+            [value]="editForm.idRubroPadre"
+            (valueChange)="editForm.idRubroPadre = $event"
+            nullLabel="— Sin rubro padre (raíz) —">
+          </app-searchable-select>
+        </div>
+        <div class="flex gap-3">
+          <button type="button" (click)="closeModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+            Cancelar
+          </button>
+          <button type="submit" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:bg-green-400">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

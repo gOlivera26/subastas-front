@@ -1,0 +1,300 @@
+<div class="relative flex min-h-[calc(100vh-64px)] flex-col py-8 px-4 sm:px-6 lg:px-8">
+  <div class="relative z-10 w-full animate-fade-in-up max-w-[1400px] mx-auto">
+
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Árbol de Rubros</h1>
+        <p class="text-[14px] text-[var(--color-storm-cloud)]">Visualización jerárquica de la estructura de rubros.</p>
+      </div>
+
+      <div class="flex items-center gap-3 flex-wrap">
+        <button (click)="goToListView()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          <lucide-icon name="list" [size]="16"></lucide-icon>
+          <span class="hidden sm:inline">Ver Lista</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="relative w-full sm:w-80 mb-6">
+      <lucide-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+      <input
+        [(ngModel)]="searchTerm"
+        (input)="filterTree()"
+        type="text"
+        placeholder="Buscar por código o nombre..."
+        class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 pl-10 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors"
+      >
+    </div>
+
+    @if (error()) {
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 animate-fade-in">
+        <lucide-icon name="alert-triangle" [size]="18" class="text-red-400 shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-red-400">{{ error() }}</p>
+      </div>
+    }
+
+    @if (success()) {
+      <div class="mb-6 flex items-center gap-3 rounded-xl border border-green-500/20 bg-green-500/10 p-4 animate-fade-in">
+        <lucide-icon name="check-circle" [size]="18" class="text-green-400 shrink-0"></lucide-icon>
+        <p class="text-[14px] font-[510] text-green-400">{{ success() }}</p>
+      </div>
+    }
+
+    <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-0 shadow-lg overflow-hidden">
+      @if (loading()) {
+        <app-loading-spinner label="Cargando árbol de rubros..." containerClass="py-16"></app-loading-spinner>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-[14px] whitespace-nowrap">
+            <thead class="bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+              <tr>
+                <th
+                  [class.cursor-pointer]="true"
+                  [class.hover:text-[var(--color-porcelain)]]="true"
+                  (click)="onSort('descripcion')"
+                  class="px-6 py-4 font-medium transition-colors w-[40%]">
+                  <div class="flex items-center gap-1.5">
+                    Nombre del Rubro
+                    <lucide-icon [name]="getSortIcon('descripcion')" [size]="14" [class]="getSortIconClass('descripcion')"></lucide-icon>
+                  </div>
+                </th>
+                <th
+                  [class.cursor-pointer]="true"
+                  [class.hover:text-[var(--color-porcelain)]]="true"
+                  (click)="onSort('codigo')"
+                  class="px-6 py-4 font-medium transition-colors w-[20%]">
+                  <div class="flex items-center gap-1.5">
+                    Código
+                    <lucide-icon [name]="getSortIcon('codigo')" [size]="14" [class]="getSortIconClass('codigo')"></lucide-icon>
+                  </div>
+                </th>
+                <th
+                  [class.cursor-pointer]="true"
+                  [class.hover:text-[var(--color-porcelain)]]="true"
+                  (click)="onSort('imputable')"
+                  class="px-6 py-4 font-medium transition-colors w-[20%]">
+                  <div class="flex items-center gap-1.5">
+                    Tipo
+                    <lucide-icon [name]="getSortIcon('imputable')" [size]="14" [class]="getSortIconClass('imputable')"></lucide-icon>
+                  </div>
+                </th>
+                <th class="px-6 py-4 font-medium transition-colors text-right w-[20%]">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+              @for (rubro of sortedTree(); track trackByFn($index, rubro)) {
+                <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: rubro, level: 0 }"></ng-container>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="px-6 py-16 text-center">
+                    <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)]">
+                      <lucide-icon name="folder-tree" [size]="32"></lucide-icon>
+                    </div>
+                    <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">No hay rubros registrados</p>
+                    <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Crea el primer rubro desde la vista de lista.</p>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<ng-template #treeRow let-rubro let-level="level">
+  <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/50 group cursor-pointer" (click)="openDetailModal(rubro)">
+    <td class="px-6 py-4">
+      <div class="flex items-center gap-2" [style.padding-left.px]="level * 32">
+        
+        @if (level > 0) {
+          <lucide-icon name="corner-down-right" [size]="16" class="text-[var(--color-storm-cloud)] shrink-0"></lucide-icon>
+        }
+
+        <button (click)="toggleNode(rubro.id, $event); $event.stopPropagation()"
+                [class.invisible]="!rubro.hasChildren"
+                class="p-0.5 rounded shrink-0 transition-colors w-5 h-5 flex items-center justify-center text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)]">
+          <lucide-icon [name]="isExpanded(rubro.id) ? 'chevron-down' : 'chevron-right'" [size]="16"></lucide-icon>
+        </button>
+
+        <lucide-icon [name]="rubro.hasChildren ? 'folder' : 'file-text'" [size]="16"
+          class="shrink-0 transition-colors text-[var(--color-storm-cloud)]">
+        </lucide-icon>
+
+        <span class="font-[590] text-[var(--color-porcelain)] text-[14px] truncate">{{ rubro.descripcion }}</span>
+      </div>
+    </td>
+    
+    <td class="px-6 py-4">
+      <span class="font-mono text-[13px] text-[var(--color-fog-grey)]">{{ rubro.codigo }}</span>
+    </td>
+    
+    <td class="px-6 py-4">
+      <span [ngClass]="rubro.imputable
+        ? 'bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] border-[var(--color-cyan-spark)]/20'
+        : 'bg-[var(--color-pitch-black)] text-[var(--color-storm-cloud)] border-[var(--color-charcoal-grey)]'"
+        class="px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider border">
+        {{ rubro.imputable ? 'Imputable' : 'No imputable' }}
+      </span>
+    </td>
+    
+    <td class="px-6 py-4 text-right">
+      <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+        <button (click)="openEditModal(rubro); $event.stopPropagation()" title="Editar" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+          <lucide-icon name="pencil" [size]="16"></lucide-icon>
+        </button>
+        <button (click)="openDeleteModal(rubro.id); $event.stopPropagation()" title="Eliminar" class="p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)] transition-colors border border-red-500/20">
+          <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+        </button>
+      </div>
+    </td>
+  </tr>
+
+  @if (rubro.hasChildren && isExpanded(rubro.id)) {
+    @for (child of rubro.children; track trackByFn($index, child)) {
+      <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: child, level: level + 1 }"></ng-container>
+    }
+  }
+</ng-template>
+
+@if (isEditModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeEditModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon name="folder-pen" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Editar Rubro</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">Modifica los datos del rubro seleccionado.</p>
+
+      <form (ngSubmit)="updateRubro()">
+        <div class="mb-5">
+          <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Código *</label>
+          <input type="text" [(ngModel)]="editForm.codigo" name="editCodigo" required
+            class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+        </div>
+        <div class="mb-5">
+          <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Descripción *</label>
+          <input type="text" [(ngModel)]="editForm.descripcion" name="editDescripcion" required
+            class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+        </div>
+        <div class="mb-6">
+          <label class="mb-3 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Imputable</label>
+          <div class="flex gap-2">
+            <button type="button" (click)="editForm.imputable = true"
+              [class]="editForm.imputable
+                ? 'bg-[var(--color-aether-blue)] text-[var(--color-porcelain)] border-[var(--color-aether-blue)]'
+                : 'bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] border-[var(--color-charcoal-grey)]'"
+              class="flex-1 rounded-xl border py-2.5 text-[13px] font-[590] transition-all">
+              Sí
+            </button>
+            <button type="button" (click)="editForm.imputable = false"
+              [class]="!editForm.imputable
+                ? 'bg-[var(--color-aether-blue)] text-[var(--color-porcelain)] border-[var(--color-aether-blue)]'
+                : 'bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] border-[var(--color-charcoal-grey)]'"
+              class="flex-1 rounded-xl border py-2.5 text-[13px] font-[590] transition-all">
+              No
+            </button>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button type="button" (click)="closeEditModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+            Cancelar
+          </button>
+          <button type="submit" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (isDeleteModalOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-sm rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeDeleteModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+        <lucide-icon name="trash-2" [size]="28"></lucide-icon>
+      </div>
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Eliminar Rubro</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">¿Estás seguro de que deseas eliminar este rubro? Esta acción no se puede deshacer.</p>
+
+      <div class="flex gap-3">
+        <button (click)="closeDeleteModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          Cancelar
+        </button>
+        <button (click)="confirmDelete()" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-red-500 py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:bg-red-400">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isDetailModalOpen() && selectedRubro()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-lg rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeDetailModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon [name]="selectedRubro()!.hasChildren ? 'folder' : 'file-text'" [size]="28"></lucide-icon>
+      </div>
+
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Detalle del Rubro</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center font-mono">{{ selectedRubro()!.codigo }}</p>
+
+      <div class="space-y-4">
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 p-4">
+          <label class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Descripción</label>
+          <p class="text-[14px] text-[var(--color-porcelain)] mt-1">{{ selectedRubro()!.descripcion }}</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 p-4">
+            <label class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Imputable</label>
+            <span [ngClass]="selectedRubro()!.imputable
+              ? 'text-[var(--color-aether-blue)]'
+              : 'text-[var(--color-storm-cloud)]'"
+              class="text-[14px] font-[590] mt-1 block">
+              {{ selectedRubro()!.imputable ? 'Sí' : 'No' }}
+            </span>
+          </div>
+
+          <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 p-4">
+            <label class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Hijos</label>
+            <span class="text-[14px] font-[590] text-[var(--color-porcelain)] mt-1 block">
+              {{ selectedRubro()!.children.length }}
+            </span>
+          </div>
+        </div>
+
+        @if (selectedRubro()!.hasChildren) {
+          <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 p-4">
+            <label class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3 block">Rubros Hijos</label>
+            <div class="space-y-2 max-h-40 overflow-y-auto">
+              @for (child of selectedRubro()!.children; track child.id) {
+                <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--color-deep-slate)]/50">
+                  <lucide-icon name="file-text" [size]="14" class="text-[var(--color-storm-cloud)]"></lucide-icon>
+                  <span class="font-mono text-[12px] text-[var(--color-fog-grey)]">{{ child.codigo }}</span>
+                  <span class="text-[13px] text-[var(--color-porcelain)] truncate">{{ child.descripcion }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <button (click)="closeDetailModal()" class="mt-6 w-full rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+        Cerrar
+      </button>
+    </div>
+  </div>
+}

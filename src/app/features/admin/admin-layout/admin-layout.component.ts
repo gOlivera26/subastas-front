@@ -36,10 +36,37 @@ export class AdminLayoutComponent {
   }
 
   toggleSidebar() {
-    this.isSidebarOpen.update(v => !v);
+    this.isSidebarOpen.update(v => {
+      localStorage.setItem('sidebar-admin', String(!v));
+      return !v;
+    });
   }
 
   closeSidebar() {
     this.isSidebarOpen.set(false);
+    localStorage.setItem('sidebar-admin', 'false');
+  }
+
+  closeSidebarOnMobile() {
+    if (window.innerWidth < 1024) this.closeSidebar();
+  }
+
+  toggleUserMenu() {
+    this.isUserMenuOpen.update(v => !v);
+  }
+
+  toggleTheme() {
+    this.isDarkMode.update(v => !v);
+    if (this.isDarkMode()) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

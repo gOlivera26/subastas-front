@@ -1,0 +1,86 @@
+<div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-0 shadow-lg overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-[14px] whitespace-nowrap">
+      <thead class="bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+        <tr>
+          @for (col of columns(); track col.key) {
+            <th
+              [class.cursor-pointer]="col.sortable"
+              [class.hover:text-[var(--color-porcelain)]]="col.sortable"
+              [class.text-right]="col.align === 'right'"
+              [class.text-center]="col.align === 'center'"
+              [style.width]="col.width"
+              (click)="col.sortable && onSort(col.key)"
+              class="px-6 py-4 font-medium transition-colors">
+              <div class="flex items-center gap-1.5" [class.justify-end]="col.align === 'right'" [class.justify-center]="col.align === 'center'">
+                {{ col.label }}
+                @if (col.sortable) {
+                  <lucide-icon [name]="getSortIcon(col.key)" [size]="14" [class]="getSortIconClass(col.key)"></lucide-icon>
+                }
+              </div>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+        @if (loading()) {
+          <tr>
+            <td [attr.colspan]="columns().length" class="px-6 py-16 text-center text-[var(--color-storm-cloud)]">
+              <app-loading-spinner label="Cargando..." containerClass=""></app-loading-spinner>
+            </td>
+          </tr>
+        } @else if (data().length === 0) {
+          <tr>
+            <td [attr.colspan]="columns().length" class="px-6 py-16 text-center">
+              <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)]">
+                <lucide-icon name="search" [size]="32"></lucide-icon>
+              </div>
+              <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ emptyMessage() }}</p>
+              <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">{{ emptySubMessage() }}</p>
+            </td>
+          </tr>
+        } @else {
+          @for (row of data(); track $index) {
+            <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/50 group">
+              @for (col of columns(); track col.key) {
+                <td
+                  [class.text-right]="col.align === 'right'"
+                  [class.text-center]="col.align === 'center'"
+                  class="px-6 py-4">
+                  <ng-container *ngTemplateOutlet="getCellTemplate(col.key) || defaultCell; context: { $implicit: row, key: col.key, value: getCellValue(row, col.key) }"></ng-container>
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (totalRows() > 0) {
+    <div class="px-6 py-4 border-t border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 flex items-center justify-between">
+      <p class="text-[12px] text-[var(--color-storm-cloud)]">
+        Mostrando pág. {{ currentPage() }} de {{ totalPages() }}
+        (Total: {{ totalRows() }})
+      </p>
+      <div class="flex items-center gap-2">
+        <button
+          [disabled]="currentPage() === 1"
+          (click)="prevPage()"
+          class="p-1 rounded bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] disabled:opacity-30 disabled:cursor-not-allowed">
+          <lucide-icon name="chevron-left" [size]="18"></lucide-icon>
+        </button>
+        <button
+          [disabled]="(currentPage() * pageSize()) >= totalRows()"
+          (click)="nextPage()"
+          class="p-1 rounded bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] disabled:opacity-30 disabled:cursor-not-allowed">
+          <lucide-icon name="chevron-right" [size]="18"></lucide-icon>
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<ng-template #defaultCell let-value>
+  <span class="text-[var(--color-porcelain)]">{{ value }}</span>
+</ng-template>

@@ -30,92 +30,95 @@
       </div>
     }
 
-    <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-1 shadow-2xl backdrop-blur-xl overflow-hidden">
-      
-      <div class="px-6 py-5 border-b border-[var(--color-charcoal-grey)] flex justify-between items-center bg-[var(--color-pitch-black)]/30 rounded-t-[1.8rem]">
-        <h2 class="text-[16px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2">
-          <lucide-icon name="users" [size]="18" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-          Bandeja de Aprobación Pendiente
-        </h2>
-        <span class="bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] text-[12px] font-[590] px-3 py-1 rounded-full border border-[var(--color-charcoal-grey)]">
-          {{ pendingUsers().length }} solicitudes
-        </span>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-[14px]">
-          <thead class="bg-[var(--color-pitch-black)]/50 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
-            <tr>
-              <th class="px-6 py-4 font-medium">Usuario / Contacto</th>
-              <th class="px-6 py-4 font-medium">Documento</th>
-              <th class="px-6 py-4 font-medium">Rol / Entidad Representada</th>
-              <th class="px-6 py-4 font-medium">Fecha Solicitud</th>
-              <th class="px-6 py-4 font-medium text-right">Acción</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
-            
-            @if (isLoading()) {
-              <tr>
-                <td colspan="5" class="px-6 py-12 text-center text-[var(--color-storm-cloud)]">
-                  <lucide-icon name="loader-2" [size]="32" class="animate-spin mx-auto mb-3 text-[var(--color-cyan-spark)]"></lucide-icon>
-                  Cargando solicitudes...
-                </td>
-              </tr>
-            } @else if (pendingUsers().length === 0) {
-              <tr>
-                <td colspan="5" class="px-6 py-16 text-center">
-                  <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)]">
-                    <lucide-icon name="shield-check" [size]="32"></lucide-icon>
-                  </div>
-                  <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">Todo al día</p>
-                  <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">No hay usuarios pendientes de aprobación en este momento.</p>
-                </td>
-              </tr>
-            } @else {
-              @for (user of pendingUsers(); track user.idUsuario) {
-                <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/50 group">
-                  <td class="px-6 py-4">
-                    <p class="font-[590] text-[var(--color-porcelain)]">{{ user.nombreCompleto }}</p>
-                    <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5">{{ user.email }}</p>
-                  </td>
-                  <td class="px-6 py-4 text-[var(--color-fog-grey)] font-mono text-[13px]">
-                    {{ user.documento }}
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-2 mb-1">
-                      <span [class]="user.tipoUsuario === 'Proveedor Directo' ? 'text-[var(--color-neon-lime)] bg-[var(--color-neon-lime)]/10' : 'text-[var(--color-cyan-spark)] bg-[var(--color-cyan-spark)]/10'" 
-                            class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
-                        {{ user.tipoUsuario }}
-                      </span>
-                    </div>
-                    <p class="text-[13px] text-[var(--color-porcelain)] truncate max-w-[200px]" [title]="user.entidadRepresentada">
-                      {{ user.entidadRepresentada }}
-                    </p>
-                  </td>
-                  <td class="px-6 py-4 text-[13px] text-[var(--color-storm-cloud)]">
-                    {{ user.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <button 
-                      (click)="approveUser(user.idUsuario, user.nombreCompleto)"
-                      [disabled]="processingId() === user.idUsuario"
-                      class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-neon-lime)]/10 px-4 py-2 text-[13px] font-[590] text-[var(--color-neon-lime)] hover:bg-[var(--color-neon-lime)] hover:text-[var(--color-pitch-black)] transition-all disabled:opacity-50 border border-[var(--color-neon-lime)]/20">
-                      @if (processingId() === user.idUsuario) {
-                        <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
-                      } @else {
-                        <lucide-icon name="check-circle" [size]="16"></lucide-icon>
-                        Aprobar
-                      }
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
+    <div class="mb-3 px-2 flex justify-between items-center">
+      <h2 class="text-[16px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2">
+        <lucide-icon name="users" [size]="18" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+        Bandeja de Aprobación Pendiente
+      </h2>
+      <span class="bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] text-[12px] font-[590] px-3 py-1 rounded-full border border-[var(--color-charcoal-grey)]">
+        {{ pendingUsers().length }} solicitudes
+      </span>
     </div>
+
+    <app-data-table
+      [columns]="columns"
+      [data]="pendingUsers()"
+      [loading]="isLoading()"
+      [cellTemplates]="cellTemplatesMap()"
+      emptyMessage="Todo al día"
+      emptySubMessage="No hay usuarios pendientes de aprobación en este momento.">
+
+      <ng-template cellKey="nombreCompleto" let-row>
+        <p class="font-[590] text-[var(--color-porcelain)]">{{ row.nombreCompleto }}</p>
+        <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5">{{ row.email }}</p>
+      </ng-template>
+
+      <ng-template cellKey="documento" let-row>
+        <span class="text-[var(--color-fog-grey)] font-mono text-[13px]">{{ row.documento }}</span>
+      </ng-template>
+
+      <ng-template cellKey="tipoUsuario" let-row>
+        <div class="flex items-center gap-2 mb-1">
+          <span [class]="row.tipoUsuario === 'Proveedor Directo' ? 'text-[var(--color-neon-lime)] bg-[var(--color-neon-lime)]/10' : 'text-[var(--color-cyan-spark)] bg-[var(--color-cyan-spark)]/10'" 
+                class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+            {{ row.tipoUsuario }}
+          </span>
+        </div>
+        <p class="text-[13px] text-[var(--color-porcelain)] truncate max-w-[200px]" [title]="row.entidadRepresentada">
+          {{ row.entidadRepresentada }}
+        </p>
+      </ng-template>
+
+      <ng-template cellKey="fechaRegistro" let-row>
+        <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span>
+      </ng-template>
+
+      <ng-template cellKey="acciones" let-row>
+        <button 
+          (click)="openApproveModal(row.idUsuario, row.nombreCompleto)"
+          [disabled]="processingId() === row.idUsuario"
+          class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-neon-lime)]/10 px-4 py-2 text-[13px] font-[590] text-[var(--color-neon-lime)] hover:bg-[var(--color-neon-lime)] hover:text-[var(--color-pitch-black)] transition-all disabled:opacity-50 border border-[var(--color-neon-lime)]/20">
+          @if (processingId() === row.idUsuario) {
+            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+          } @else {
+            <lucide-icon name="check-circle" [size]="16"></lucide-icon>
+            Aprobar
+          }
+        </button>
+      </ng-template>
+    </app-data-table>
 
   </div>
 </div>
+
+@if (isApproveModalOpen() && selectedUserToApprove()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeApproveModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
+      
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <lucide-icon name="check-circle" [size]="28"></lucide-icon>
+      </div>
+      
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-2 text-center">Confirmar Aprobación</h2>
+      <p class="text-[14px] text-[var(--color-storm-cloud)] mb-6 text-center leading-relaxed">
+        ¿Estás seguro de que deseas aprobar y dar acceso a la plataforma al usuario <strong class="text-[var(--color-porcelain)]">{{ selectedUserToApprove()?.nombre }}</strong>?
+      </p>
+      
+      <div class="flex gap-3">
+        <button (click)="closeApproveModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          Cancelar
+        </button>
+        <button (click)="confirmApproval()" [disabled]="processingId() !== null" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-70">
+          @if (processingId() !== null) {
+            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+          } @else {
+            Sí, Aprobar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

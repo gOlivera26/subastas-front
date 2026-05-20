@@ -25,126 +25,76 @@
       </div>
     }
 
-    <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-1 shadow-2xl backdrop-blur-xl overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-[14px] whitespace-nowrap">
-          <thead class="bg-[var(--color-pitch-black)]/50 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
-            <tr>
-              <th class="px-6 py-4 font-medium">Estado</th>
-              <th class="px-6 py-4 font-medium">Usuario / Contacto</th>
-              <th class="px-6 py-4 font-medium">Documento</th>
-              <th class="px-6 py-4 font-medium">Rol del Sistema</th>
-              <th class="px-6 py-4 font-medium">Tipo / Entidad</th>
-              <th class="px-6 py-4 font-medium text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
-            
-            @if (isLoading()) {
-              <tr>
-                <td colspan="6" class="px-6 py-16 text-center text-[var(--color-storm-cloud)]">
-                  <lucide-icon name="loader-2" [size]="32" class="animate-spin mx-auto mb-3 text-[var(--color-cyan-spark)]"></lucide-icon>
-                  Cargando padrón...
-                </td>
-              </tr>
-            } @else if (activeUsers().length === 0) {
-              <tr>
-                <td colspan="6" class="px-6 py-16 text-center">
-                  <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)]">
-                    <lucide-icon name="search" [size]="32"></lucide-icon>
-                  </div>
-                  <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">No se encontraron resultados</p>
-                  <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Intenta con otros términos de búsqueda.</p>
-                </td>
-              </tr>
-            } @else {
-              @for (user of activeUsers(); track user.idUsuario) {
-                <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/50 group">
-                  <td class="px-6 py-4">
-                    <span [ngClass]="{
-                            'bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]': user.estado === 'ACTIVO',
-                            'bg-red-500/10 text-red-400': user.estado === 'BAJA' || user.estado === 'INACTIVO',
-                            'bg-amber-500/10 text-amber-400': user.estado === 'BLOQUEADO'
-                          }" 
-                          class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border border-transparent"
-                          [class.border-[var(--color-neon-lime)]]="user.estado === 'ACTIVO'">
-                      {{ user.estado }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <p class="font-[590] text-[var(--color-porcelain)]">{{ user.nombreCompleto }}</p>
-                    <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5">{{ user.email }}</p>
-                  </td>
-                  <td class="px-6 py-4 text-[var(--color-fog-grey)] font-mono text-[13px]">
-                    {{ user.documento }}
-                  </td>
-                  <td class="px-6 py-4 text-[13px] text-[var(--color-porcelain)]">
-                    <span class="bg-[var(--color-pitch-black)] border border-[var(--color-charcoal-grey)] px-2 py-1 rounded text-[11px] font-[510]">
-                      {{ user.rol }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <p class="text-[11px] uppercase tracking-widest font-bold text-[var(--color-cyan-spark)] mb-0.5">{{ user.tipoUsuario }}</p>
-                    <p class="text-[13px] text-[var(--color-porcelain)] truncate max-w-[200px]" [title]="user.entidadRepresentada">
-                      {{ user.entidadRepresentada }}
-                    </p>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                      
-                      <button (click)="linkEntity(user)" title="Vincular a Entidad (Proveedor/Org)" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
-                        <lucide-icon name="handshake" [size]="16"></lucide-icon>
-                      </button>
+    <app-data-table
+      [columns]="columns"
+      [data]="activeUsers()"
+      [totalRows]="totalRows()"
+      [loading]="isLoading()"
+      [currentPage]="currentPage()"
+      [pageSize]="pageSize()"
+      [cellTemplates]="cellTemplatesMap()"
+      (sortChange)="onSort($event)"
+      (pageChange)="onPageChange($event)">
 
-                      <button (click)="manageRoles(user)" title="Gestionar Rol y Módulos" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-aether-blue)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
-                        <lucide-icon name="users" [size]="16"></lucide-icon>
-                      </button>
+      <ng-template cellKey="estado" let-row>
+        <span [ngClass]="{
+                'bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]': row.estado === 'ACTIVO',
+                'bg-red-500/10 text-red-400': row.estado === 'BAJA' || row.estado === 'INACTIVO',
+                'bg-amber-500/10 text-amber-400': row.estado === 'BLOQUEADO'
+              }" 
+              class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border border-transparent"
+              [class.border-[var(--color-neon-lime)]]="row.estado === 'ACTIVO'">
+          {{ row.estado }}
+        </span>
+      </ng-template>
 
-                      <button (click)="viewAccessLogs(user)" title="Ver Historial de Accesos" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
-                        <lucide-icon name="mouse-pointer-click" [size]="16"></lucide-icon>
-                      </button>
+      <ng-template cellKey="nombreCompleto" let-row>
+        <p class="font-[590] text-[var(--color-porcelain)]">{{ row.nombreCompleto }}</p>
+        <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5">{{ row.email }}</p>
+      </ng-template>
 
-                      <button (click)="openResetModal(user)" title="Blanquear Contraseña" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-neon-lime)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
-                        <lucide-icon name="unlock" [size]="16"></lucide-icon>
-                      </button>
+      <ng-template cellKey="documento" let-row>
+        <span class="text-[var(--color-fog-grey)] font-mono text-[13px]">{{ row.documento }}</span>
+      </ng-template>
 
-                      @if (user.tipoUsuario !== 'Independiente' && user.tipoUsuario !== 'Sin Asignar') {
-                        <button (click)="openUnlinkModal(user)" title="Desvincular Entidad" class="p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)] transition-colors ml-1 border border-red-500/20">
-                          <lucide-icon name="user-minus" [size]="16"></lucide-icon>
-                        </button>
-                      }
-                    </div>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
+      <ng-template cellKey="rol" let-row>
+        <span class="bg-[var(--color-pitch-black)] border border-[var(--color-charcoal-grey)] px-2 py-1 rounded text-[11px] font-[510] text-[var(--color-porcelain)]">
+          {{ row.rol }}
+        </span>
+      </ng-template>
 
-      @if (totalRows() > 0) {
-        <div class="px-6 py-4 border-t border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 flex items-center justify-between">
-          <p class="text-[12px] text-[var(--color-storm-cloud)]">
-            Mostrando pág. {{ currentPage() }} de {{ Math.ceil(totalRows() / pageSize()) }} 
-            (Total: {{ totalRows() }})
-          </p>
-          <div class="flex items-center gap-2">
-            <button 
-              [disabled]="currentPage() === 1"
-              (click)="changePage(currentPage() - 1)"
-              class="p-1 rounded bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] disabled:opacity-30 disabled:cursor-not-allowed">
-              <lucide-icon name="chevron-left" [size]="18"></lucide-icon>
-            </button>
-            <button 
-              [disabled]="currentPage() === Math.ceil(totalRows() / pageSize())"
-              (click)="changePage(currentPage() + 1)"
-              class="p-1 rounded bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] disabled:opacity-30 disabled:cursor-not-allowed">
-              <lucide-icon name="chevron-right" [size]="18"></lucide-icon>
-            </button>
-          </div>
+      <ng-template cellKey="tipoUsuario" let-row>
+        <p class="text-[11px] uppercase tracking-widest font-bold text-[var(--color-cyan-spark)] mb-0.5">{{ row.tipoUsuario }}</p>
+        <p class="text-[13px] text-[var(--color-porcelain)] truncate max-w-[200px]" [title]="row.entidadRepresentada">
+          {{ row.entidadRepresentada }}
+        </p>
+      </ng-template>
+
+      <ng-template cellKey="acciones" let-row>
+        <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+          
+          <button (click)="linkEntity(row)" title="Vincular a Entidad (Proveedor/Org)" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+            <lucide-icon name="handshake" [size]="16"></lucide-icon>
+          </button>
+
+          <button (click)="manageRoles(row)" title="Gestionar Rol y Módulos" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-aether-blue)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+            <lucide-icon name="users" [size]="16"></lucide-icon>
+          </button>
+
+          <button (click)="openResetModal(row)" title="Blanquear Clave" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-neon-lime)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+            <lucide-icon name="key-round" [size]="16"></lucide-icon>
+          </button>
+
+          <button (click)="viewAccessLogs(row)" title="Ver Accesos" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
+            <lucide-icon name="mouse-pointer-click" [size]="16"></lucide-icon>
+          </button>
+
+          <button (click)="openUnlinkModal(row)" title="Desvincular" class="p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)] transition-colors border border-red-500/20">
+            <lucide-icon name="user-minus" [size]="16"></lucide-icon>
+          </button>
         </div>
-      }
-    </div>
+      </ng-template>
+    </app-data-table>
   </div>
 </div>
 
@@ -220,7 +170,7 @@
       <button (click)="closeRoleModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
         <lucide-icon name="x" [size]="24"></lucide-icon>
       </button>
-      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-aether-blue)]/10 text-[var(--color-aether-blue)]">
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
         <lucide-icon name="shield" [size]="28"></lucide-icon>
       </div>
       <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Modificar Accesos</h2>
@@ -250,7 +200,7 @@
         <button 
           (click)="confirmRoleUpdate()" 
           [disabled]="isUpdatingRole() || selectedRoleId() === ''" 
-          class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-aether-blue)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed">
+          class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed">
           @if (isUpdatingRole()) {
             <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
           } @else {
@@ -270,7 +220,7 @@
         <lucide-icon name="x" [size]="24"></lucide-icon>
       </button>
 
-      <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]">
+      <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
         <lucide-icon name="handshake" [size]="28"></lucide-icon>
       </div>
 
@@ -354,8 +304,7 @@
         <button 
           (click)="confirmLink()" 
           [disabled]="isLinking() || (linkType() === 'GESTOR' && selectedOrgId() === '') || (linkType() === 'PROVEEDOR' && !verifiedProvider())" 
-          class="flex w-1/2 items-center justify-center gap-2 rounded-xl py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
-          [ngClass]="linkType() === 'GESTOR' ? 'bg-[var(--color-cyan-spark)]' : 'bg-[var(--color-neon-lime)]'">
+          class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed">
           @if (isLinking()) {
             <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
           } @else {
@@ -376,7 +325,7 @@
         <lucide-icon name="x" [size]="24"></lucide-icon>
       </button>
 
-      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-porcelain)]/10 text-[var(--color-porcelain)]">
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
         <lucide-icon name="activity" [size]="28"></lucide-icon>
       </div>
 
