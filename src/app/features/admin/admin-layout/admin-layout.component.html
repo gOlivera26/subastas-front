@@ -5,49 +5,73 @@
   }
 
   <aside 
-    class="fixed inset-y-0 left-0 z-50 w-72 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/95 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0 lg:z-auto"
-    [ngClass]="isSidebarOpen() ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden lg:border-r-0'">
+    class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/95 backdrop-blur-xl overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] lg:static lg:translate-x-0 lg:z-auto"
+    [ngClass]="isSidebarOpen() ? 'w-72 translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[68px]'">
     
-    <div class="flex h-16 shrink-0 items-center justify-between px-6 border-b border-[var(--color-charcoal-grey)]">
-      <a routerLink="/modulos" class="flex items-center gap-3 transition-opacity hover:opacity-80">
-        <div class="flex size-8 items-center justify-center rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+    <div class="flex h-16 shrink-0 items-center px-4 border-b border-[var(--color-charcoal-grey)]"
+         [ngClass]="isSidebarOpen() ? 'justify-between' : 'justify-center'">
+      <a routerLink="/modulos" class="flex items-center gap-3 transition-opacity hover:opacity-80 min-w-0">
+        <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
           <lucide-icon name="shield" [size]="18"></lucide-icon>
         </div>
-        <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)]">Administración</span>
+        <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)] truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()">Administración</span>
       </a>
       <button (click)="closeSidebar()" class="lg:hidden text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]">
         <lucide-icon name="x" [size]="20"></lucide-icon>
       </button>
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Gestión de Accesos</p>
+    <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] transition-opacity duration-300"
+         [class.opacity-0]="!isSidebarOpen()"
+         [class.hidden]="!isSidebarOpen()">Gestión de Accesos</p>
       
-      <a routerLink="/admin/usuarios/activos" 
+      @if (authService.hasPageAccess('admin_usuarios.activos')) {
+        <a routerLink="/admin/usuarios/activos" 
          routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
          [routerLinkActiveOptions]="{exact: true}"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="users" [size]="18"></lucide-icon>
-        Usuarios Activos
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="users" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Usuarios Activos</span>
       </a>
 
-      <a routerLink="/admin/usuarios/pendientes" 
+      }
+      @if (authService.hasPageAccess('admin_usuarios.pendientes')) {
+        <a routerLink="/admin/usuarios/pendientes" 
          routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-neon-lime)] border-[var(--color-charcoal-grey)] shadow-sm"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center justify-between rounded-xl border border-transparent px-4 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <div class="flex items-center gap-3">
-          <lucide-icon name="user-plus" [size]="18"></lucide-icon>
-          Aprobaciones
-        </div>
-        </a>
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="user-plus" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Aprobaciones</span>
+      </a>
+      }
+
+      @if (authService.hasPageAccess('admin_usuarios.seguridad')) {
+        <a routerLink="/admin/seguridad" 
+         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-neon-lime)] border-[var(--color-charcoal-grey)] shadow-sm"
+         (click)="closeSidebarOnMobile()"
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="shield" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Seguridad</span>
+      </a>
+      }
       
-      <div class="my-6 border-t border-[var(--color-charcoal-grey)] mx-3"></div>
-      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Sistema</p>
+      <div class="my-6 border-t border-[var(--color-charcoal-grey)] mx-3 transition-opacity duration-300"
+           [class.opacity-0]="!isSidebarOpen()"></div>
+      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] transition-opacity duration-300"
+         [class.opacity-0]="!isSidebarOpen()"
+         [class.hidden]="!isSidebarOpen()">Sistema</p>
       
-      <a routerLink="/modulos" class="flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
-        <lucide-icon name="arrow-left" [size]="18"></lucide-icon>
-        Volver al Panel
+      <a routerLink="/modulos" 
+         class="flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="arrow-left" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Volver al Panel</span>
       </a>
     </nav>
   </aside>

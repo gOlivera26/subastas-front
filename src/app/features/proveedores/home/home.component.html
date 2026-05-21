@@ -1,0 +1,38 @@
+<div class="mx-auto max-w-3xl py-12 text-center">
+  <div class="mb-8 inline-flex size-16 items-center justify-center rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]">
+    <lucide-icon name="building-2" [size]="28" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+  </div>
+  <h1 class="mb-3 text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Proveedores</h1>
+  <p class="text-[15px] text-[var(--color-storm-cloud)]">
+    Gestión de proveedores, rubros y documentación del portal.
+  </p>
+
+  <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <a routerLink="/proveedores/listado"
+       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
+      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
+        <lucide-icon name="list" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+      </div>
+      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Listado de Proveedores</h3>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Consultá, creá y editá proveedores del sistema.</p>
+    </a>
+
+    <a routerLink="/proveedores/rubros-tree"
+       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+        <lucide-icon name="folder-tree" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+      </div>
+      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Gestión de Rubros (Árbol)</h3>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Explorá y editá rubros en jerarquía.</p>
+    </a>
+
+    <a routerLink="/proveedores/rubros-list"
+       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+        <lucide-icon name="list" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+      </div>
+      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Gestión de Rubros (Lista)</h3>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Administrá rubros en formato tabla.</p>
+    </a>
+  </div>
+</div>

@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { NgClass } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { routeFade } from '../../../core/animations/route-animations';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -15,10 +16,15 @@ import { routeFade } from '../../../core/animations/route-animations';
 export class AdminLayoutComponent {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
+  protected authService = inject(AuthService);
 
-  isSidebarOpen = signal(false);
+  isSidebarOpen = signal(localStorage.getItem('sidebar-admin') === 'true');
   pageTitle = signal('');
   routeState = signal('initial');
+  
+  isUserMenuOpen = signal(false);
+  isDarkMode = signal(localStorage.getItem('theme') === 'dark');
+  user = this.authService.currentUser;
 
   constructor() {
     this.router.events.pipe(

@@ -1,177 +1,54 @@
 <div class="mx-auto max-w-5xl">
-
-  <!-- HEADER -->
   <div class="mb-8 flex items-center justify-between">
-    <div>
-      <h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Organizaciones</h1>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de reparticiones y organizaciones del sistema.</p>
-    </div>
-    <button (click)="openCreateModal()"
-            class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[var(--color-cyan-spark)]/50 hover:shadow-[0_0_20px_rgba(2,184,204,0.08)]">
-      <lucide-icon name="plus" [size]="16"></lucide-icon>
-      Nueva Organización
-    </button>
+    <div><h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Organizaciones</h1><p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de reparticiones y organizaciones del sistema.</p></div>
+    <button (click)="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[var(--color-cyan-spark)]/50 hover:shadow-[0_0_20px_rgba(2,184,204,0.08)]"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva Organización</button>
   </div>
 
-  <!-- SUCCESS MESSAGE -->
-  @if (successMessage(); as msg) {
-    <div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] font-[510] text-emerald-400 backdrop-blur-sm animate-slide-up">
-      <lucide-icon name="check-circle" [size]="18"></lucide-icon>
-      {{ msg }}
-    </div>
-  }
+  @if (successMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] font-[510] text-emerald-400 backdrop-blur-sm animate-slide-up"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
+  @if (errorMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] font-[510] text-red-400 backdrop-blur-sm animate-slide-up"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
 
-  <!-- ERROR MESSAGE -->
-  @if (errorMessage(); as msg) {
-    <div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] font-[510] text-red-400 backdrop-blur-sm animate-slide-up">
-      <lucide-icon name="alert-circle" [size]="18"></lucide-icon>
-      {{ msg }}
-    </div>
-  }
-
-  <!-- TABLE -->
-  <div class="overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 backdrop-blur-sm">
-
-    @if (isLoading()) {
-      <div class="flex items-center justify-center py-20">
-        <div class="flex items-center gap-3 text-[13px] text-[var(--color-storm-cloud)]">
-          <lucide-icon name="loader-2" [size]="20" class="animate-spin text-[var(--color-cyan-spark)]"></lucide-icon>
-          Cargando organizaciones...
-        </div>
-      </div>
-    } @else if (organizaciones().length === 0) {
-      <div class="flex flex-col items-center justify-center py-20">
-        <div class="mb-4 flex size-14 items-center justify-center rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]">
-          <lucide-icon name="building" [size]="24" class="text-[var(--color-storm-cloud)]"></lucide-icon>
-        </div>
-        <p class="text-[14px] font-[510] text-[var(--color-storm-cloud)]">No hay organizaciones registradas</p>
-        <p class="mt-1 text-[12px] text-[var(--color-fog-grey)]">Creá la primera para comenzar.</p>
-      </div>
+  <ng-template cellKey="activo" let-row>
+    @if (row.activo) {
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[12px] font-[590] text-emerald-400"><span class="size-1.5 rounded-full bg-emerald-400"></span>Activo</span>
     } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr class="border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30">
-              <th class="px-6 py-4 text-left text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Nombre</th>
-              <th class="px-6 py-4 text-left text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">CUIT</th>
-              <th class="px-6 py-4 text-left text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Abreviatura</th>
-              <th class="px-6 py-4 text-left text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Estado</th>
-              <th class="px-6 py-4 text-right text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--color-charcoal-grey)]/50">
-            @for (org of organizaciones(); track org.idOrganizacion) {
-              <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/40 group">
-                <td class="px-6 py-4">
-                  <span class="text-[14px] font-[510] text-[var(--color-porcelain)]">{{ org.nombre }}</span>
-                </td>
-                <td class="px-6 py-4 text-[13px] text-[var(--color-storm-cloud)]">
-                  {{ org.cuit }}
-                </td>
-                <td class="px-6 py-4 text-[13px] text-[var(--color-storm-cloud)]">
-                  {{ org.abreviatura || '-' }}
-                </td>
-                <td class="px-6 py-4">
-                  @if (org.activo) {
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[12px] font-[590] text-emerald-400">
-                      <span class="size-1.5 rounded-full bg-emerald-400"></span>
-                      Activo
-                    </span>
-                  } @else {
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-charcoal-grey)]/30 px-2.5 py-0.5 text-[12px] font-[590] text-[var(--color-storm-cloud)]">
-                      Inactivo
-                    </span>
-                  }
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button (click)="openEditModal(org)"
-                            title="Editar"
-                            class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-cyan-spark)]">
-                      <lucide-icon name="pencil" [size]="16"></lucide-icon>
-                    </button>
-                    @if (org.activo) {
-                      <button (click)="confirmDelete(org)"
-                              title="Desactivar"
-                              class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-red-400">
-                        <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-                      </button>
-                    }
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-charcoal-grey)]/30 px-2.5 py-0.5 text-[12px] font-[590] text-[var(--color-storm-cloud)]">Inactivo</span>
     }
-  </div>
+  </ng-template>
+  <ng-template cellKey="acciones" let-row>
+    <div class="flex items-center justify-end gap-1">
+      <button (click)="openEditModal(row)" title="Editar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
+      @if (row.activo) {
+        <button (click)="confirmDelete(row)" title="Desactivar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-red-400"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+      }
+    </div>
+  </ng-template>
+
+  <app-data-table [columns]="columns" [data]="organizaciones()" [totalRows]="organizaciones().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" emptyMessage="No hay organizaciones registradas" emptySubMessage="Creá la primera para comenzar."></app-data-table>
 </div>
 
-<!-- MODAL -->
 @if (isModalOpen()) {
   <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
     <div class="relative w-full max-w-lg rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col">
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5">
-        <div>
-          <h3 class="text-[18px] font-[590] text-[var(--color-porcelain)]">
-            {{ isEditing() ? 'Editar Organización' : 'Nueva Organización' }}
-          </h3>
-          <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">
-            {{ isEditing() ? 'Modificá los datos de la organización.' : 'Registrá una nueva organización en el sistema.' }}
-          </p>
-        </div>
-        <button (click)="closeModal()" class="rounded-xl p-2.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
-          <lucide-icon name="x" [size]="20"></lucide-icon>
-        </button>
+        <div><h3 class="text-[18px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar Organización' : 'Nueva Organización' }}</h3><p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">{{ isEditing() ? 'Modificá los datos de la organización.' : 'Registrá una nueva organización en el sistema.' }}</p></div>
+        <button (click)="closeModal()" class="rounded-xl p-2.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="20"></lucide-icon></button>
       </div>
-
       <div class="p-6">
         <form #f="ngForm" (ngSubmit)="save()" class="space-y-5">
-          <div>
-            <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nombre <span class="text-red-400">*</span></label>
-            <input type="text" [(ngModel)]="form.nombre" name="nombre" required
-                   class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
-          </div>
-
-          <div>
-            <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">CUIT <span class="text-red-400">*</span></label>
-            <input type="text" [(ngModel)]="form.cuit" name="cuit" required
-                   class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
-          </div>
-
-          <div>
-            <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Abreviatura</label>
-            <input type="text" [(ngModel)]="form.abreviatura" name="abreviatura"
-                   class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" />
-          </div>
-
+          <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nombre <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.nombre" name="nombre" required class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" /></div>
+          <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">CUIT <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.cuit" name="cuit" required class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" /></div>
+          <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Abreviatura</label><input type="text" [(ngModel)]="form.abreviatura" name="abreviatura" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" /></div>
           <label class="flex items-center gap-3 cursor-pointer mt-4">
-            <div class="relative">
-              <input type="checkbox" [(ngModel)]="form.activo" name="activo"
-                     class="peer sr-only" />
-              <div class="h-5 w-9 rounded-full bg-[var(--color-charcoal-grey)] transition-colors peer-checked:bg-emerald-500/40 after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-[var(--color-storm-cloud)] after:transition-all peer-checked:after:translate-x-4 peer-checked:after:bg-emerald-400"></div>
-            </div>
+            <div class="relative"><input type="checkbox" [(ngModel)]="form.activo" name="activo" class="peer sr-only" /><div class="h-5 w-9 rounded-full bg-[var(--color-charcoal-grey)] transition-colors peer-checked:bg-emerald-500/40 after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-[var(--color-storm-cloud)] after:transition-all peer-checked:after:translate-x-4 peer-checked:after:bg-emerald-400"></div></div>
             <span class="text-[13px] font-[510] text-[var(--color-light-steel)]">Activa en el sistema</span>
           </label>
-
           <button type="submit" class="hidden"></button>
         </form>
       </div>
-
       <div class="flex items-center justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-b-[2rem]">
-        <button (click)="closeModal()"
-                class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] font-[590] text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
-          Cancelar
-        </button>
-        <button (click)="save()" [disabled]="isSaving() || !form.nombre || !form.cuit"
-                class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-6 py-2.5 text-[13px] font-[590] text-black transition-all hover:bg-[var(--color-cyan-spark)]/90 disabled:opacity-50 disabled:cursor-not-allowed">
-          @if (isSaving()) {
-            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
-          }
-          {{ isSaving() ? 'Guardando...' : 'Guardar' }}
-        </button>
+        <button (click)="closeModal()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] font-[590] text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">Cancelar</button>
+        <button (click)="save()" [disabled]="isSaving() || !form.nombre || !form.cuit" class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-6 py-2.5 text-[13px] font-[590] text-black transition-all hover:bg-[var(--color-cyan-spark)]/90 disabled:opacity-50 disabled:cursor-not-allowed">@if (isSaving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>}{{ isSaving() ? 'Guardando...' : 'Guardar' }}</button>
       </div>
     </div>
   </div>

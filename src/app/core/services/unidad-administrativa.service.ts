@@ -10,8 +10,6 @@ export interface UnidadAdministrativaRequest {
   nombreUnidadAdm: string;
   idVigencia: number;
   idOrganizacion?: number;
-  nroServicioAdm?: number;
-  idProveedor?: number;
   mail?: string;
   alias?: string;
   puerto?: number;

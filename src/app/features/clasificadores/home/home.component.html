@@ -7,7 +7,7 @@
     Gestión de catálogos maestros para el sistema de subastas.
   </p>
 
-  <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
     <a routerLink="/clasificadores/organizaciones"
        class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
       <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
@@ -33,6 +33,24 @@
       </div>
       <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Unidades Adm.</h3>
       <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Áreas y oficinas dependientes de una vigencia.</p>
+    </a>
+
+    <a routerLink="/clasificadores/objetos-gasto"
+       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+        <lucide-icon name="tags" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+      </div>
+      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Objetos del Gasto</h3>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Clasificación presupuestaria por objeto del gasto.</p>
+    </a>
+
+    <a routerLink="/clasificadores/catalogo-bienes"
+       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+        <lucide-icon name="package" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+      </div>
+      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Catálogo de Bienes</h3>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Ítems subastables del sistema.</p>
     </a>
   </div>
 </div>

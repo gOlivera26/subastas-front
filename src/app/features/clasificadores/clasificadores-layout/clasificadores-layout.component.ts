@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { NgClass } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { routeFade } from '../../../core/animations/route-animations';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-clasificadores-layout',
@@ -15,8 +16,9 @@ import { routeFade } from '../../../core/animations/route-animations';
 export class ClasificadoresLayoutComponent {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
+  protected auth = inject(AuthService);
 
-  isSidebarOpen = signal(false);
+  isSidebarOpen = signal(localStorage.getItem('sidebar-clasificadores') !== 'false');
   pageTitle = signal('');
   routeState = signal('initial');
 
@@ -38,10 +40,18 @@ export class ClasificadoresLayoutComponent {
   }
 
   toggleSidebar() {
-    this.isSidebarOpen.update(v => !v);
+    this.isSidebarOpen.update(v => {
+      localStorage.setItem('sidebar-clasificadores', String(!v));
+      return !v;
+    });
   }
 
   closeSidebar() {
     this.isSidebarOpen.set(false);
+    localStorage.setItem('sidebar-clasificadores', 'false');
+  }
+
+  closeSidebarOnMobile() {
+    if (window.innerWidth < 1024) this.closeSidebar();
   }
 }

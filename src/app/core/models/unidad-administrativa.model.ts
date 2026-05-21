@@ -5,8 +5,6 @@ export interface UnidadAdministrativa {
   idVigencia: number;
   idOrganizacion?: number;
   organizacionNombre?: string;
-  nroServicioAdm?: number;
-  idProveedor?: number;
   mail?: string;
   alias?: string;
   puerto?: number;
