@@ -1,7 +1,9 @@
-import { Component, signal, computed, inject } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgClass } from '@angular/common';
+import { filter } from 'rxjs/operators';
+import { routeFade } from '../../../core/animations/route-animations';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -9,15 +11,35 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, NgClass],
   templateUrl: './admin-layout.component.html',
+  animations: [routeFade],
 })
 export class AdminLayoutComponent {
-  private authService = inject(AuthService);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+  protected authService = inject(AuthService);
 
-  isSidebarOpen = signal(localStorage.getItem('sidebar-admin') !== 'false');
+  isSidebarOpen = signal(localStorage.getItem('sidebar-admin') === 'true');
+  pageTitle = signal('');
+  routeState = signal('initial');
+  
   isUserMenuOpen = signal(false);
-  isDarkMode = signal(document.documentElement.classList.contains('dark'));
+  isDarkMode = signal(localStorage.getItem('theme') === 'dark');
+  user = this.authService.currentUser;
 
-  user = computed(() => this.authService.currentUser());
+  constructor() {
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe(() => {
+      let route = this.activatedRoute;
+      while (route.firstChild) route = route.firstChild;
+      const state = route.snapshot.data['state'] || 'home';
+      const title = route.snapshot.data['title'] || '';
+      queueMicrotask(() => {
+        this.routeState.set(state);
+        this.pageTitle.set(title);
+      });
+    });
+  }
 
   toggleSidebar() {
     this.isSidebarOpen.update(v => {

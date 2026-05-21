@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
@@ -26,6 +26,14 @@ export class AuthService {
 
   isAuthenticated = signal<boolean>(this.hasValidSession());
   currentUser = signal<LoginResponse | null>(this.getUserFromStorage());
+  isSuperAdmin = computed(() => this.currentUser()?.rol === 'SUPERADMIN');
+
+  hasPageAccess(keyName: string): boolean {
+    const user = this.currentUser();
+    if (!user) return false;
+    if (user.rol === 'SUPERADMIN') return true;
+    return user.paginas?.some(p => p.keyName === keyName) ?? false;
+  }
 
   login(email: string, password: string): Observable<OperationResponse<LoginResponse>> {
     return this.http.post<OperationResponse<LoginResponse>>(`${this.apiUrl}/login`, { email, password })

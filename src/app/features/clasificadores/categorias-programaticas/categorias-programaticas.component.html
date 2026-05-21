@@ -1,0 +1,108 @@
+<div class="mx-auto max-w-[1400px]">
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div><h1 class="text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Categorías Programáticas</h1><p class="text-[14px] text-[var(--color-storm-cloud)]">Hacé clic en el chevrón para expandir o colapsar la jerarquía.</p></div>
+    <div class="flex items-center gap-3 flex-wrap">
+      <select class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)]" [ngModel]="selectedVigenciaId()" (change)="onVigenciaChange($event)">@for (v of vigencias(); track v.idVigencia) {<option [value]="v.idVigencia">Ejercicio {{ v.ejercicio }} {{ v.activoEjecucion ? '(Activo)' : '' }}</option>}</select>
+      <button (click)="openCreateModal()" [disabled]="!selectedVigenciaId()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] disabled:opacity-50"><lucide-icon name="plus" [size]="16"></lucide-icon><span class="hidden sm:inline">Nuevo</span></button>
+    </div>
+  </div>
+
+  @if (success()) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] text-emerald-400 animate-slide-up"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ success() }}</div>}
+  @if (error()) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] text-red-400 animate-slide-up"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ error() }}</div>}
+
+  <div class="relative w-full sm:w-80 mb-6">
+    <lucide-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+    <input [(ngModel)]="searchTerm" type="text" placeholder="Buscar por nombre, código o UA..." class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 pl-10 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors">
+  </div>
+
+  <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-0 shadow-lg overflow-hidden">
+    @if (loading()) {
+      <app-loading-spinner label="Cargando categorías..." containerClass="py-16"></app-loading-spinner>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-[14px] whitespace-nowrap">
+          <thead class="bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+            <tr>
+              <th class="px-6 py-4 font-medium transition-colors w-[40%]">Jerarquía</th>
+              <th class="px-6 py-4 font-medium transition-colors w-[15%]">Código</th>
+              <th class="px-6 py-4 font-medium transition-colors w-[20%]">UA</th>
+              <th class="px-6 py-4 font-medium transition-colors w-[10%]">Nat.</th>
+              <th class="px-6 py-4 font-medium transition-colors text-right w-[15%]">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+            @for (item of filteredTree(); track trackByFn($index, item)) {
+              <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: item, level: 0 }"></ng-container>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-6 py-16 text-center">
+                  <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)]">
+                    <lucide-icon name="folder-tree" [size]="32"></lucide-icon>
+                  </div>
+                  <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">No hay categorías en esta vigencia</p>
+                  <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Creá una nueva categoría para comenzar.</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<ng-template #treeRow let-item let-level="level">
+  <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/50 group cursor-pointer" (click)="openEditModal(item)">
+    <td class="px-6 py-4">
+      <div class="flex items-center gap-2" [style.padding-left.px]="level * 32">
+        @if (level > 0) {
+          <lucide-icon name="corner-down-right" [size]="16" class="text-[var(--color-storm-cloud)] shrink-0"></lucide-icon>
+        }
+        <button (click)="toggleNode(item.idCatProg, $event); $event.stopPropagation()"
+                [class.invisible]="!item.hasChildren"
+                class="p-0.5 rounded shrink-0 transition-colors w-5 h-5 flex items-center justify-center text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)]">
+          <lucide-icon [name]="isExpanded(item.idCatProg) ? 'chevron-down' : 'chevron-right'" [size]="16"></lucide-icon>
+        </button>
+        <lucide-icon [name]="item.hasChildren ? 'folder' : 'file-text'" [size]="16" class="shrink-0 transition-colors text-[var(--color-storm-cloud)]"></lucide-icon>
+        <span class="font-[590] text-[var(--color-porcelain)] text-[14px] truncate">{{ item.nombre }}</span>
+      </div>
+    </td>
+    <td class="px-6 py-4">
+      <span class="font-mono text-[13px] text-[var(--color-fog-grey)]">{{ item.codigo }}</span>
+    </td>
+    <td class="px-6 py-4">
+      <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ item.unidadAdmNombre || '-' }}</span>
+    </td>
+    <td class="px-6 py-4">
+      @if (item.naturaleza) {
+        <span class="px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider border bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] border-[var(--color-cyan-spark)]/20">{{ item.naturaleza }}</span>
+      } @else {
+        <span class="text-[13px] text-[var(--color-storm-cloud)]">-</span>
+      }
+    </td>
+    <td class="px-6 py-4 text-right">
+      <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+        <button (click)="openEditModal(item); $event.stopPropagation()" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
+        <button (click)="confirmDelete(item); $event.stopPropagation()" class="p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)] transition-colors border border-red-500/20"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+      </div>
+    </td>
+  </tr>
+  @if (item.hasChildren && isExpanded(item.idCatProg)) {
+    @for (child of item.children; track trackByFn($index, child)) {
+      <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: child, level: level + 1 }"></ng-container>
+    }
+  }
+</ng-template>
+
+@if (isModalOpen()) {<div class="fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div><div class="relative w-full max-w-lg rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in"><div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar' : 'Nueva' }} Categoría</h3><button (click)="closeModal()" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>
+<div class="space-y-4 px-6 py-6"><div class="grid grid-cols-2 gap-4">
+  <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Código <span class="text-red-400">*</span></label><input type="number" [(ngModel)]="form.codigo" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"/></div>
+  <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Categoría Padre</label><select [(ngModel)]="form.idCatProgRel" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option [ngValue]="undefined">Ninguno (raíz)</option>@for (p of parentList(); track p.idCatProg) {<option [value]="p.idCatProg">{{ p.codigo }} - {{ p.nombre }}</option>}</select></div>
+</div>
+<div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nombre <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.nombre" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"/></div>
+<div class="grid grid-cols-3 gap-4">
+  @if (auth.isSuperAdmin()) {<div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Org.</label><select [(ngModel)]="form.idOrganizacion" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option [ngValue]="undefined">Global</option>@for (o of organizaciones(); track o.idOrganizacion) {<option [value]="o.idOrganizacion">{{ o.nombre }}</option>}</select></div>}
+  <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">UA</label><select [(ngModel)]="form.idUnidadAdm" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option [ngValue]="undefined">Ninguna</option>@for (ua of unidadesAdm(); track ua.idUnidadAdm) {<option [value]="ua.idUnidadAdm">{{ ua.nombreUnidadAdm }}</option>}</select></div>
+  <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Naturaleza</label><select [(ngModel)]="form.naturaleza" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option value="">Ninguna</option><option>AC</option><option>CO</option><option>PR</option><option>SP</option><option>OB</option><option>IN</option></select></div>
+</div></div>
+<div class="flex justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4"><button (click)="closeModal()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button><button (click)="save()" [disabled]="isSaving()" class="rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black disabled:opacity-50">@if (isSaving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Guardar</button></div></div></div>}

@@ -5,47 +5,70 @@
   }
 
   <aside 
-    class="fixed inset-y-0 left-0 z-50 w-72 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/95 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0 lg:z-auto"
-    [ngClass]="isSidebarOpen() ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden lg:border-r-0'">
+    class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/95 backdrop-blur-xl overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] lg:static lg:translate-x-0 lg:z-auto"
+    [ngClass]="isSidebarOpen() ? 'w-72 translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[68px]'">
     
-    <div class="flex h-16 shrink-0 items-center justify-between px-6 border-b border-[var(--color-charcoal-grey)]">
-      <a routerLink="/modulos" class="flex items-center gap-3 transition-opacity hover:opacity-80">
-        <div class="flex size-8 items-center justify-center rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+    <div class="flex h-16 shrink-0 items-center px-4 border-b border-[var(--color-charcoal-grey)]"
+         [ngClass]="isSidebarOpen() ? 'justify-between' : 'justify-center'">
+      <a routerLink="/modulos" class="flex items-center gap-3 transition-opacity hover:opacity-80 min-w-0">
+        <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
           <lucide-icon name="building-2" [size]="18"></lucide-icon>
         </div>
-        <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)]">Proveedores</span>
+        <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)] truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()">Proveedores</span>
       </a>
       <button (click)="closeSidebar()" class="lg:hidden text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]">
         <lucide-icon name="x" [size]="20"></lucide-icon>
       </button>
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Gestión</p>
+    <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] transition-opacity duration-300"
+         [class.opacity-0]="!isSidebarOpen()"
+         [class.hidden]="!isSidebarOpen()">Gestión</p>
       
-      <a routerLink="/proveedores" 
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
-         [routerLinkActiveOptions]="{exact: true}"
-         (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="list" [size]="18"></lucide-icon>
-        Listado de Proveedores
-      </a>
-      
-      <a routerLink="/proveedores/rubros" 
+      <a routerLink="/proveedores/listado" 
          routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="folder-tree" [size]="18"></lucide-icon>
-        Gestión de Rubros
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="list" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Listado de Proveedores</span>
       </a>
       
-      <div class="my-6 border-t border-[var(--color-charcoal-grey)] mx-3"></div>
-      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Sistema</p>
+      <a routerLink="/proveedores/rubros-tree" 
+         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         (click)="closeSidebarOnMobile()"
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="folder-tree" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Gestión de Rubros (Árbol)</span>
+      </a>
+
+      <a routerLink="/proveedores/rubros-list" 
+         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         (click)="closeSidebarOnMobile()"
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="list" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Gestión de Rubros (Lista)</span>
+      </a>
       
-      <a routerLink="/modulos" class="flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
-        <lucide-icon name="arrow-left" [size]="18"></lucide-icon>
-        Volver al Panel
+      <div class="my-6 border-t border-[var(--color-charcoal-grey)] mx-3 transition-opacity duration-300"
+           [class.opacity-0]="!isSidebarOpen()"></div>
+      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] transition-opacity duration-300"
+         [class.opacity-0]="!isSidebarOpen()"
+         [class.hidden]="!isSidebarOpen()">Sistema</p>
+      
+      <a routerLink="/modulos" 
+         class="flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="arrow-left" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Volver al Panel</span>
       </a>
     </nav>
   </aside>
@@ -60,6 +83,10 @@
         <button (click)="toggleSidebar()" class="hidden lg:flex items-center justify-center p-2 rounded-lg text-[var(--color-storm-cloud)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
           <lucide-icon [name]="isSidebarOpen() ? 'panel-left-close' : 'panel-left'" [size]="20"></lucide-icon>
         </button>
+        <a routerLink="/proveedores" class="hidden sm:flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-[590] text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
+          <lucide-icon name="home" [size]="16"></lucide-icon>
+          Inicio
+        </a>
       </div>
       
       <div class="flex items-center gap-4 ml-auto">
@@ -88,7 +115,15 @@
       </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto bg-[var(--color-pitch-black)] relative">
+    <main [@routeFade]="routeState()"
+          class="flex-1 overflow-y-auto bg-[var(--color-pitch-black)] relative">
+      @if (pageTitle() && pageTitle() !== 'Inicio') {
+        <div class="flex items-center gap-2 border-b border-[var(--color-charcoal-grey)] px-4 sm:px-6 lg:px-8 py-3">
+          <a routerLink="/proveedores" class="text-[13px] font-[510] text-[var(--color-storm-cloud)] transition-colors hover:text-[var(--color-porcelain)]">Proveedores</a>
+          <lucide-icon name="chevron-right" [size]="14" class="text-[var(--color-storm-cloud)]"></lucide-icon>
+          <span class="text-[13px] font-[590] text-[var(--color-porcelain)]">{{ pageTitle() }}</span>
+        </div>
+      }
       <div class="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
         <div class="absolute top-0 right-0 h-[600px] w-[600px] rounded-full bg-[var(--color-aether-blue)] opacity-[0.03] blur-[150px]"></div>
       </div>

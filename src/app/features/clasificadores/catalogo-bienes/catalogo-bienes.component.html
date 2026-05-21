@@ -1,0 +1,57 @@
+<div class="mx-auto max-w-[1200px]">
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div><h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Catálogo de Bienes</h1><p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Ítems subastables del sistema.</p></div>
+    <div class="flex items-center gap-3">
+      <select class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] text-[var(--color-porcelain)]" [ngModel]="selectedVigenciaId()" (change)="onVigenciaChange($event)">@for (v of vigencias(); track v.idVigencia) {<option [value]="v.idVigencia">Ejercicio {{ v.ejercicio }} {{ v.activoEjecucion ? '(Activo)' : '' }}</option>}</select>
+      <button (click)="openCreateModal()" [disabled]="!selectedVigenciaId()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] disabled:opacity-50"><lucide-icon name="plus" [size]="16"></lucide-icon>Nuevo</button>
+    </div>
+  </div>
+
+  @if (successMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] text-emerald-400 animate-slide-up"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
+  @if (errorMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] text-red-400 animate-slide-up"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
+
+  <ng-template cellKey="codigo" let-row>
+    <span class="font-mono text-[13px] text-[var(--color-cyan-spark)]">{{ row.codigo }}</span>
+  </ng-template>
+  <ng-template cellKey="idItemRel" let-row>
+    <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.idItemRel ? 'Sub-ítem' : 'Raíz' }}</span>
+  </ng-template>
+  <ng-template cellKey="organizacionNombre" let-row>
+    <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.organizacionNombre || 'Global' }}</span>
+  </ng-template>
+  <ng-template cellKey="acciones" let-row>
+    <div class="flex justify-end gap-1">
+      <button (click)="openEditModal(row)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
+      <button (click)="confirmDelete(row)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-red-400"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+    </div>
+  </ng-template>
+
+  <app-data-table [columns]="columns" [data]="items()" [totalRows]="items().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" emptyMessage="No hay bienes en esta vigencia"></app-data-table>
+</div>
+
+@if (isModalOpen()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
+    <div class="relative w-full max-w-lg rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar' : 'Nuevo' }} Bien</h3><button (click)="closeModal()" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>
+      <div class="space-y-4 px-6 py-6">
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Código <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.codigo" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" /></div>
+          <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Ítem Padre</label><select [(ngModel)]="form.idItemRel" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option [ngValue]="undefined">Ninguno (raíz)</option>@for (p of parentList(); track p.idItem) {<option [value]="p.idItem">{{ p.codigo }} - {{ p.nItem }}</option>}</select></div>
+        </div>
+        <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nombre <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.nItem" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" /></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Objeto del Gasto</label><select [(ngModel)]="form.idObjetoGasto" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option [ngValue]="undefined">Ninguno</option>@for (og of objetosGasto(); track og.idObjetoGasto) {<option [value]="og.idObjetoGasto">{{ og.numeroObjeto }} - {{ og.nombreObjeto }}</option>}</select></div>
+          <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Organización</label>
+            @if (auth.isSuperAdmin()) {<select [(ngModel)]="form.idOrganizacion" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option [ngValue]="undefined">Ninguna / Global</option>@for (org of organizaciones(); track org.idOrganizacion) {<option [ngValue]="org.idOrganizacion">{{ org.nombre }}</option>}</select>}
+            @else {<p class="text-[14px] text-[var(--color-storm-cloud)] py-2.5">Automática</p>}
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4">
+        <button (click)="closeModal()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
+        <button (click)="save()" [disabled]="isSaving()" class="rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black disabled:opacity-50">@if (isSaving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Guardar</button>
+      </div>
+    </div>
+  </div>
+}

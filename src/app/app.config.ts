@@ -1,30 +1,34 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { AlertCircle, AlertTriangle, ArrowLeft, ArrowUpDown, Building2, CheckCircle, CheckCircleIcon, ChevronDown, ChevronLeft, ChevronUp, ChevronsUpDown, FileText, Folder, FolderPen, FolderPlus, FolderTree, Handshake, KeyRound, LayoutTemplate, List, Loader, LogOut, LUCIDE_ICONS, LucideIconProvider, MapPin, Moon, MousePointerClick, Pencil, Plus, Search, Settings, Shield, Sun, Tags, Trash2, Unlock, User, UserCircle, UserMinus, SearchX, Link, PanelLeft, PanelLeftClose, Download, Info, CornerDownRight } from 'lucide-angular';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { AlertTriangle, ArrowLeft, ChevronLeft, FileText, Handshake, KeyRound, LayoutTemplate, LogOut, LUCIDE_ICONS, LucideIconProvider, MousePointerClick, Pencil, Search, Settings, Shield, Unlock, User, UserCircle, UserMinus } from 'lucide-angular';
 import { 
   Gavel, UserPlus, Zap, Trophy, Eye, Github, Twitter, Linkedin, 
   ArrowRight, Sparkles, Menu, X, ChevronRight, ShieldCheck, EyeOff, Activity,
-  Mail, Lock, LogIn, Loader2, Users, ShoppingBag
+  Mail, Lock, LogIn, Loader2, Users, ShoppingBag, Calendar, CheckCircle, AlertCircle,
+  Play, Plus, Trash2, Building, Building2, ChevronDown, Info, Sun, Moon, PanelLeft, PanelLeftClose,
+  List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package
 } from 'lucide-angular/src/icons';
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http'; // <-- NUEVO
-import { authInterceptor } from './core/interceptos/auth.interceptors';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './core/interceptors/auth.interceptors';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    provideAnimations(),
     provideHttpClient(withInterceptors([authInterceptor])), 
     {
       provide: LUCIDE_ICONS,
       useValue: new LucideIconProvider({ 
         Gavel, UserPlus, Zap, Trophy, Eye, Github, Twitter, Linkedin, 
         ArrowRight, Sparkles, Menu, X, ChevronRight, ShieldCheck, EyeOff, Activity,
-        Mail, Lock, LogIn, Loader2, Users, ShoppingBag, User, LogOut, Settings, Shield, LayoutTemplate, FileText,
-        UserCircle, KeyRound, Pencil, Search, ArrowLeft, AlertTriangle, Handshake, MousePointerClick, Unlock,UserMinus, ChevronLeft,
-        Building2, List, Tags, MapPin, Plus, Loader, AlertCircle, FolderTree, Trash2, FolderPen, CheckCircle,
-        FolderPlus, Folder,ChevronDown, ChevronUp, ArrowUpDown, ChevronsUpDown, Sun, Moon,
-        SearchX, Link, PanelLeft, PanelLeftClose, Download, Info, CornerDownRight
+        Mail, Lock, LogIn, Loader2, Users, ShoppingBag, User, LogOut, Settings, Shield,
+        LayoutTemplate, FileText, UserCircle, KeyRound, Pencil, Search, ArrowLeft,
+        AlertTriangle, Handshake, MousePointerClick, Unlock, UserMinus, ChevronLeft,
+        Calendar, CheckCircle, AlertCircle, Play, Plus, Trash2, Building, Building2, ChevronDown, Info,
+        Sun, Moon, PanelLeft, PanelLeftClose, List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package
       }),
       multi: true,
     },

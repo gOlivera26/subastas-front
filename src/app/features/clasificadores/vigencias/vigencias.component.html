@@ -1,0 +1,54 @@
+<div class="mx-auto max-w-5xl">
+  <div class="mb-8 flex items-center justify-between">
+    <div><h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Vigencias</h1><p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Administración de años fiscales y ciclos presupuestarios.</p></div>
+    <button (click)="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[var(--color-cyan-spark)]/50 hover:shadow-[0_0_20px_rgba(2,184,204,0.08)]"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva Vigencia</button>
+  </div>
+
+  @if (successMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] font-[510] text-emerald-400 backdrop-blur-sm animate-slide-up"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
+  @if (errorMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] font-[510] text-red-400 backdrop-blur-sm animate-slide-up"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
+
+  <ng-template cellKey="activoEjecucion" let-row>
+    @if (row.activoEjecucion) {
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[12px] font-[590] text-emerald-400"><span class="size-1.5 rounded-full bg-emerald-400"></span>Activo</span>
+    } @else {
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-charcoal-grey)]/30 px-2.5 py-0.5 text-[12px] font-[590] text-[var(--color-storm-cloud)]">Inactivo</span>
+    }
+  </ng-template>
+  <ng-template cellKey="fecIng" let-row>
+    <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.fecIng | date:'dd/MM/yyyy' }}</span>
+  </ng-template>
+  <ng-template cellKey="acciones" let-row>
+    <div class="flex items-center justify-end gap-1">
+      @if (!row.activoEjecucion) {
+        <button (click)="setActiva(row)" title="Marcar como activa" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-emerald-400"><lucide-icon name="play" [size]="16"></lucide-icon></button>
+      }
+      <button (click)="openEditModal(row)" title="Editar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
+      <button (click)="confirmDelete(row)" title="Eliminar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-red-400"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+    </div>
+  </ng-template>
+
+  <app-data-table [columns]="columns" [data]="vigenciaOrdenada()" [totalRows]="vigencias().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" emptyMessage="No hay vigencias registradas" emptySubMessage="Creá la primera para comenzar."></app-data-table>
+</div>
+
+@if (isModalOpen()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
+    <div class="relative w-full max-w-lg rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4">
+        <div><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar Vigencia' : 'Nueva Vigencia' }}</h3><p class="mt-0.5 text-[12px] text-[var(--color-storm-cloud)]">{{ isEditing() ? 'Modificá los datos del año fiscal.' : 'Registrá un nuevo año fiscal.' }}</p></div>
+        <button (click)="closeModal()" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button>
+      </div>
+      <div class="space-y-5 px-6 py-6">
+        <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Año Fiscal</label><input type="number" [(ngModel)]="form.ejercicio" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] placeholder-[var(--color-fog-grey)] transition-colors focus:border-[var(--color-cyan-spark)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)]/20" /></div>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <div class="relative"><input type="checkbox" [(ngModel)]="form.activoEjecucion" class="peer sr-only" /><div class="h-5 w-9 rounded-full bg-[var(--color-charcoal-grey)] transition-colors peer-checked:bg-emerald-500/40 after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-[var(--color-storm-cloud)] after:transition-all peer-checked:after:translate-x-4 peer-checked:after:bg-emerald-400"></div></div>
+          <span class="text-[13px] font-[510] text-[var(--color-light-steel)]">Activo para Ejecución</span>
+        </label>
+      </div>
+      <div class="flex items-center justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4">
+        <button (click)="closeModal()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] font-[590] text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">Cancelar</button>
+        <button (click)="save()" [disabled]="isSaving()" class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black transition-all hover:bg-[var(--color-cyan-spark)]/90 disabled:opacity-50">@if (isSaving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>}{{ isSaving() ? 'Guardando...' : 'Guardar' }}</button>
+      </div>
+    </div>
+  </div>
+}
