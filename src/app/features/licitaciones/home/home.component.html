@@ -1,0 +1,49 @@
+<div class="mx-auto max-w-4xl py-12 text-center">
+  <div class="mb-8 inline-flex size-16 items-center justify-center rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]">
+    <lucide-icon name="gavel" [size]="28" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+  </div>
+  <h1 class="mb-3 text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)] leading-tight">
+    Sistema de Subastas Electrónicas Inversas, Directas y Licitaciones
+  </h1>
+  <p class="text-[15px] text-[var(--color-storm-cloud)]">
+    Gestión integral de procesos de compra, provisiones y subastas.
+  </p>
+
+  <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <a routerLink="/licitaciones/nota-pedido"
+       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+        <lucide-icon name="file-text" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+      </div>
+      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Nota de Pedido</h3>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de reservas y notas de pedido.</p>
+    </a>
+
+    <a routerLink="/licitaciones/subasta"
+       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
+      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
+        <lucide-icon name="gavel" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+      </div>
+      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Subasta</h3>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Configuración y ejecución de subastas.</p>
+    </a>
+
+    <a routerLink="/licitaciones/informes"
+       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
+      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
+        <lucide-icon name="bar-chart" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+      </div>
+      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Informes</h3>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Reportes y análisis de procesos.</p>
+    </a>
+
+    <a routerLink="/licitaciones/tablero"
+       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
+      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
+        <lucide-icon name="layout-dashboard" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+      </div>
+      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Tablero</h3>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Vista general y métricas clave.</p>
+    </a>
+  </div>
+</div>

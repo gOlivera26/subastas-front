@@ -1,0 +1,623 @@
+<div class="mx-auto max-w-7xl">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Nota de Pedido</h1>
+      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestioná las notas de pedido por área y ejercicio.</p>
+    </div>
+    <button (click)="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[#448b54] hover:shadow-[0_0_20px_rgba(68,139,84,0.15)]">
+      <lucide-icon name="plus" [size]="16"></lucide-icon>Nuevo
+    </button>
+  </div>
+
+  @if (successMessage(); as msg) {
+    <div class="mb-4 flex items-center gap-3 rounded-xl border border-[#448b54]/30 bg-[#448b54]/10 px-5 py-3 text-[13px] font-[510] text-[#448b54] backdrop-blur-sm animate-slide-up shadow-sm">
+      <lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ msg }}
+    </div>
+  }
+  @if (errorMessage() && !isModalOpen()) {
+    <div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] font-[510] text-red-400 backdrop-blur-sm animate-slide-up shadow-sm">
+      <lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ errorMessage() }}
+    </div>
+  }
+
+  <div class="mb-6 rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-lg">
+    <h3 class="mb-4 text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Filtros de Búsqueda</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div>
+        <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Área</label>
+        <select [(ngModel)]="filtros().idUnidadAdm" (ngModelChange)="onFilterUnidadAdmChange($event)" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors">
+          <option [ngValue]="undefined">-- Consultar por Área --</option>
+          @for (ua of unidadesAdm(); track ua.idUnidadAdm) {
+            <option [ngValue]="ua.idUnidadAdm">{{ ua.nombreUnidadAdm }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Ejercicio</label>
+        <select [(ngModel)]="filtros().idVigencia" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors">
+          <option [ngValue]="undefined">-- Todos --</option>
+          @for (vig of vigencias(); track vig.idVigencia) {
+            <option [ngValue]="vig.idVigencia">{{ vig.ejercicio }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nro. Provisión</label>
+        <input type="text" [(ngModel)]="filtros().nroReserva" placeholder="Nro Provisión" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors" />
+      </div>
+    </div>
+    <div class="mt-4 flex items-center justify-end gap-3">
+      <button (click)="limpiarFiltros()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-storm-cloud)] transition-colors hover:bg-[#448b54] hover:text-white">
+        <lucide-icon name="rotate-ccw" [size]="14"></lucide-icon>Restablecer orden
+      </button>
+      <button (click)="buscar()" class="inline-flex items-center gap-2 rounded-xl bg-[#448b54] px-5 py-2.5 text-[13px] font-[590] text-white transition-all hover:bg-[#367043]">
+        <lucide-icon name="search" [size]="16"></lucide-icon>BUSCAR
+      </button>
+    </div>
+  </div>
+
+  <div class="mb-4 flex items-center justify-between">
+    <h3 class="text-[14px] font-[590] text-[var(--color-porcelain)]">
+      <span class="text-[#448b54]">|</span> RESULTADOS
+    </h3>
+  </div>
+
+  <ng-template cellKey="descripcionEstado" let-row>
+    @if (row.descripcionEstado === 'AUTORIZADO') {
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-[#448b54] px-2.5 py-0.5 text-[11px] font-[590] text-white uppercase shadow-sm">{{ row.descripcionEstado }}</span>
+    } @else if (row.descripcionEstado === 'GENERADO') {
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-[#f1c40f] px-2.5 py-0.5 text-[11px] font-[590] text-white uppercase shadow-sm">{{ row.descripcionEstado }}</span>
+    } @else {
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-charcoal-grey)]/30 px-2.5 py-0.5 text-[11px] font-[590] text-[var(--color-storm-cloud)] uppercase">{{ row.descripcionEstado }}</span>
+    }
+  </ng-template>
+
+  <ng-template cellKey="acciones" let-row>
+    <div class="flex items-center justify-end gap-1">
+      @if (row.descripcionEstado === 'GENERADO') {
+        <button (click)="openItemsList(row)" title="Gestionar Ítems" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
+          <lucide-icon name="menu" [size]="16"></lucide-icon>
+        </button>
+      }
+      <button (click)="verDetalle(row)" title="Ver detalle" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
+        <lucide-icon name="eye" [size]="16"></lucide-icon>
+      </button>
+      <button (click)="openCloneModal(row)" title="Clonar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
+        <lucide-icon name="copy" [size]="16"></lucide-icon>
+      </button>
+      @if (row.descripcionEstado === 'GENERADO') {
+        <button (click)="openAuthorizeModal(row)" title="Autorizar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
+          <lucide-icon name="check-circle" [size]="16"></lucide-icon>
+        </button>
+      }
+    </div>
+  </ng-template>
+
+  <app-data-table [columns]="columns" [data]="reservas()" [totalRows]="reservas().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" (sortChange)="onSort($event)" emptyMessage="No hay notas de pedido registradas" emptySubMessage="Creá la primera para comenzar."></app-data-table>
+</div>
+
+@if (isItemsListOpen() && selectedReserva()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeItemsList()"></div>
+    <div class="relative w-full max-w-5xl rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[90vh]">
+      
+      <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-t-[2rem]">
+        <div>
+          <h3 class="text-[18px] font-[700] text-[#448b54] uppercase tracking-wide">
+            LISTADO DE BIENES Y SERVICIOS <span class="text-[var(--color-storm-cloud)] font-normal normal-case">| {{ detalles().length }} ÍTEMS</span>
+          </h3>
+        </div>
+        <button (click)="closeItemsList()" class="rounded-xl p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)] transition-colors">
+          <lucide-icon name="x" [size]="20"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto bg-[var(--color-pitch-black)]/30 rounded-b-[2rem]">
+        <div class="flex justify-end mb-6">
+          <button (click)="openBienModal()" class="inline-flex items-center gap-2 rounded-xl bg-[#448b54] px-5 py-2.5 text-[13px] font-[600] text-white transition-all hover:bg-[#367043] shadow-sm border border-[#367043]">
+            <lucide-icon name="plus" [size]="16" class="stroke-[3]"></lucide-icon>AGREGAR BIEN O SERVICIO
+          </button>
+        </div>
+
+        @if (isLoadingDetalles()) {
+          <div class="flex items-center justify-center py-12 text-[var(--color-storm-cloud)]">
+            <lucide-icon name="loader-2" [size]="24" class="animate-spin mr-3"></lucide-icon>Cargando detalles...
+          </div>
+        } @else if (detalles().length === 0) {
+          <div class="text-center py-8 text-[var(--color-storm-cloud)]">
+            <p class="text-[14px]">No hay ítems registrados en esta nota de pedido.</p>
+          </div>
+        } @else {
+          <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-pitch-black)] shadow-sm">
+            <table class="w-full text-left text-[13px]">
+              <thead class="bg-[#448b54] text-white text-[11px] font-[600] uppercase tracking-widest">
+                <tr>
+                  <th class="px-4 py-3 border-r border-[#367043]/30">NOMBRE</th>
+                  <th class="px-4 py-3 border-r border-[#367043]/30">MONEDA</th>
+                  <th class="px-4 py-3 text-center border-r border-[#367043]/30 w-24">CANT.</th>
+                  <th class="px-4 py-3 text-right border-r border-[#367043]/30 w-32">IMPORTE</th>
+                  <th class="px-4 py-3 text-right border-r border-[#367043]/30 w-32">TOTAL</th>
+                  <th class="px-4 py-3 text-center w-28">ACCIONES</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+                @for (det of detalles(); track det.idReservaDet) {
+                  <tr class="hover:bg-[var(--color-deep-slate)]/50 transition-colors">
+                    <td class="px-4 py-4 text-[var(--color-porcelain)] border-r border-[var(--color-charcoal-grey)]">{{ det.nombreBien }}</td>
+                    <td class="px-4 py-4 text-[var(--color-light-steel)] border-r border-[var(--color-charcoal-grey)]">{{ det.nombreMoneda || '-' }}</td>
+                    <td class="px-4 py-4 text-center text-[var(--color-porcelain)] border-r border-[var(--color-charcoal-grey)]">{{ det.cantidad }}</td>
+                    <td class="px-4 py-4 text-right text-[var(--color-porcelain)] border-r border-[var(--color-charcoal-grey)]">${{ det.importe | number:'1.2-2' }}</td>
+                    <td class="px-4 py-4 text-right font-[600] text-[var(--color-cyan-spark)] border-r border-[var(--color-charcoal-grey)]">${{ (det.cantidad || 0) * (det.importe || 0) | number:'1.2-2' }}</td>
+                    <td class="px-4 py-4">
+                      <div class="flex items-center justify-center gap-2">
+                        <button (click)="editBien(det)" class="rounded-lg p-2 border border-[var(--color-charcoal-grey)] text-[var(--color-cyan-spark)] bg-[var(--color-pitch-black)] hover:bg-[var(--color-deep-slate)] transition-colors shadow-sm">
+                          <lucide-icon name="pencil" [size]="14"></lucide-icon>
+                        </button>
+                        <button (click)="deleteBien(det)" class="rounded-lg p-2 border border-[var(--color-charcoal-grey)] text-red-400 bg-[var(--color-pitch-black)] hover:bg-[var(--color-deep-slate)] transition-colors shadow-sm">
+                          <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (detalles().length > 0) {
+            <div class="mt-4 flex items-center justify-end rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-6 py-4 shadow-sm">
+              <span class="text-[12px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)] mr-4">Total General de la Nota de Pedido:</span>
+              <span class="text-[20px] font-[700] text-[#448b54]">${{ totalGeneral() | number:'1.2-2' }}</span>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}
+
+@if (isBienModalOpen()) {
+  <div class="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeBienModal()"></div>
+    <div class="relative w-full max-w-2xl rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[90vh]">
+      
+      <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4 bg-[var(--color-graphite)] rounded-t-xl">
+        <h3 class="text-[16px] font-[700] text-[#448b54] uppercase tracking-wide">
+          DETALLE DE PROVISIÓN
+        </h3>
+        <button (click)="closeBienModal()" class="text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+          <lucide-icon name="x" [size]="20"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto">
+        @if (bienErrorMessage()) {
+          <div class="mb-5 flex items-center gap-3 rounded border border-red-500/20 bg-red-500/10 text-red-400 px-4 py-3 text-[13px] font-[510]">
+            <lucide-icon name="alert-circle" [size]="18" class="shrink-0"></lucide-icon>{{ bienErrorMessage() }}
+          </div>
+        }
+
+        <div class="space-y-6">
+          <div>
+            <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">Programa del gasto <span class="text-red-500">*</span></label>
+            <div class="flex items-center gap-0">
+              <div (click)="openSelectCatProg()" class="flex-1 rounded-l-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] cursor-pointer hover:border-[#448b54] transition-colors truncate min-h-[42px] flex items-center">
+                {{ getSelectedCatProgName() }}
+              </div>
+              <button type="button" (click)="clearCatProg()" class="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-r-xl bg-[#448b54] text-[#0B0E14] border border-[#448b54] hover:bg-[#367043] transition-colors shadow-sm">
+                <lucide-icon name="x" [size]="22" class="stroke-[3]"></lucide-icon>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">Bien o servicio <span class="text-red-500">*</span></label>
+            <div class="flex items-center gap-0">
+              <div (click)="openSelectBien()" class="flex-1 rounded-l-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] cursor-pointer hover:border-[#448b54] transition-colors truncate min-h-[42px] flex items-center">
+                {{ getSelectedBienName() }}
+              </div>
+              <button type="button" (click)="clearBien()" class="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-r-xl bg-[#448b54] text-[#0B0E14] border border-[#448b54] hover:bg-[#367043] transition-colors shadow-sm">
+                <lucide-icon name="x" [size]="22" class="stroke-[3]"></lucide-icon>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">Especificaciones técnicas</label>
+            <textarea [(ngModel)]="bienForm.especificacionesTecnicas" rows="4" 
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] outline-none transition-colors resize-none"></textarea>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">Moneda <span class="text-red-500">*</span></label>
+            <div class="w-full sm:w-1/2">
+               <app-searchable-select
+                 [options]="monedaOptions()"
+                 [value]="bienForm.idMoneda"
+                 (valueChange)="bienForm.idMoneda = $event"
+                 placeholder="-- Seleccione la moneda --"
+                 label="">
+               </app-searchable-select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+            <div>
+              <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">Cantidad <span class="text-red-500">*</span></label>
+              <input type="number" [(ngModel)]="bienForm.cantidad" min="1"
+                class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] outline-none transition-colors" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">Importe sugerido <span class="text-red-500">*</span></label>
+              <input type="number" [(ngModel)]="bienForm.importe" min="0" step="0.01"
+                class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] outline-none transition-colors" />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4 bg-[var(--color-graphite)] rounded-b-xl">
+        <button type="button" (click)="saveBien()" [disabled]="isSavingBien()"
+          class="inline-flex items-center justify-center rounded-lg bg-[#448b54] px-6 py-2.5 text-[14px] font-[600] text-white hover:bg-[#367043] disabled:opacity-50 transition-colors shadow-sm">
+          @if (isSavingBien()) { <lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon> }
+          Grabar
+        </button>
+        <button type="button" (click)="closeBienModal()" class="rounded-lg bg-red-500/20 border border-red-500/30 px-5 py-2.5 text-[14px] font-[590] text-red-400 hover:bg-red-500/30 transition-colors shadow-sm">Cancelar</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (bienToDelete()) {
+  <app-confirmation-modal
+    [isOpen]="true"
+    [title]="'Eliminar ítem'"
+    [message]="'¿Eliminar el ítem \'' + (bienToDelete()?.nombreBien || 'seleccionado') + '\'? Esta acción no se puede deshacer.'"
+    [type]="'danger'"
+    [confirmText]="'Eliminar'"
+    (confirm)="confirmDelete()"
+    (cancel)="bienToDelete.set(null)">
+  </app-confirmation-modal>
+}
+
+<ng-template #catProgTreeRow let-node let-level="level">
+  <div class="relative flex items-center justify-between py-3 px-4 mb-2 rounded-xl bg-[var(--color-graphite)] border border-[var(--color-charcoal-grey)] hover:border-[#448b54] transition-all cursor-pointer overflow-hidden group shadow-sm" 
+       [style.margin-left.rem]="level * 2" 
+       (click)="selectCatProg(node)">
+     
+     <div class="absolute left-0 top-0 bottom-0 w-1.5 transition-colors" [ngClass]="isCatProgExpanded(node.idCatProg) ? 'bg-[#448b54]' : 'bg-transparent group-hover:bg-[#448b54]/50'"></div>
+
+     <div class="flex gap-4 items-center w-full ml-3">
+       @if (node.hasChildren) {
+         <button (click)="toggleCatProgNode(node.idCatProg, $event)" class="w-10 h-10 flex items-center justify-center bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] group-hover:text-white shrink-0 rounded-lg shadow-sm group-hover:bg-[#448b54] transition-colors border border-[var(--color-charcoal-grey)]">
+            <lucide-icon [name]="isCatProgExpanded(node.idCatProg) ? 'chevron-up' : 'chevron-down'" [size]="20" class="stroke-[3]"></lucide-icon>
+         </button>
+       } @else {
+         <div class="w-10 h-10 shrink-0"></div>
+       }
+       
+       <div class="flex-1 grid grid-cols-[100px_1fr] sm:grid-cols-[120px_1fr] gap-4">
+          <div>
+            <p class="text-[11px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-1">Código</p>
+            <p class="text-[15px] font-[510] text-[var(--color-porcelain)]">{{ node.codigo }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-1">Nombre</p>
+            <p class="text-[15px] font-[510] text-[var(--color-porcelain)]">{{ node.nombre }}</p>
+          </div>
+       </div>
+     </div>
+     
+     <button (click)="selectCatProg(node); $event.stopPropagation()" class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#448b54] text-white hover:bg-[#367043] transition-all shadow-[0_0_10px_rgba(68,139,84,0.2)] ml-4 shrink-0">
+       <lucide-icon name="check" [size]="20" class="stroke-[3]"></lucide-icon>
+     </button>
+  </div>
+
+  @if (node.hasChildren && isCatProgExpanded(node.idCatProg)) {
+    <div class="mt-2 mb-4">
+      @for (child of node.children; track child.idCatProg) {
+         <ng-container *ngTemplateOutlet="catProgTreeRow; context: { $implicit: child, level: level + 1 }"></ng-container>
+      }
+    </div>
+  }
+</ng-template>
+
+@if (isSelectCatProgModalOpen()) {
+  <div class="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" role="dialog">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isSelectCatProgModalOpen.set(false)"></div>
+    <div class="relative w-full max-w-4xl rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col h-[85vh] overflow-hidden">
+      
+      <div class="flex items-center justify-between px-6 py-5 shrink-0 bg-[var(--color-graphite)] border-b border-[var(--color-charcoal-grey)] rounded-t-xl">
+        <h3 class="text-[18px] font-[700] text-[#448b54] uppercase tracking-wide">
+          SELECCIONAR PROGRAMAS DE GASTO
+        </h3>
+        <button (click)="isSelectCatProgModalOpen.set(false)" class="rounded-xl p-2 text-[var(--color-storm-cloud)] hover:text-red-400 hover:bg-[var(--color-deep-slate)] transition-colors">
+          <lucide-icon name="x" [size]="20"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto bg-[var(--color-pitch-black)]/30 p-6 custom-scrollbar rounded-b-xl">
+         <div class="mb-6 relative">
+            <lucide-icon name="search" [size]="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+            <input [(ngModel)]="catProgSearch" placeholder="Filtrar por código o nombre..." class="w-full rounded-xl border border-transparent bg-[var(--color-pitch-black)] px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:bg-[var(--color-graphite)] outline-none transition-all shadow-inner">
+         </div>
+
+        <div class="space-y-1">
+          @for (node of filteredCatProgTree(); track trackByCatProgFn($index, node)) {
+             <ng-container *ngTemplateOutlet="catProgTreeRow; context: { $implicit: node, level: 0 }"></ng-container>
+          }
+          @if (filteredCatProgTree().length === 0) {
+            <p class="text-center text-[var(--color-storm-cloud)] py-8">No se encontraron programas de gasto.</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isSelectBienModalOpen()) {
+  <div class="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" role="dialog">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isSelectBienModalOpen.set(false)"></div>
+    <div class="relative w-full max-w-4xl rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col h-[85vh] overflow-hidden">
+      
+      <div class="flex items-center justify-between px-6 py-5 shrink-0 bg-[var(--color-graphite)] border-b border-[var(--color-charcoal-grey)] rounded-t-xl">
+        <h3 class="text-[18px] font-[700] text-[#448b54] uppercase tracking-wide">
+          CATÁLOGO BIENES Ó SERVICIOS
+        </h3>
+        <button (click)="isSelectBienModalOpen.set(false)" class="rounded-xl p-2 text-[var(--color-storm-cloud)] hover:text-red-400 hover:bg-[var(--color-deep-slate)] transition-colors">
+          <lucide-icon name="x" [size]="20"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="p-6 shrink-0 bg-[var(--color-pitch-black)]/30 border-b border-[var(--color-charcoal-grey)]">
+         <div class="mb-1">
+            <label class="block text-[11px] font-[600] uppercase text-[var(--color-storm-cloud)] mb-2">NOMBRE DEL ÍTEM</label>
+            <div class="relative">
+               <lucide-icon name="search" [size]="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+               <input [(ngModel)]="bienSearch" placeholder="Buscar por código o nombre del ítem..." class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] outline-none transition-all shadow-inner">
+            </div>
+         </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6 bg-[var(--color-graphite)] rounded-b-xl">
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-graphite)] shadow-sm">
+          <table class="w-full text-left text-[13px]">
+            <thead class="bg-[#448b54] text-white text-[11px] font-[600] uppercase tracking-widest">
+              <tr>
+                <th class="px-6 py-3 border-r border-[#367043]/30 w-32">CÓDIGO</th>
+                <th class="px-6 py-3 border-r border-[#367043]/30">NOMBRE</th>
+                <th class="px-6 py-3 w-16"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]">
+              @for (b of filteredBienesList(); track b.idItem) {
+                <tr class="hover:bg-[var(--color-deep-slate)]/50 transition-colors cursor-pointer" (click)="selectBien(b)">
+                  <td class="px-6 py-4 font-[600] text-[var(--color-porcelain)] border-r border-[var(--color-charcoal-grey)]">{{ b.codigo }}</td>
+                  <td class="px-6 py-4 text-[var(--color-light-steel)] border-r border-[var(--color-charcoal-grey)] uppercase">{{ b.nItem }}</td>
+                  <td class="px-6 py-4 text-right">
+                    <button class="text-[#448b54] hover:text-[#367043] transition-colors flex items-center justify-center w-full">
+                      <lucide-icon name="check" [size]="24" class="stroke-[4]"></lucide-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+              @if (filteredBienesList().length === 0) {
+                <tr>
+                  <td colspan="3" class="text-center text-[var(--color-storm-cloud)] py-8">No se encontraron bienes.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isModalOpen()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
+    <div class="relative w-full max-w-2xl rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-t-[2rem]">
+        <div>
+          <h3 class="text-[18px] font-[590] text-[var(--color-porcelain)]">NUEVA NOTA DE PEDIDO</h3>
+          <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Completá los campos obligatorios (*) para habilitar el guardado.</p>
+        </div>
+        <button (click)="closeModal()" class="rounded-xl p-2.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
+          <lucide-icon name="x" [size]="20"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto">
+        @if (errorMessage()) {
+          <div class="mb-5 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-[13px] font-[510] text-red-400">
+            <lucide-icon name="alert-circle" [size]="18" class="shrink-0"></lucide-icon>{{ errorMessage() }}
+          </div>
+        }
+
+        <form #f="ngForm" (ngSubmit)="save()" class="space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Área Solicitante <span class="text-red-400">*</span></label>
+              <select [(ngModel)]="form.idUnidadAdm" name="idUnidadAdm" required (ngModelChange)="onModalUnidadAdmChange($event)" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors">
+                <option [ngValue]="0">-- Seleccione --</option>
+                @for (ua of unidadesAdm(); track ua.idUnidadAdm) {
+                  <option [ngValue]="ua.idUnidadAdm">{{ ua.nombreUnidadAdm }}</option>
+                }
+              </select>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Oficina Responsable <span class="text-red-400">*</span></label>
+              <select [(ngModel)]="form.idSubResponsable" name="idSubResponsable" required class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors">
+                <option [ngValue]="0">-- Seleccione --</option>
+                @for (of of oficinas(); track $any(of).idSubResponsable || of.idSubResponsables) {
+                  <option [ngValue]="$any(of).idSubResponsable || of.idSubResponsables">{{ of.nombre }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div>
+              <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Fecha Reserva</label>
+              <input [value]="form.fechaReserva | date:'dd/MM/yyyy'" disabled class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/50 px-4 py-2.5 text-[14px] text-[var(--color-storm-cloud)] cursor-not-allowed" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Estado Actual</label>
+              <div class="flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-[#448b54] px-4 py-2.5 text-[14px] font-[600] tracking-wide text-white shadow-sm">
+                GENERADO
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="flex items-center justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-b-[2rem]">
+        <button type="button" (click)="closeModal()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] font-[590] text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">Cancelar</button>
+        <button type="button" (click)="save()" [disabled]="isSaving()" class="inline-flex items-center gap-2 rounded-xl bg-[#448b54] px-6 py-2.5 text-[13px] font-[600] text-white transition-all hover:bg-[#367043] disabled:opacity-50 disabled:cursor-not-allowed">
+          @if (isSaving()) { <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon> }
+          {{ isSaving() ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isDetailOpen() && selectedReserva()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeDetail()"></div>
+    <div class="relative w-full max-w-4xl rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-t-[2rem]">
+        <div>
+          <h3 class="text-[18px] font-[590] text-[var(--color-porcelain)]">DETALLE DE LA NOTA DE PEDIDO <span class="text-[var(--color-storm-cloud)] font-normal">| NRO: {{ selectedReserva()?.nroReserva }}</span></h3>
+        </div>
+        <button (click)="closeDetail()" class="rounded-xl p-2.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
+          <lucide-icon name="x" [size]="20"></lucide-icon>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 pb-6 border-b border-[var(--color-charcoal-grey)]">
+          <div>
+            <p class="text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Número de Nota de Pedido</p>
+            <p class="mt-1 text-[14px] font-[510] text-[var(--color-porcelain)]">{{ selectedReserva()?.nroReserva }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Área</p>
+            <p class="mt-1 text-[14px] font-[510] text-[var(--color-porcelain)]">{{ selectedReserva()?.nombreUnidadAdm }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Estado de la Nota de Pedido</p>
+            <p class="mt-1 text-[14px] font-[510] text-[var(--color-porcelain)]">{{ selectedReserva()?.descripcionEstado }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)]">Oficina Solicitante</p>
+            <p class="mt-1 text-[14px] font-[510] text-[var(--color-porcelain)]">{{ selectedReserva()?.nombreSubResponsable }}</p>
+          </div>
+        </div>
+
+        <h4 class="mb-4 text-[14px] font-[590] text-[var(--color-porcelain)]">BIENES Y SERVICIOS DE LA NOTA DE PEDIDO</h4>
+
+        @if (isLoadingDetalles()) {
+          <div class="flex items-center justify-center py-12 text-[var(--color-storm-cloud)]">
+            <lucide-icon name="loader-2" [size]="24" class="animate-spin mr-3"></lucide-icon>Cargando detalles...
+          </div>
+        } @else if (detalles().length === 0) {
+          <div class="text-center py-8 text-[var(--color-storm-cloud)]">
+            <p class="text-[14px]">No hay ítems registrados en esta nota de pedido.</p>
+          </div>
+        } @else {
+          <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-pitch-black)]">
+            <table class="w-full text-left text-[13px]">
+              <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+                <tr>
+                  <th class="px-4 py-3">Nombre</th>
+                  <th class="px-4 py-3">Categoría Programática</th>
+                  <th class="px-4 py-3">Moneda</th>
+                  <th class="px-4 py-3 text-right">Cant.</th>
+                  <th class="px-4 py-3 text-right">Importe</th>
+                  <th class="px-4 py-3 text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+                @for (det of detalles(); track det.idReservaDet) {
+                  <tr class="hover:bg-[var(--color-deep-slate)]/50 transition-colors">
+                    <td class="px-4 py-3 text-[var(--color-porcelain)]">{{ det.nombreBien }}</td>
+                    <td class="px-4 py-3 text-[var(--color-light-steel)]">{{ det.nombreCategoriaProgramatica }}</td>
+                    <td class="px-4 py-3 text-[var(--color-light-steel)]">{{ det.nombreMoneda }}</td>
+                    <td class="px-4 py-3 text-right text-[var(--color-porcelain)]">{{ det.cantidad }}</td>
+                    <td class="px-4 py-3 text-right text-[var(--color-porcelain)]">{{ det.importe | number:'1.2-2' }}</td>
+                    <td class="px-4 py-3 text-right font-[590] text-[#448b54]">{{ (det.cantidad || 0) * (det.importe || 0) | number:'1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (detalles().length > 0) {
+            <div class="mt-4 flex items-center justify-end rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/30 px-5 py-3">
+              <span class="text-[12px] font-[590] uppercase tracking-wider text-[var(--color-storm-cloud)] mr-3">Total General de la Nota de Pedido:</span>
+              <span class="text-lg font-[590] text-[#448b54]">${{ totalGeneral() | number:'1.2-2' }}</span>
+            </div>
+          }
+        }
+      </div>
+      <div class="flex items-center justify-end border-t border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-b-[2rem]">
+        <button (click)="closeDetail()" class="rounded-xl bg-red-500/20 border border-red-500/30 px-5 py-2.5 text-[13px] font-[590] text-red-400 transition-colors hover:bg-red-500/30">Cerrar</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (reservaToClone()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeCloneModal()"></div>
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col overflow-hidden">
+      @if (isCloning()) {
+        <div class="p-10 flex flex-col items-center justify-center">
+          <app-loading-spinner label="Clonando nota de pedido..."></app-loading-spinner>
+        </div>
+      } @else {
+        <div class="p-6 text-center pt-8">
+          <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+            <lucide-icon name="copy" [size]="28"></lucide-icon>
+          </div>
+          <h3 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Clonar Nota de Pedido</h3>
+          <p class="text-[14px] text-[var(--color-storm-cloud)]">¿Estás seguro de que deseas clonar la nota de pedido <strong class="text-[var(--color-porcelain)]">{{ reservaToClone()?.nroReserva }}</strong>?<br/>Se generará una nueva nota en estado Generado con los mismos ítems.</p>
+        </div>
+        <div class="flex gap-3 px-6 py-5 bg-[var(--color-pitch-black)]/30 border-t border-[var(--color-charcoal-grey)]">
+          <button (click)="closeCloneModal()" class="w-1/2 rounded-xl border border-[var(--color-charcoal-grey)] bg-transparent py-3 text-[14px] font-[590] text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">Cancelar</button>
+          <button (click)="confirmClone()" class="w-1/2 rounded-xl bg-[var(--color-cyan-spark)] py-3 text-[14px] font-[590] text-[#0B0E14] transition-all hover:brightness-110">Sí, Clonar</button>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (reservaToAuthorize()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeAuthorizeModal()"></div>
+    <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col overflow-hidden">
+      @if (isAuthorizing()) {
+        <div class="p-10 flex flex-col items-center justify-center">
+          <app-loading-spinner label="Autorizando nota de pedido..."></app-loading-spinner>
+        </div>
+      } @else {
+        <div class="p-6 text-center pt-8">
+          <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-[#448b54]/10 text-[#448b54]">
+            <lucide-icon name="check-circle" [size]="28"></lucide-icon>
+          </div>
+          <h3 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Autorizar Nota de Pedido</h3>
+          <p class="text-[14px] text-[var(--color-storm-cloud)] mb-6">Estás a punto de autorizar la nota de pedido <strong class="text-[var(--color-porcelain)]">{{ reservaToAuthorize()?.nroReserva }}</strong>.<br/>Esta acción no se puede deshacer.</p>
+          
+          <div class="text-left w-full">
+            <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">¿Por qué se autoriza? <span class="text-red-500">*</span></label>
+            <textarea [(ngModel)]="autorizarMotivo" rows="3" placeholder="Ingresa una justificación formal para la autorización..."
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] outline-none transition-colors resize-none"></textarea>
+          </div>
+        </div>
+        <div class="flex gap-3 px-6 py-5 bg-[var(--color-pitch-black)]/30 border-t border-[var(--color-charcoal-grey)]">
+          <button (click)="closeAuthorizeModal()" class="w-1/2 rounded-xl border border-[var(--color-charcoal-grey)] bg-transparent py-3 text-[14px] font-[590] text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">Cancelar</button>
+          <button (click)="confirmAuthorize()" [disabled]="!autorizarMotivo().trim()" class="w-1/2 rounded-xl bg-[#448b54] py-3 text-[14px] font-[590] text-white transition-all hover:bg-[#367043] disabled:opacity-50 disabled:cursor-not-allowed">Sí, Autorizar</button>
+        </div>
+      }
+    </div>
+  </div>
+}

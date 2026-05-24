@@ -26,6 +26,13 @@ import { ProveedoresComponent } from './features/proveedores/proveedores-layout/
 import { RubrosListComponent } from './features/proveedores/rubros-list/rubros-list.component';
 import { RubrosTreeComponent } from './features/proveedores/rubros-tree/rubros-tree.component';
 
+import { LicitacionesLayoutComponent } from './features/licitaciones/licitaciones-layout/licitaciones-layout.component';
+import { LicitacionesHomeComponent } from './features/licitaciones/home/home.component';
+import { NotaPedidoComponent } from './features/licitaciones/nota-pedido/nota-pedido.component';
+import { SubastaPlaceholderComponent } from './features/licitaciones/subasta/subasta.component';
+import { InformesPlaceholderComponent } from './features/licitaciones/informes/informes.component';
+import { TableroPlaceholderComponent } from './features/licitaciones/tablero/tablero.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -75,6 +82,19 @@ export const routes: Routes = [
       { path: 'listado', component: ProveedoresComponent, data: { state: 'proveedores-listado', title: 'Listado de Proveedores' } },
       { path: 'rubros-list', component: RubrosListComponent, data: { state: 'rubros-list', title: 'Rubros (Lista)' } },
       { path: 'rubros-tree', component: RubrosTreeComponent, data: { state: 'rubros-tree', title: 'Rubros (Árbol)' } }
+    ]
+  },
+
+  {
+    path: 'licitaciones',
+    component: LicitacionesLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: '', component: LicitacionesHomeComponent, data: { state: 'licitaciones-home', title: 'Inicio' } },
+      { path: 'nota-pedido', component: NotaPedidoComponent, data: { state: 'nota-pedido', title: 'Nota de Pedido' } },
+      { path: 'subasta', component: SubastaPlaceholderComponent, data: { state: 'subasta', title: 'Subasta' } },
+      { path: 'informes', component: InformesPlaceholderComponent, data: { state: 'informes', title: 'Informes' } },
+      { path: 'tablero', component: TableroPlaceholderComponent, data: { state: 'tablero', title: 'Tablero' } },
     ]
   },
 

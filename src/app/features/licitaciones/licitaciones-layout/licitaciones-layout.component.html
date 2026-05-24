@@ -1,0 +1,141 @@
+<div class="flex h-screen bg-[var(--color-pitch-black)] overflow-hidden">
+
+  @if (isSidebarOpen()) {
+    <div (click)="closeSidebar()" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"></div>
+  }
+
+  <aside
+    class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/95 backdrop-blur-xl overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] lg:static lg:translate-x-0"
+    [ngClass]="isSidebarOpen() ? 'w-72 translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[68px]'">
+
+    <div class="flex h-16 shrink-0 items-center px-4 border-b border-[var(--color-charcoal-grey)]"
+         [ngClass]="isSidebarOpen() ? 'justify-between' : 'justify-center'">
+      <a routerLink="/licitaciones" class="flex items-center gap-3 transition-opacity hover:opacity-80 min-w-0">
+        <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+          <lucide-icon name="gavel" [size]="18"></lucide-icon>
+        </div>
+        <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)] truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()">Sistema de Subastas</span>
+      </a>
+      <button (click)="closeSidebar()" class="lg:hidden text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="x" [size]="20"></lucide-icon>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] transition-opacity duration-300"
+         [class.opacity-0]="!isSidebarOpen()"
+         [class.hidden]="!isSidebarOpen()">Módulo</p>
+
+      @if (auth.hasPageAccess('licitaciones.inicio')) {
+        <a routerLink="/licitaciones"
+         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         [routerLinkActiveOptions]="{exact: true}"
+         (click)="closeSidebarOnMobile()"
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="home" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Inicio</span>
+      </a>
+      }
+
+      @if (auth.hasPageAccess('licitaciones.nota-pedido')) {
+        <a routerLink="/licitaciones/nota-pedido"
+         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-neon-lime)] border-[var(--color-charcoal-grey)] shadow-sm"
+         (click)="closeSidebarOnMobile()"
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="file-text" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Nota de Pedido</span>
+      </a>
+      }
+
+      @if (auth.hasPageAccess('licitaciones.subasta')) {
+        <a routerLink="/licitaciones/subasta"
+         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         (click)="closeSidebarOnMobile()"
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="gavel" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Subasta</span>
+      </a>
+      }
+
+      @if (auth.hasPageAccess('licitaciones.informes')) {
+        <a routerLink="/licitaciones/informes"
+         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         (click)="closeSidebarOnMobile()"
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="bar-chart" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Informes</span>
+      </a>
+      }
+
+      @if (auth.hasPageAccess('licitaciones.tablero')) {
+        <a routerLink="/licitaciones/tablero"
+         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         (click)="closeSidebarOnMobile()"
+         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+        <lucide-icon name="layout-dashboard" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Tablero</span>
+      </a>
+      }
+
+      <div class="my-6 border-t border-[var(--color-charcoal-grey)] mx-3 transition-opacity duration-300"
+           [class.opacity-0]="!isSidebarOpen()"></div>
+      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] transition-opacity duration-300"
+         [class.opacity-0]="!isSidebarOpen()"
+         [class.hidden]="!isSidebarOpen()">Sistema</p>
+
+      <a routerLink="/modulos" 
+         class="flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="arrow-left" [size]="18" class="shrink-0"></lucide-icon>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Volver al Panel</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="flex flex-1 flex-col overflow-hidden relative">
+
+    <header class="flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 backdrop-blur-md px-4 sm:px-6 lg:px-8 z-20">
+      <div class="flex items-center gap-2">
+        <button (click)="toggleSidebar()" class="lg:hidden flex items-center justify-center p-2 rounded-lg text-[var(--color-storm-cloud)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+          <lucide-icon name="menu" [size]="24"></lucide-icon>
+        </button>
+        <button (click)="toggleSidebar()" class="hidden lg:flex items-center justify-center p-2 rounded-lg text-[var(--color-storm-cloud)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+          <lucide-icon [name]="isSidebarOpen() ? 'panel-left-close' : 'panel-left'" [size]="20"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="text-[13px] font-[590] text-[var(--color-porcelain)] hidden sm:block">Sistema de Subastas Electrónicas Inversas, Directas y Licitaciones</span>
+      </div>
+    </header>
+
+    <main [@routeFade]="routeState()"
+          class="flex-1 overflow-y-auto bg-[var(--color-pitch-black)] relative">
+      @if (showBreadcrumb()) {
+        <div class="flex items-center gap-2 border-b border-[var(--color-charcoal-grey)] px-4 sm:px-6 lg:px-8 py-3">
+          <a routerLink="/licitaciones" class="text-[13px] font-[510] text-[var(--color-storm-cloud)] transition-colors hover:text-[var(--color-porcelain)]">Sistema de Subastas</a>
+          <lucide-icon name="chevron-right" [size]="14" class="text-[var(--color-storm-cloud)]"></lucide-icon>
+          <span class="text-[13px] font-[590] text-[var(--color-porcelain)]">{{ pageTitle() }}</span>
+        </div>
+      }
+      <div class="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+        <div class="absolute top-0 right-0 h-[600px] w-[600px] rounded-full bg-[var(--color-aether-blue)] opacity-[0.03] blur-[150px]"></div>
+      </div>
+      <div class="relative z-10 p-4 sm:p-6 lg:p-8">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>

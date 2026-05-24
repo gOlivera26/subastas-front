@@ -60,11 +60,11 @@
   }
 
   body {
-    font-family: var(--font-inter-variable);
-    background-color: var(--color-pitch-black);
-    color: var(--color-porcelain);
-    @apply antialiased h-screen overflow-hidden;
-  }
+  font-family: var(--font-inter-variable);
+  background-color: var(--color-pitch-black);
+  color: var(--color-porcelain);
+  @apply antialiased min-h-screen bg-[var(--color-pitch-black)]; 
+}
 
   ::-webkit-scrollbar {
     width: 6px;
