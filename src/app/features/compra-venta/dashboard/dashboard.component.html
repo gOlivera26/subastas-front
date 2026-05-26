@@ -1,0 +1,122 @@
+<div class="mx-auto max-w-[1400px]">
+  <span class="hidden">{{ tick() }}</span>
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Dashboard</h1>
+      <p class="text-[14px] text-[var(--color-storm-cloud)]">Subastas en tiempo real y próximos remates.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+    <div>
+      <label class="mb-1.5 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Vigencia</label>
+      <select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"
+              [ngModel]="selectedVigenciaId()" (change)="onVigenciaChange($any($event.target).value)">
+        @for (v of vigencias(); track v.idVigencia) {<option [value]="v.idVigencia">Ejercicio {{ v.ejercicio }} {{ v.activoEjecucion ? '(Activo)' : '' }}</option>}
+      </select>
+    </div>
+    <div>
+      <label class="mb-1.5 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Desde</label>
+      <input type="date" [ngModel]="fechaInicio()" (ngModelChange)="fechaInicio.set($event)" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" />
+    </div>
+    <div>
+      <label class="mb-1.5 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Hasta</label>
+      <input type="date" [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" />
+    </div>
+  </div>
+
+  <section class="mb-10">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="size-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+      <h2 class="text-[18px] font-[590] text-[var(--color-porcelain)]">En Curso Ahora</h2>
+      <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[11px] font-[590]">{{ enCurso().length }}</span>
+    </div>
+    @if (enCurso().length === 0) {
+      <div class="rounded-2xl border border-dashed border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30 p-12 text-center">
+        <lucide-icon name="clock" [size]="32" class="mb-3 text-[var(--color-storm-cloud)]"></lucide-icon>
+        <p class="text-[14px] text-[var(--color-storm-cloud)]">No hay subastas en curso</p>
+        <p class="mt-1 text-[12px] text-[var(--color-fog-grey)]">Seleccioná otra vigencia o fechas.</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        @for (sub of enCurso(); track sub.idCotizacion) {
+          <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 hover:border-[var(--color-cyan-spark)]/30 transition-all group">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)]">{{ sub.tipo }}</span>
+              <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[11px] font-[590]"><span class="size-1.5 rounded-full bg-emerald-400 animate-pulse"></span>En vivo</span>
+            </div>
+            <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] mb-1">{{ sub.titulo }}</h3>
+            <p class="text-[12px] text-[var(--color-fog-grey)] mb-3">#{{ sub.nroCotizacion }}</p>
+            <div class="flex items-center gap-2 text-[24px] font-mono font-[590] text-[var(--color-neon-lime)] mb-4">
+              <lucide-icon name="clock" [size]="20"></lucide-icon>
+              {{ getTimeLeft(sub.fechaFin) }}
+            </div>
+            <a [routerLink]="['/compra-venta/subastas', sub.idCotizacion]" class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-neon-lime)] px-5 py-2.5 text-[13px] font-[590] text-black transition-all hover:brightness-110">
+              <lucide-icon name="gavel" [size]="16"></lucide-icon>
+              Ingresar a la Subasta
+            </a>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="mb-10">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="size-2.5 rounded-full bg-[var(--color-cyan-spark)]"></div>
+      <h2 class="text-[18px] font-[590] text-[var(--color-porcelain)]">Próximas Subastas</h2>
+      <span class="px-2 py-0.5 rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[11px] font-[590]">{{ proximas().length }}</span>
+    </div>
+    @if (proximas().length === 0) {
+      <div class="rounded-2xl border border-dashed border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30 p-12 text-center">
+        <lucide-icon name="calendar" [size]="32" class="mb-3 text-[var(--color-storm-cloud)]"></lucide-icon>
+        <p class="text-[14px] text-[var(--color-storm-cloud)]">No hay subastas próximas</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        @for (sub of proximas(); track sub.idCotizacion) {
+          <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 hover:border-[var(--color-neon-lime)]/30 transition-all">
+            <span class="text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)]">{{ sub.tipo }}</span>
+            <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] mt-2 mb-1">{{ sub.titulo }}</h3>
+            <p class="text-[12px] text-[var(--color-fog-grey)] mb-3">#{{ sub.nroCotizacion }}</p>
+            <div class="flex items-center gap-4 text-[13px] text-[var(--color-storm-cloud)]">
+              <span class="flex items-center gap-1"><lucide-icon name="calendar" [size]="14"></lucide-icon>{{ sub.fechaInicio | date:'dd/MM' }}</span>
+              <span class="flex items-center gap-1"><lucide-icon name="clock" [size]="14"></lucide-icon>{{ sub.fechaInicio | date:'HH:mm' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <section>
+    <h2 class="text-[18px] font-[590] text-[var(--color-porcelain)] mb-4">Calendario del Mes</h2>
+    <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-[14px]">
+          <thead class="bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+            <tr>
+              <th class="px-6 py-4">Nro</th><th class="px-6 py-4">Subasta</th><th class="px-6 py-4">Tipo</th><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Estado</th><th class="px-6 py-4 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+            @if (delMes().length === 0) {
+              <tr><td colspan="6" class="px-6 py-16 text-center text-[var(--color-storm-cloud)]">No hay subastas este mes</td></tr>
+            } @else {
+              @for (sub of delMes(); track sub.idCotizacion) {
+                <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors">
+                  <td class="px-6 py-4 font-mono text-[var(--color-fog-grey)] text-[13px]">{{ sub.nroCotizacion }}</td>
+                  <td class="px-6 py-4 text-[var(--color-porcelain)]">{{ sub.titulo }}</td>
+                  <td class="px-6 py-4 text-[var(--color-storm-cloud)]">{{ sub.tipo }}</td>
+                  <td class="px-6 py-4 text-[var(--color-porcelain)]">{{ sub.fechaInicio | date:'dd/MM/yyyy' }}</td>
+                  <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[11px] font-[590]">{{ sub.estado }}</span></td>
+                  <td class="px-6 py-4 text-right"><a [routerLink]="['/compra-venta/subastas', sub.idCotizacion]" class="text-[var(--color-cyan-spark)] hover:underline text-[13px] font-[510]">Ver</a></td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

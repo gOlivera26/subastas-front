@@ -1,0 +1,322 @@
+<div class="mx-auto max-w-[1500px]">
+  <div class="mb-6">
+    <h1 class="text-[24px] font-[590] text-[var(--color-porcelain)]">Subasta / Licitación</h1>
+    <p class="text-[14px] text-[var(--color-storm-cloud)]">Administración de procesos de compra y subastas electrónicas.</p>
+  </div>
+
+  <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+      <app-custom-select label="Área" [options]="areaOptions()" placeholder="Consultar por Área" />
+      <app-custom-select label="Ejercicio" [options]="vigenciaOptions()" placeholder="Todos" [(value)]="filterVigencia" (valueChange)="buscar()" />
+      <app-custom-select label="Estado" [options]="estadoOptions" placeholder="Consultar por estado" [(value)]="filterEstado" />
+      <div><label class="block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)] ml-1 mb-1">Nro. de Subasta</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="filterNroSubasta" /></div>
+      <div><label class="block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)] ml-1 mb-1">Nro. de Expte</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="filterNroExpte" /></div>
+      <app-calendar label="Fecha de Inicio" placeholder="dd/MM/yyyy" />
+    </div>
+    <div class="flex items-center gap-3">
+      <button (click)="openCrear()" class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-neon-lime)] px-5 py-2.5 text-[14px] font-[590] text-black hover:brightness-110"><lucide-icon name="plus" [size]="16"></lucide-icon>Nuevo</button>
+      <button (click)="buscar()" class="rounded-xl bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] font-[590] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)]">Ver Todas las subastas</button>
+    </div>
+  </div>
+
+  <ng-template #estadoTpl let-row>
+    @if (row.estado === 'Publicada') {<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[11px] font-[590]">{{ row.estado }}</span>}
+    @else if (row.estado === 'Generado') {<span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[11px] font-[590]">{{ row.estado }}</span>}
+    @else if (row.estado === 'Finalizada') {<span class="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 text-[11px] font-[590]">{{ row.estado }}</span>}
+    @else {<span class="px-2.5 py-0.5 rounded-full bg-[var(--color-charcoal-grey)]/30 text-[var(--color-storm-cloud)] text-[11px] font-[590]">{{ row.estado || '-' }}</span>}
+  </ng-template>
+  <ng-template #fechaTpl let-row><span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row | date:'dd/MM/yyyy HH:mm' }}</span></ng-template>
+  <ng-template #ofertasTpl let-row><span class="font-mono text-[13px] text-[var(--color-porcelain)]">-</span></ng-template>
+
+  <app-smart-table
+    [columns]="columns" [data]="items()" [actions]="actions"
+    [customTemplates]="customTemplates()" [loading]="loading()" [pageSize]="20"
+    (onAction)="onAction($event)">
+  </app-smart-table>
+</div>
+
+<!-- ============= MODAL ============= -->
+<app-modal [isOpen]="showCrear()" title="Nueva Subasta"
+  [subtitle]="pasoCrear() === 1 ? 'Definí el modo de adjudicación.' : pasoCrear() === 2 ? 'Seleccioná bienes y servicios de las notas de pedido.' : 'Asigná ítems a grupos y configurá parámetros.'"
+  maxWidthClass="max-w-6xl" (close)="closeCrear()">
+
+  <!-- PASO 1: Elegir modo (renglón o ítem) -->
+  @if (pasoCrear() === 1) {
+    <div class="space-y-6">
+      <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-6 text-center">
+        <lucide-icon name="help-circle" [size]="32" class="mb-3 text-[var(--color-cyan-spark)]"></lucide-icon>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] mb-2">¿Subasta por renglón?</h3>
+        <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6">Si es por ítem, cada bien se adjudica individualmente. Si es por renglón, los ítems se agrupan y se adjudican juntos.</p>
+        <div class="flex items-center justify-center gap-3">
+          <button (click)="elegirModo(false)" class="px-8 py-3 rounded-xl text-[14px] font-[590] bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-all flex items-center gap-2">
+            <lucide-icon name="x" [size]="16"></lucide-icon>No, por Ítem
+          </button>
+          <button (click)="elegirModo(true)" class="px-8 py-3 rounded-xl text-[14px] font-[590] bg-[var(--color-cyan-spark)] text-black hover:brightness-110 transition-all flex items-center gap-2">
+            <lucide-icon name="check" [size]="16"></lucide-icon>Sí, por Renglón
+          </button>
+        </div>
+      </div>
+
+      @if (useRenglones()) {
+        <div class="rounded-xl border border-[var(--color-cyan-spark)]/20 bg-[var(--color-cyan-spark)]/5 p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-[14px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2"><span class="size-5 rounded-md bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[10px] font-[590] flex items-center justify-center">2</span> Crear grupos (renglones)</h4>
+            <span class="text-[12px] text-[var(--color-storm-cloud)]">{{ renglones().length }} grupos</span>
+          </div>
+          <div class="flex gap-2 mb-4">
+            <input class="flex-1 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" placeholder="Nombre del grupo..." [(ngModel)]="renglonNombre" (keyup.enter)="addRenglon()" />
+            <button (click)="addRenglon()" [disabled]="!renglonNombre().trim()" class="rounded-xl bg-[var(--color-cyan-spark)] px-4 py-2 text-[13px] font-[590] text-black disabled:opacity-50 hover:brightness-110 flex items-center gap-1"><lucide-icon name="plus" [size]="14"></lucide-icon>Agregar grupo</button>
+          </div>
+          @if (renglones().length > 0) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              @for (r of renglones(); track r.id) {
+                <div class="flex items-center justify-between rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 px-3 py-2">
+                  <div class="flex items-center gap-2">
+                    <span class="size-5 rounded bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[10px] font-[590] flex items-center justify-center">{{ r.id }}</span>
+                    <span class="text-[13px] text-[var(--color-porcelain)]">{{ r.nombre }}</span>
+                  </div>
+                  <button (click)="removeRenglon(r.id)" class="p-1 text-[var(--color-storm-cloud)] hover:text-red-400"><lucide-icon name="trash-2" [size]="12"></lucide-icon></button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <div class="flex justify-end gap-3">
+        <button (click)="closeCrear()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
+        <button (click)="avanzarASeleccion()" class="rounded-xl bg-[var(--color-neon-lime)] px-5 py-2 text-[13px] font-[590] text-black disabled:opacity-50">
+          Siguiente: Seleccionar Ítems →
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- PASO 2: Seleccionar provisiones -->
+  @if (pasoCrear() === 2) {
+    <div class="space-y-4">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex items-center gap-3">
+          <app-custom-select label="Área" [options]="areaOptions()" placeholder="Filtrar por área" (valueChange)="onModalAreaChange($event)" />
+          <app-custom-select label="Oficina" [options]="oficinaOptions()" placeholder="Todas" (valueChange)="onModalOficinaChange($event)" [disabled]="!modalAreaId()" />
+          <div>
+            <label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Buscar Nota</label>
+            <div class="flex gap-2">
+              <div class="relative">
+                <lucide-icon name="search" [size]="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+                <input class="w-40 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] pl-9 pr-3 py-2.5 text-[13px] text-[var(--color-porcelain)]" placeholder="Nro. nota..." [(ngModel)]="filterNroProvision" (keyup.enter)="buscarReservas()" />
+              </div>
+              <button (click)="buscarReservas()" class="rounded-xl bg-[var(--color-cyan-spark)] px-3 py-2.5 text-[13px] font-[590] text-black hover:brightness-110 flex items-center gap-1"><lucide-icon name="search" [size]="14"></lucide-icon></button>
+            </div>
+          </div>
+        </div>
+        <span class="text-[13px] text-[var(--color-storm-cloud)]"><span class="text-[var(--color-neon-lime)] font-[590]">{{ selectedCount() }}</span> seleccionados</span>
+      </div>
+
+      <!-- Grilla superior: disponibles -->
+      <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
+        <div class="px-4 py-2.5 bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)]">
+          <h4 class="text-[13px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2"><lucide-icon name="package" [size]="14" class="text-[var(--color-storm-cloud)]"></lucide-icon>Bienes y Servicios Disponibles</h4>
+        </div>
+        <app-smart-table
+          [columns]="reservaColumns" [data]="itemsDisponibles()"
+          [selectable]="true" [selectedIds]="selectedIds()"
+          (selectedIdsChange)="onReservaSelectionChange($event)"
+          [loading]="loadingReservas()" [pageSize]="10">
+        </app-smart-table>
+      </div>
+
+      <!-- Grilla inferior: seleccionados -->
+      @if (selectedCount() > 0) {
+        <div class="rounded-xl border border-[var(--color-neon-lime)]/20 bg-[var(--color-neon-lime)]/5 overflow-hidden">
+          <div class="px-4 py-2.5 bg-[var(--color-neon-lime)]/10 border-b border-[var(--color-neon-lime)]/10 flex items-center justify-between">
+            <h4 class="text-[13px] font-[590] text-[var(--color-neon-lime)] flex items-center gap-2"><lucide-icon name="check" [size]="14"></lucide-icon>Bienes y Servicios Seleccionados</h4>
+            <span class="text-[12px] text-[var(--color-neon-lime)]">{{ selectedCount() }} ítems</span>
+          </div>
+          <app-smart-table
+            [columns]="selColumns" [data]="selectedItems()" [actions]="selActions"
+            [pageSize]="999" (onAction)="quitarItem($any($event).row)">
+          </app-smart-table>
+        </div>
+      }
+
+      <div class="flex justify-end gap-3">
+        <button (click)="volver()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">← Volver</button>
+        <button (click)="closeCrear()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
+        <button (click)="avanzarAParametros()" [disabled]="selectedCount() === 0" class="rounded-xl bg-[var(--color-neon-lime)] px-5 py-2 text-[13px] font-[590] text-black disabled:opacity-50">Siguiente →</button>
+      </div>
+    </div>
+  }
+
+  <!-- PASO 3: Asignar a renglones + Parámetros -->
+  @if (pasoCrear() === 3) {
+    <div class="space-y-6">
+      @if (useRenglones()) {
+        <div class="rounded-xl border border-[var(--color-cyan-spark)]/20 bg-[var(--color-cyan-spark)]/5 p-4">
+          <h4 class="text-[13px] font-[590] text-[var(--color-porcelain)] mb-3 flex items-center gap-2"><span class="size-5 rounded-md bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[10px] font-[590] flex items-center justify-center">3</span> Asignar ítems a cada grupo</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            @for (renglon of renglones(); track renglon.id) {
+              <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 overflow-hidden">
+                <div class="px-3 py-2 bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)] flex items-center gap-2">
+                  <span class="size-5 rounded bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[10px] font-[590] flex items-center justify-center">{{ renglon.id }}</span>
+                  <span class="text-[13px] font-[590] text-[var(--color-porcelain)] truncate flex-1">{{ renglon.nombre }}</span>
+                  <span class="text-[11px] text-[var(--color-storm-cloud)]">{{ renglon.itemIds.length }} ítems</span>
+                </div>
+                <div class="px-3 py-1 max-h-[160px] overflow-y-auto">
+                  @for (item of selectedItems(); track item.id) {
+                    <label class="flex items-center gap-2 py-1 px-1 rounded hover:bg-[var(--color-deep-slate)]/30 cursor-pointer text-[11px]">
+                      <input type="checkbox" [checked]="isItemInRenglon(renglon.id, item.id)" (change)="toggleItemInRenglon(renglon.id, item.id)" class="rounded" />
+                      <span class="text-[var(--color-storm-cloud)] truncate flex-1">{{ item.nItem || 'Ítem #' + item.idItem }}</span>
+                      <span class="text-[var(--color-fog-grey)]">x{{ item.cantidad }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+          @if (itemsSinRenglon().length > 0) {
+            <div class="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 flex items-center gap-2">
+              <lucide-icon name="alert-circle" [size]="14" class="text-amber-400 shrink-0"></lucide-icon>
+              <p class="text-[11px] text-amber-400">{{ itemsSinRenglon().length }} ítems sin grupo. Asignalos antes de continuar.</p>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="grid grid-cols-2 gap-6">
+        <div class="space-y-3">
+          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Datos de la Contratación</h4>
+          <app-custom-select label="Tipo de Contratación" [options]="tipoOptions" [(value)]="tipoContratacion" />
+          <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Número de Expediente</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" /></div>
+          <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Objeto de la Contratación</label><textarea class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" rows="2" [(ngModel)]="observacion"></textarea></div>
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Fechas y Parámetros</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <app-calendar label="Inicio Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="fechaInicio" />
+            <app-calendar label="Fin Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="fechaFin" />
+          </div>
+          <app-calendar label="Límite de Consultas" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="fechaLimiteConsultas" />
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Margen de Mejora (%)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="margenMejora" /></div>
+          </div>
+          <label class="flex items-center gap-2 text-[12px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="checkbox" [(ngModel)]="permiteProrroga" class="rounded" /> Admite prórroga</label>
+          <div class="rounded-xl bg-[var(--color-pitch-black)]/50 border border-[var(--color-charcoal-grey)] p-3 space-y-1">
+            <p class="text-[12px] text-[var(--color-storm-cloud)]"><strong class="text-[var(--color-neon-lime)]">{{ selectedCount() }}</strong> ítems</p>
+            @if (useRenglones()) {<p class="text-[12px] text-[var(--color-storm-cloud)]"><strong class="text-[var(--color-cyan-spark)]">{{ renglones().length }}</strong> renglones</p>}
+            <p class="text-[11px] text-[var(--color-fog-grey)]">Adjudicación por {{ useRenglones() ? 'renglón' : 'ítem' }}</p>
+          </div>
+        </div>
+        <div class="col-span-2 flex justify-end gap-3 mt-4">
+          <button (click)="volver()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">← Volver</button>
+          <button (click)="closeCrear()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
+          <button (click)="grabar()" [disabled]="saving()" class="rounded-xl bg-[var(--color-neon-lime)] px-6 py-2 text-[13px] font-[590] text-black disabled:opacity-50">
+            @if (saving()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1"></lucide-icon>}Grabar Subasta
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</app-modal>
+
+<!-- MODAL: Especificaciones -->
+<app-modal [isOpen]="showEspec()" title="Especificaciones" [subtitle]="'Subasta #' + (especItem()?.nroCotizacion || '')" maxWidthClass="max-w-3xl" (close)="closeEspec()">
+  @if (showEspec()) {
+    <div class="space-y-6">
+      <div class="grid grid-cols-2 gap-6">
+        <div class="space-y-3">
+          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Datos Generales</h4>
+          <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Nro. Expediente</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="especNroExpediente" /></div>
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Fechas</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <app-calendar label="Inicio Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="especFechaInicio" />
+            <app-calendar label="Fin Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="especFechaFin" />
+          </div>
+          <app-calendar label="Límite Consultas" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="especFechaLimite" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="space-y-3">
+          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Parámetros</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Margen (%)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="especMargen" /></div>
+            <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Prórroga (min)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="especProrrogaMin" /></div>
+          </div>
+          <label class="flex items-center gap-2 text-[12px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="checkbox" [(ngModel)]="especProrroga" class="rounded" /> Admite prórroga</label>
+          <div class="flex items-center gap-4 mt-2">
+            <span class="text-[12px] text-[var(--color-storm-cloud)]">Visibilidad:</span>
+            <div class="flex rounded-lg border border-[var(--color-charcoal-grey)] overflow-hidden">
+              @for (opt of [{l:'Pública',v:'1'},{l:'Privada',v:'0'},{l:'Cerrada',v:'2'}]; track opt.v) {
+                <button (click)="especRedet.set(opt.v)"
+                  class="px-3 py-1 text-[11px] font-[590] transition-colors"
+                  [class.bg-[var(--color-charcoal-grey)]]="especRedet() !== opt.v"
+                  [class.text-[var(--color-storm-cloud)]]="especRedet() !== opt.v"
+                  [class.bg-[var(--color-cyan-spark)]]="especRedet() === opt.v"
+                  [class.text-black]="especRedet() === opt.v">{{ opt.l }}</button>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Criterio</h4>
+          <div class="flex rounded-lg border border-[var(--color-charcoal-grey)] overflow-hidden w-fit">
+            <button (click)="especCriterio.set(0)"
+              class="px-4 py-1.5 text-[12px] font-[590] transition-colors"
+              [class.bg-[var(--color-neon-lime)]]="especCriterio() === 0"
+              [class.text-black]="especCriterio() === 0"
+              [class.text-[var(--color-storm-cloud)]]="especCriterio() !== 0">Por Ítem</button>
+            <button (click)="especCriterio.set(1)"
+              class="px-4 py-1.5 text-[12px] font-[590] transition-colors"
+              [class.bg-[var(--color-neon-lime)]]="especCriterio() === 1"
+              [class.text-black]="especCriterio() === 1"
+              [class.text-[var(--color-storm-cloud)]]="especCriterio() !== 1">Por Renglón</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button (click)="closeEspec()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
+        <button (click)="grabarEspec()" [disabled]="savingEspec()" class="rounded-xl bg-[var(--color-neon-lime)] px-5 py-2 text-[13px] font-[590] text-black disabled:opacity-50">@if (savingEspec()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1"></lucide-icon>}Guardar</button>
+      </div>
+    </div>
+  }
+</app-modal>
+
+<!-- MODAL: Detalle -->
+<app-modal [isOpen]="showDetalle()" title="Detalle de Subasta" [subtitle]="'# ' + (detalleItem()?.nroCotizacion || '')" maxWidthClass="max-w-lg" (close)="closeDetalle()">
+  <div class="space-y-3 text-[14px]">
+    <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-4 grid grid-cols-2 gap-3">
+      <div><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Tipo</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.tipo || '-' }}</p></div>
+      <div><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Estado</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.estado || '-' }}</p></div>
+      <div><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Inicio</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.fechaInicio || '-' }}</p></div>
+      <div><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Fin</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.fechaFin || '-' }}</p></div>
+      <div class="col-span-2"><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Objeto</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.titulo || '-' }}</p></div>
+    </div>
+    <div class="flex justify-end"><button (click)="closeDetalle()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cerrar</button></div>
+  </div>
+</app-modal>
+
+<!-- MODAL: Proveedores -->
+<app-modal [isOpen]="showProveedores()" title="Proveedores" [subtitle]="'Subasta #' + (provItem()?.nroCotizacion || '')" maxWidthClass="max-w-2xl" (close)="closeProveedores()">
+  <div class="py-12 text-center text-[var(--color-storm-cloud)]">
+    <lucide-icon name="users" [size]="32" class="mb-3"></lucide-icon>
+    <p>Próximamente: gestión de proveedores por subasta.</p>
+  </div>
+</app-modal>
+
+<!-- MODAL: Pliegos -->
+<app-modal [isOpen]="showPliegos()" title="Pliegos" [subtitle]="'Subasta #' + (pliegoItem()?.nroCotizacion || '')" maxWidthClass="max-w-lg" (close)="closePliegos()">
+  <div class="py-12 text-center text-[var(--color-storm-cloud)]">
+    <lucide-icon name="file-text" [size]="32" class="mb-3"></lucide-icon>
+    <p>Próximamente: carga de pliegos licitatorios.</p>
+  </div>
+</app-modal>
+
+<!-- MODAL: Preguntas -->
+<app-modal [isOpen]="showPreguntas()" title="Preguntas" [subtitle]="'Subasta #' + (preguntaItem()?.nroCotizacion || '')" maxWidthClass="max-w-2xl" (close)="closePreguntas()">
+  <div class="py-12 text-center text-[var(--color-storm-cloud)]">
+    <lucide-icon name="help-circle" [size]="32" class="mb-3"></lucide-icon>
+    <p>Próximamente: preguntas y respuestas de proveedores.</p>
+  </div>
+</app-modal>

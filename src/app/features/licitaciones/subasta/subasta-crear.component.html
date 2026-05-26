@@ -1,0 +1,73 @@
+<div class="mx-auto max-w-[1200px]">
+  <a routerLink="/licitaciones/subasta" class="inline-flex items-center gap-2 text-[14px] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] mb-6"><lucide-icon name="arrow-left" [size]="16"></lucide-icon>Volver al listado</a>
+
+  @if (successNro()) {
+    <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-12 text-center">
+      <lucide-icon name="check-circle" [size]="48" class="mb-4 text-emerald-400"></lucide-icon>
+      <h2 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Subasta {{ successNro() }} creada</h2>
+      <a routerLink="/licitaciones/subasta" class="text-[var(--color-cyan-spark)] hover:underline text-[14px]">Volver al listado</a>
+    </div>
+  } @else {
+    <!-- STEPPER -->
+    <div class="flex items-center gap-4 mb-8">
+      <div class="flex items-center gap-2" [class.opacity-50]="paso() !== 1"><div class="flex size-8 items-center justify-center rounded-full text-[13px] font-[590]" [class.bg-[var(--color-neon-lime)]!text-black]="paso()===1" [class.bg-[var(--color-deep-slate)]!text-[var(--color-storm-cloud)]]="paso()!==1">1</div><span class="text-[14px] font-[590] text-[var(--color-porcelain)]">Seleccionar Ítems</span></div>
+      <div class="flex-1 h-px bg-[var(--color-charcoal-grey)]"></div>
+      <div class="flex items-center gap-2" [class.opacity-50]="paso() !== 2"><div class="flex size-8 items-center justify-center rounded-full text-[13px] font-[590]" [class.bg-[var(--color-neon-lime)]!text-black]="paso()===2" [class.bg-[var(--color-deep-slate)]!text-[var(--color-storm-cloud)]]="paso()!==2">2</div><span class="text-[14px] font-[590] text-[var(--color-porcelain)]">Especificaciones</span></div>
+    </div>
+
+    @if (paso() === 1) {
+      <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+          <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Área / UA</label><select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option>Todas</option></select></div>
+          <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Oficina Solicitante</label><select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option>Todas</option></select></div>
+          <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Nro Provisión</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" placeholder="Buscar..." /></div>
+          <div class="flex items-end"><button class="w-full rounded-xl bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] px-4 py-2.5 text-[14px] font-[510] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] flex items-center justify-center gap-2"><lucide-icon name="search" [size]="16"></lucide-icon>Buscar Provisión</button></div>
+        </div>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ reservas().length }} ítems · <span class="text-[var(--color-neon-lime)]">{{ selectedIds().size }} seleccionados</span></span>
+          <label class="flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="checkbox" class="rounded" /> Subastar por Renglón</label>
+        </div>
+        <div class="overflow-y-auto max-h-[55vh] rounded-xl border border-[var(--color-charcoal-grey)]">
+          <table class="w-full text-left text-[14px]">
+            <thead class="sticky top-0 bg-[var(--color-deep-slate)] text-[11px] uppercase text-[var(--color-storm-cloud)]"><tr><th class="px-4 py-3 w-12">Sel</th><th class="px-4 py-3">Nro Reserva</th><th class="px-4 py-3">Ítem</th><th class="px-4 py-3 w-24">Cant.</th><th class="px-4 py-3 w-32">Importe</th><th class="px-4 py-3 w-32">Renglón</th></tr></thead>
+            <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+              @for (r of reservas(); track r.idReserva || $index) {
+                <tr class="hover:bg-[var(--color-deep-slate)]/30 cursor-pointer" [class.bg-[var(--color-cyan-spark)]/5]="selectedIds().has(r.idReserva)" (click)="toggleReserva(r.idReserva)">
+                  <td class="px-4 py-3"><div class="size-5 rounded border-2 flex items-center justify-center" [class.border-[var(--color-cyan-spark)]!bg-[var(--color-cyan-spark)]]="selectedIds().has(r.idReserva)" [class.border-[var(--color-charcoal-grey)]]="!selectedIds().has(r.idReserva)">@if (selectedIds().has(r.idReserva)) {<lucide-icon name="check" [size]="14" class="text-black"></lucide-icon>}</div></td>
+                  <td class="px-4 py-3 font-mono text-[var(--color-fog-grey)] text-[13px]">{{ r.nroReserva || '#' + r.idReserva }}</td>
+                  <td class="px-4 py-3 text-[var(--color-porcelain)]">{{ r.nItem || r.nombre || '-' }}</td>
+                  <td class="px-4 py-3 text-[var(--color-storm-cloud)]">{{ r.cantidad || '-' }}</td>
+                  <td class="px-4 py-3 text-[var(--color-storm-cloud)]">{{ r.importe || '-' }}</td>
+                  <td class="px-4 py-3 text-[var(--color-storm-cloud)]">-</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="flex justify-end gap-3 mt-6"><a routerLink="/licitaciones/subasta" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] text-[var(--color-storm-cloud)]">Cancelar</a><button (click)="avanzar()" [disabled]="selectedIds().size === 0" class="rounded-xl bg-[var(--color-neon-lime)] px-6 py-2.5 text-[14px] font-[590] text-black disabled:opacity-50">Siguiente: Especificaciones</button></div>
+      </div>
+    }
+
+    @if (paso() === 2) {
+      <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="space-y-6">
+            <h3 class="text-[13px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]"><lucide-icon name="file-text" [size]="16" class="inline mr-2"></lucide-icon>Datos de la Subasta</h3>
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Tipo de Contratación</label><select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="tipoContratacion"><option [value]="7">Subasta Electrónica Inversa</option><option [value]="9">Subasta Electrónica Directa</option><option [value]="13">Subasta Inversa Monto Fijo</option><option [value]="15">Subasta Inversa SEEC</option></select></div>
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Número de Expediente</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" /></div>
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Objeto de la Contratación</label><textarea class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" rows="3" [(ngModel)]="observacion"></textarea></div>
+          </div>
+          <div class="space-y-6">
+            <h3 class="text-[13px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]"><lucide-icon name="calendar" [size]="16" class="inline mr-2"></lucide-icon>Fechas y Parámetros</h3>
+            <div class="grid grid-cols-2 gap-4"><div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Inicio Subasta</label><input type="datetime-local" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="fechaInicio" /></div><div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Fin Subasta</label><input type="datetime-local" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="fechaFin" /></div></div>
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Límite de Consultas</label><input type="datetime-local" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="fechaLimiteConsultas" /></div>
+            <div class="grid grid-cols-2 gap-4"><div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Margen de Oferta (%)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="margenMejora" /></div><div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Criterio de Selección</label><select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="criterioAdjudicacion"><option [value]="0">Por Ítem</option><option [value]="1">Por Renglón</option></select></div></div>
+            <div class="flex flex-wrap gap-4"><label class="flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="checkbox" [(ngModel)]="permiteProrroga" class="rounded" /> Prorrogable</label><label class="flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="radio" name="vis" checked class="rounded" /> Pública</label><label class="flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="radio" name="vis" class="rounded" /> Privada</label></div>
+          </div>
+        </div>
+        <div class="mt-6 pt-6 border-t border-[var(--color-charcoal-grey)] rounded-2xl bg-[var(--color-pitch-black)]/20 p-4"><p class="text-[12px] text-[var(--color-storm-cloud)]"><lucide-icon name="info" [size]="14" class="inline mr-1"></lucide-icon><strong>{{ selectedIds().size }}</strong> ítems seleccionados para esta subasta.</p></div>
+        <div class="flex justify-end gap-3 mt-6"><button (click)="volver()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] text-[var(--color-storm-cloud)]">Volver</button><button (click)="save()" [disabled]="saving()" class="rounded-xl bg-[var(--color-neon-lime)] px-6 py-2.5 text-[14px] font-[590] text-black disabled:opacity-50">@if (saving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Grabar Subasta</button></div>
+      </div>
+    }
+  }
+</div>

@@ -10,6 +10,7 @@ import { AdminLayoutComponent } from './features/admin/admin-layout/admin-layout
 import { AdminUsuariosComponent } from './features/admin/usuarios/pending-users/pending-users.component';
 import { ActiveUsersComponent } from './features/admin/usuarios/active-users/active-users.component';
 import { SeguridadComponent } from './features/admin/seguridad/seguridad.component';
+import { AdminHomeComponent } from './features/admin/home/admin-home.component';
 import { ClasificadoresLayoutComponent } from './features/clasificadores/clasificadores-layout/clasificadores-layout.component';
 import { ClasificadoresHomeComponent } from './features/clasificadores/home/home.component';
 import { VigenciasComponent } from './features/clasificadores/vigencias/vigencias.component';
@@ -19,17 +20,25 @@ import { OrganizacionesComponent } from './features/clasificadores/organizacione
 import { ObjetosGastoComponent } from './features/clasificadores/objetos-gasto/objetos-gasto.component';
 import { CatalogoBienesComponent } from './features/clasificadores/catalogo-bienes/catalogo-bienes.component';
 import { CategoriasProgramaticasComponent } from './features/clasificadores/categorias-programaticas/categorias-programaticas.component';
+import { MonedasComponent } from './features/clasificadores/monedas/monedas.component';
+import { AreasComponent } from './features/clasificadores/areas/areas.component';
 
 import { ProveedoresLayoutComponent } from './features/proveedores/proveedores-layout/proveedores-layout.component';
 import { ProveedoresHomeComponent } from './features/proveedores/home/home.component';
 import { ProveedoresComponent } from './features/proveedores/proveedores-layout/proveedores.component';
 import { RubrosListComponent } from './features/proveedores/rubros-list/rubros-list.component';
 import { RubrosTreeComponent } from './features/proveedores/rubros-tree/rubros-tree.component';
+import { CompraVentaLayoutComponent } from './features/compra-venta/compra-venta-layout/compra-venta-layout.component';
+import { DashboardCompraVentaComponent } from './features/compra-venta/dashboard/dashboard.component';
+import { SubastasComponent } from './features/compra-venta/subastas/subastas.component';
+import { SubastaDetalleComponent } from './features/compra-venta/subasta-detalle/subasta-detalle.component';
+import { MisOfertasComponent } from './features/compra-venta/mis-ofertas/mis-ofertas.component';
 
 import { LicitacionesLayoutComponent } from './features/licitaciones/licitaciones-layout/licitaciones-layout.component';
 import { LicitacionesHomeComponent } from './features/licitaciones/home/home.component';
 import { NotaPedidoComponent } from './features/licitaciones/nota-pedido/nota-pedido.component';
-import { SubastaPlaceholderComponent } from './features/licitaciones/subasta/subasta.component';
+import { SubastaComponent } from './features/licitaciones/subasta/subasta.component';
+import { SubastaCrearComponent } from './features/licitaciones/subasta/subasta-crear.component';
 import { InformesPlaceholderComponent } from './features/licitaciones/informes/informes.component';
 import { TableroPlaceholderComponent } from './features/licitaciones/tablero/tablero.component';
 
@@ -54,7 +63,7 @@ export const routes: Routes = [
       { path: 'usuarios/pendientes', component: AdminUsuariosComponent, data: { state: 'pendientes', title: 'Aprobaciones' } }, 
       { path: 'usuarios/activos', component: ActiveUsersComponent, data: { state: 'activos', title: 'Usuarios Activos' } },
       { path: 'seguridad', component: SeguridadComponent, data: { state: 'seguridad', title: 'Seguridad' } },
-      { path: '', redirectTo: 'usuarios/pendientes', pathMatch: 'full' }
+      { path: '', component: AdminHomeComponent, data: { state: 'admin-home', title: 'Inicio' } }
     ]
   },
 
@@ -70,6 +79,8 @@ export const routes: Routes = [
       { path: 'objetos-gasto', component: ObjetosGastoComponent, data: { state: 'objetos-gasto', title: 'Objetos del Gasto' } },
       { path: 'catalogo-bienes', component: CatalogoBienesComponent, data: { state: 'catalogo-bienes', title: 'Catálogo de Bienes' } },
       { path: 'categorias-programaticas', component: CategoriasProgramaticasComponent, data: { state: 'categorias-programaticas', title: 'Categorías Programáticas' } },
+      { path: 'monedas', component: MonedasComponent, data: { state: 'monedas', title: 'Monedas' } },
+      { path: 'areas', component: AreasComponent, data: { state: 'areas', title: 'Áreas / Oficinas' } },
     ]
   },
 
@@ -86,13 +97,26 @@ export const routes: Routes = [
   },
 
   {
+    path: 'compra-venta',
+    component: CompraVentaLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: '', component: DashboardCompraVentaComponent, data: { state: 'compra-venta', title: 'Dashboard' } },
+      { path: 'subastas', component: SubastasComponent, data: { state: 'subastas', title: 'Subastas' } },
+      { path: 'subastas/:id', component: SubastaDetalleComponent, data: { state: 'subasta-detalle', title: 'Subasta en Vivo' } },
+      { path: 'mis-ofertas', component: MisOfertasComponent, data: { state: 'mis-ofertas', title: 'Mis Ofertas' } },
+    ]
+  },
+
+  {
     path: 'licitaciones',
     component: LicitacionesLayoutComponent,
     canActivate: [authGuard],
     children: [
       { path: '', component: LicitacionesHomeComponent, data: { state: 'licitaciones-home', title: 'Inicio' } },
       { path: 'nota-pedido', component: NotaPedidoComponent, data: { state: 'nota-pedido', title: 'Nota de Pedido' } },
-      { path: 'subasta', component: SubastaPlaceholderComponent, data: { state: 'subasta', title: 'Subasta' } },
+      { path: 'subasta', component: SubastaComponent, data: { state: 'subasta', title: 'Subasta' } },
+      { path: 'subasta/crear', component: SubastaCrearComponent, data: { state: 'subasta-crear', title: 'Nueva Subasta' } },
       { path: 'informes', component: InformesPlaceholderComponent, data: { state: 'informes', title: 'Informes' } },
       { path: 'tablero', component: TableroPlaceholderComponent, data: { state: 'tablero', title: 'Tablero' } },
     ]

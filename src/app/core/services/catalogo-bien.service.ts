@@ -14,6 +14,14 @@ export interface CatalogoBienRequest {
   idObjetoGasto?: number;
 }
 
+export interface CatalogoBienBulkItem {
+  idItem: number;
+  idItemRel?: number;
+  codigo: string;
+  nItem: string;
+  numeroObjeto: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CatalogoBienService {
   private http = inject(HttpClient);
@@ -35,5 +43,9 @@ export class CatalogoBienService {
 
   delete(id: number): Observable<OperationResponse<boolean>> {
     return this.http.delete<OperationResponse<boolean>>(`${this.apiUrl}/${id}`);
+  }
+
+  bulkUpload(items: CatalogoBienBulkItem[], idOrganizacion?: number) {
+    return this.http.post<OperationResponse<number>>(`${this.apiUrl}/upload`, { items, idOrganizacion });
   }
 }

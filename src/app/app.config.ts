@@ -8,7 +8,7 @@ import {
   Mail, Lock, LogIn, Loader2, Users, ShoppingBag, Calendar, CheckCircle, AlertCircle,
   Play, Plus, Trash2, Building, Building2, ChevronDown, Info, Sun, Moon, PanelLeft, PanelLeftClose,
   List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
-  BarChart, LayoutDashboard, RotateCcw, Copy
+  Banknote, Network, Upload, LayoutDashboard, Clock, Construction, BarChart, RotateCcw, Copy, Send, HelpCircle, SearchX, Inbox
 } from 'lucide-angular/src/icons';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -27,10 +27,10 @@ export const appConfig: ApplicationConfig = {
         ArrowRight, Sparkles, Menu, X, ChevronRight, ShieldCheck, EyeOff, Activity,
         Mail, Lock, LogIn, Loader2, Users, ShoppingBag, User, LogOut, Settings, Shield,
         LayoutTemplate, FileText, UserCircle, KeyRound, Pencil, Search, ArrowLeft,
-        AlertTriangle, Handshake, MousePointerClick, Unlock, UserMinus, ChevronLeft,
+        AlertTriangle, Handshake, MousePointerClick, Unlock, UserMinus, ChevronLeft, Check,
         Calendar, CheckCircle, AlertCircle, Play, Plus, Trash2, Building, Building2, ChevronDown, Info,
         Sun, Moon, PanelLeft, PanelLeftClose, List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
-        BarChart, LayoutDashboard, RotateCcw, Copy, Check
+        Banknote, Network, Upload, LayoutDashboard, Clock, Construction, BarChart, RotateCcw, Copy, Send, HelpCircle, SearchX, Inbox
       }),
       multi: true,
     },

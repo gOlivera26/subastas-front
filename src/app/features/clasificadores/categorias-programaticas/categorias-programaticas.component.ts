@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { CategoriaProgramaticaService, CategoriaProgramaticaRequest } from '../../../core/services/categoria-programatica.service';
+import { CategoriaProgramaticaService, CategoriaProgramaticaRequest, CategoriaProgramaticaBulkItem } from '../../../core/services/categoria-programatica.service';
 import { CategoriaProgramatica, CategoriaTreeItem } from '../../../core/models/categoria-programatica.model';
 import { VigenciaService } from '../../../core/services/vigencia.service';
 import { Vigencia } from '../../../core/models/vigencia.model';
@@ -36,6 +36,11 @@ export class CategoriasProgramaticasComponent implements OnInit {
   success = signal<string | null>(null);
   expandedNodes = signal<Set<number>>(new Set());
   searchTerm = signal('');
+
+  isUploadOpen = signal(false);
+  uploadRows = signal<{ codigo: string; nombre: string; naturaleza: string; nombreUA: string }[]>([]);
+  uploadOrgId = signal<number | undefined>(undefined);
+  isUploading = signal(false);
 
   isModalOpen = signal(false);
   isEditing = signal(false);
@@ -160,4 +165,34 @@ export class CategoriasProgramaticasComponent implements OnInit {
 
   private showSuccess(m: string) { this.success.set(m); setTimeout(() => this.success.set(null), 3000); }
   trackByFn(_index: number, item: CategoriaTreeItem): number { return item.idCatProg; }
+
+  openUpload() { this.uploadRows.set([]); this.uploadOrgId.set(this.auth.isSuperAdmin() ? undefined : undefined); this.isUploadOpen.set(true); }
+
+  async onUploadFileSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const text = await input.files[0].text();
+    const lines = text.split('\n').filter(l => l.trim());
+    const rows: { codigo: string; nombre: string; naturaleza: string; nombreUA: string }[] = [];
+    const first = lines[0] || '';
+    const sep = first.includes(';') ? ';' : first.includes('|') ? '|' : ',';
+    const clean = (v: string) => v.replace(/^["']|["']$/g, '').trim();
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(sep).map(c => clean(c));
+      if (cols.length >= 2 && cols[0]) rows.push({ codigo: cols[0], nombre: cols[1], naturaleza: cols[2] || '', nombreUA: cols[3] || '' });
+    }
+    this.uploadRows.set(rows);
+  }
+
+  async uploadCsv() {
+    this.isUploading.set(true);
+    const items: CategoriaProgramaticaBulkItem[] = this.uploadRows().map(r => ({
+      codigo: Number(r.codigo), nombre: r.nombre, naturaleza: r.naturaleza || undefined, nombreUnidadAdm: r.nombreUA || undefined
+    }));
+    const orgId = this.uploadOrgId();
+    this.service.bulkUpload(items, orgId).subscribe({
+      next: (r: any) => { this.isUploading.set(false); if (r.success) { this.isUploadOpen.set(false); this.showSuccess(`${r.data} categorías importadas.`); this.loadItems(); } else { this.error.set(r.message || 'Error.'); } },
+      error: (e: any) => { this.isUploading.set(false); this.error.set(e.error?.message || 'Error.'); }
+    });
+  }
 }

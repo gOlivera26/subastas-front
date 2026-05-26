@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
 import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
-import { ObjetoGastoService, ObjetoGastoRequest } from '../../../core/services/objeto-gasto.service';
+import { ObjetoGastoService, ObjetoGastoRequest, ObjetoGastoBulkItem } from '../../../core/services/objeto-gasto.service';
 import { ObjetoGasto } from '../../../core/models/objeto-gasto.model';
 import { VigenciaService } from '../../../core/services/vigencia.service';
 import { Vigencia } from '../../../core/models/vigencia.model';
@@ -35,6 +35,11 @@ export class ObjetosGastoComponent implements OnInit {
   editingId = signal<number | null>(null);
   parentList = signal<ObjetoGasto[]>([]);
   form: ObjetoGastoRequest = this.getEmptyForm();
+
+  isUploadOpen = signal(false);
+  uploadRows = signal<{ idObjetoGasto: string; idObjetoGastoRel: string; numeroObjeto: string; nombreObjeto: string; imputaEjecucion: string }[]>([]);
+  uploadOrgId = signal<number | undefined>(undefined);
+  isUploading = signal(false);
 
   cellTemplateDirectives = viewChildren(CellTemplateDirective);
   cellTemplatesMap = computed(() => {
@@ -82,7 +87,7 @@ export class ObjetosGastoComponent implements OnInit {
     this.isLoading.set(true);
     this.service.getAll(id).subscribe({
       next: (res: any) => { this.isLoading.set(false); if (res.success && res.data) { this.items.set(res.data); this.parentList.set(res.data); } else this.items.set([]); },
-      error: () => { this.isLoading.set(false); this.items.set([]); this.errorMessage.set('Error al cargar.'); }
+      error: (err: any) => { this.isLoading.set(false); this.items.set([]); this.errorMessage.set(err.error?.message || err.message || 'Error al cargar.'); }
     });
   }
 
@@ -115,4 +120,33 @@ export class ObjetosGastoComponent implements OnInit {
   }
 
   private showSuccess(msg: string) { this.successMessage.set(msg); setTimeout(() => this.successMessage.set(null), 3000); }
+
+  openUpload() { this.uploadRows.set([]); this.isUploadOpen.set(true); }
+
+  async onUploadFileSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const text = await input.files[0].text();
+    const lines = text.split('\n').filter(l => l.trim());
+    const rows: { idObjetoGasto: string; idObjetoGastoRel: string; numeroObjeto: string; nombreObjeto: string; imputaEjecucion: string }[] = [];
+    const first = lines[0] || '';
+    const sep = first.includes(';') ? ';' : first.includes('|') ? '|' : ',';
+    const clean = (v: string) => v.replace(/["']/g, '').trim();
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(sep).map(c => clean(c));
+      if (cols.length >= 3 && cols[2]) rows.push({ idObjetoGasto: cols[0] || '', idObjetoGastoRel: cols[1] || '', numeroObjeto: cols[2], nombreObjeto: cols[3] || '', imputaEjecucion: cols[4] || '' });
+    }
+    this.uploadRows.set(rows);
+  }
+
+  async uploadCsv() {
+    this.isUploading.set(true);
+    const items: ObjetoGastoBulkItem[] = this.uploadRows().map(r => ({
+      idObjetoGasto: Number(r.idObjetoGasto) || 0, idObjetoGastoRel: r.idObjetoGastoRel ? Number(r.idObjetoGastoRel) : undefined, numeroObjeto: r.numeroObjeto, nombreObjeto: r.nombreObjeto, imputaEjecucion: r.imputaEjecucion === '1' || r.imputaEjecucion.toLowerCase() === 'true' || r.imputaEjecucion.toLowerCase() === 'si'
+    }));
+    this.service.bulkUpload(items, this.uploadOrgId()).subscribe({
+      next: (r: any) => { this.isUploading.set(false); if (r.success) { this.isUploadOpen.set(false); this.showSuccess(`${r.data} objetos de gasto importados.`); this.loadItems(); } else { this.errorMessage.set(r.message || 'Error.'); } },
+      error: (e: any) => { this.isUploading.set(false); this.errorMessage.set(e.error?.message || 'Error.'); }
+    });
+  }
 }

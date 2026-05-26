@@ -1,7 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
+import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
 import { RoleService, Role, AppPage, ModuloConPaginas, RoleModule } from '../../../core/services/role.service';
 import { UserService, ActiveUser } from '../../../core/services/user.service';
 import { OrganizationService, Organization } from '../../../core/services/organization.service';
@@ -9,7 +11,7 @@ import { OrganizationService, Organization } from '../../../core/services/organi
 @Component({
   selector: 'app-seguridad',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, NgClass],
+  imports: [CommonModule, FormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective],
   templateUrl: './seguridad.component.html',
 })
 export class SeguridadComponent implements OnInit {
@@ -39,6 +41,19 @@ export class SeguridadComponent implements OnInit {
   organizations = signal<Organization[]>([]);
   isLinkModalOpen = signal(false);
   linkForm = { idUsuario: '', idOrganizacion: 0, esPrincipal: true };
+
+  cellTemplateDirectives = viewChildren(CellTemplateDirective);
+  cellTemplatesMap = computed(() => {
+    const map: Record<string, TemplateRef<any>> = {};
+    this.cellTemplateDirectives().forEach(d => { map[d.cellKey] = d.templateRef; });
+    return map;
+  });
+
+  columns: TableColumn[] = [
+    { key: 'nombre', label: 'Nombre' },
+    { key: 'descripcion', label: 'Descripción' },
+    { key: 'acciones', label: 'Acciones', align: 'right', width: '140px' },
+  ];
   isLinking = signal(false);
 
   ngOnInit() {
