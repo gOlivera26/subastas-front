@@ -4,6 +4,7 @@
     <div class="flex items-center gap-3 flex-wrap">
       <select class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)]" [ngModel]="selectedVigenciaId()" (change)="onVigenciaChange($event)">@for (v of vigencias(); track v.idVigencia) {<option [value]="v.idVigencia">Ejercicio {{ v.ejercicio }} {{ v.activoEjecucion ? '(Activo)' : '' }}</option>}</select>
       <button (click)="openCreateModal()" [disabled]="!selectedVigenciaId()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] disabled:opacity-50"><lucide-icon name="plus" [size]="16"></lucide-icon><span class="hidden sm:inline">Nuevo</span></button>
+      <button (click)="openUpload()" [disabled]="!selectedVigenciaId()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] disabled:opacity-50"><lucide-icon name="upload" [size]="16"></lucide-icon><span class="hidden sm:inline">Importar CSV</span></button>
     </div>
   </div>
 
@@ -106,3 +107,35 @@
   <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Naturaleza</label><select [(ngModel)]="form.naturaleza" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option value="">Ninguna</option><option>AC</option><option>CO</option><option>PR</option><option>SP</option><option>OB</option><option>IN</option></select></div>
 </div></div>
 <div class="flex justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4"><button (click)="closeModal()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button><button (click)="save()" [disabled]="isSaving()" class="rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black disabled:opacity-50">@if (isSaving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Guardar</button></div></div></div>}
+
+@if (isUploadOpen()) {<div class="fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isUploadOpen.set(false)"></div><div class="relative w-full max-w-3xl rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[85vh]"><div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4 shrink-0"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">Importar Categorías desde CSV</h3><button (click)="isUploadOpen.set(false)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>
+<div class="p-6 space-y-4">
+  @if (uploadRows().length === 0) {
+    <div class="rounded-xl border-2 border-dashed border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 p-10 text-center cursor-pointer" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="$event.preventDefault(); fileInput.files=$event.dataTransfer?.files||null; onUploadFileSelected($event)">
+      <input type="file" accept=".csv" (change)="onUploadFileSelected($event)" class="hidden" #fileInput />
+      <lucide-icon name="file-text" [size]="36" class="mb-3 text-[var(--color-storm-cloud)]"></lucide-icon>
+      <p class="text-[14px] text-[var(--color-porcelain)]">Arrastrá un CSV o hacé clic para seleccionar</p>
+      <p class="mt-1 text-[12px] text-[var(--color-storm-cloud)]">Formato: <code class="text-[var(--color-cyan-spark)]">codigo; nombre; naturaleza; nombre_unidad_adm</code></p>
+      <p class="text-[11px] text-[var(--color-fog-grey)]">(soporta <code>;</code>, <code>,</code> o <code>|</code>, con o sin comillas)</p>
+    </div>
+  } @else {
+    @if (auth.isSuperAdmin()) {<div class="w-64"><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Organización</label><select [(ngModel)]="uploadOrgId" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option [ngValue]="undefined">Global</option>@for (o of organizaciones(); track o.idOrganizacion) {<option [ngValue]="o.idOrganizacion">{{ o.nombre }}</option>}</select></div>}
+    <p class="text-[12px] text-[var(--color-storm-cloud)]">{{ uploadRows().length }} registros. La UA se busca automáticamente por nombre, vigencia activa por defecto.</p>
+    <div class="overflow-y-auto max-h-[50vh] rounded-xl border border-[var(--color-charcoal-grey)]">
+      <table class="w-full text-left text-[14px]">
+        <thead class="sticky top-0 bg-[var(--color-deep-slate)] border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)]"><tr><th class="px-4 py-3 w-20">Código</th><th class="px-4 py-3">Nombre</th><th class="px-4 py-3 w-16">Nat.</th><th class="px-4 py-3">UA (nombre)</th></tr></thead>
+        <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+          @for (row of uploadRows(); track $index) {
+            <tr class="hover:bg-[var(--color-deep-slate)]/30">
+              <td class="px-4 py-2.5 font-mono text-[13px] text-[var(--color-fog-grey)]">{{ row.codigo }}</td>
+              <td class="px-4 py-2.5 text-[var(--color-porcelain)]">{{ row.nombre }}</td>
+              <td class="px-4 py-2.5"><span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">{{ row.naturaleza || '-' }}</span></td>
+              <td class="px-4 py-2.5 text-[13px]" [class.text-[var(--color-storm-cloud)]]="row.nombreUA" [class.text-red-400]="!row.nombreUA">{{ row.nombreUA || 'Sin UA' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="flex justify-end gap-3"><button (click)="isUploadOpen.set(false)" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button><button (click)="uploadCsv()" [disabled]="isUploading()" class="rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black disabled:opacity-50">@if (isUploading()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Importar {{ uploadRows().length }} categorías</button></div>
+  }
+</div></div></div>}

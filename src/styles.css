@@ -3,29 +3,37 @@
 @tailwind utilities;
 
 @layer base {
-  /* MODO CLARO - HOMENAJE A OWEN CRIPPA & AVIACIÓN NAVAL */
+  /* MODO CLARO - BANDERA ARGENTINA — OWEN CRIPPA */
   :root {
-    --color-pitch-black: #F8FAFC;
+    /* Fondos: blancos con alma celeste */
+    --color-pitch-black: #F4F7FC;
     --color-graphite: #FFFFFF;
-    --color-deep-slate: #E2E8F0;
-    --color-charcoal-grey: #CBD5E1;
-    --color-muted-ash: #94A3B8;
-    --color-gunmetal: #64748B;
-    --color-porcelain: #0F172A;
-    --color-light-steel: #334155;
-    --color-storm-cloud: #475569;
-    --color-fog-grey: #64748B;
-    --color-alabaster: #1E293B;
-    --color-neon-lime: #FFCE00; /* Sol de Mayo */
-    --color-aether-blue: #1B365D; /* Azul Aviación Naval */
-    --color-cyan-spark: #74ACDF; /* Celeste Bandera */
+    --color-deep-slate: #E3EDF8;
+    --color-charcoal-grey: #C9DBF0;
+    --color-muted-ash: #9CB5D4;
+    --color-gunmetal: #6282A8;
+
+    /* Tipografía: azul naval argentino */
+    --color-porcelain: #07152E;
+    --color-light-steel: #122D56;
+    --color-storm-cloud: #2C4B78;
+    --color-fog-grey: #53709A;
+    --color-alabaster: #0A1C38;
+
+    /* Acentos: símbolos patrios  */
+    --color-neon-lime: #DAA200;      /* Sol de Mayo  */
+    --color-aether-blue: #0F2B5C;    /* Azul Naval   */
+    --color-cyan-spark: #2C7CD0;     /* Celeste Bandera */
+    --color-forest-green: #1A7A3A;   /* Verde Malvinas */
+    --color-emerald: #059669;
+    --color-warning-red: #C53030;
 
     --font-inter-variable: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --radius-pill: 9999px;
     --radius-buttons: 6px;
-    --shadow-subtle-2: rgba(0, 0, 0, 0.1) 0px 4px 12px 0px;
-    --shadow-md: rgba(0, 0, 0, 0.05) 0px 2px 4px 0px;
-    --shadow-sm: rgba(0, 0, 0, 0.05) 0px 2px 4px 0px;
+    --shadow-subtle-2: rgba(15, 43, 92, 0.07) 0px 4px 18px 0px;
+    --shadow-md: rgba(15, 43, 92, 0.04) 0px 2px 4px 0px;
+    --shadow-sm: rgba(15, 43, 92, 0.03) 0px 1px 3px 0px;
   }
 
   /* MODO OSCURO - DISEÑO ORIGINAL */

@@ -14,6 +14,14 @@ export interface ObjetoGastoRequest {
   imputaEjecucion?: boolean;
 }
 
+export interface ObjetoGastoBulkItem {
+  idObjetoGasto: number;
+  idObjetoGastoRel?: number;
+  numeroObjeto: string;
+  nombreObjeto: string;
+  imputaEjecucion?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ObjetoGastoService {
   private http = inject(HttpClient);
@@ -35,5 +43,9 @@ export class ObjetoGastoService {
 
   delete(id: number): Observable<OperationResponse<boolean>> {
     return this.http.delete<OperationResponse<boolean>>(`${this.apiUrl}/${id}`);
+  }
+
+  bulkUpload(items: ObjetoGastoBulkItem[], idOrganizacion?: number) {
+    return this.http.post<OperationResponse<number>>(`${this.apiUrl}/upload`, { items, idOrganizacion });
   }
 }

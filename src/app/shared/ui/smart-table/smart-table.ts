@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Output, TemplateRef, computed, input, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
 import { TableColumn, TableAction } from './table.models';
 
 @Component({
   selector: 'app-smart-table',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, LoadingSpinnerComponent],
   templateUrl: './smart-table.html',
 })
 export class SmartTableComponent {

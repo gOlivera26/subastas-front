@@ -10,6 +10,13 @@ export interface CategoriaProgramaticaRequest {
   idVigencia: number; codigo: number; nombre: string; naturaleza?: string;
 }
 
+export interface CategoriaProgramaticaBulkItem {
+  codigo: number;
+  nombre: string;
+  naturaleza?: string;
+  nombreUnidadAdm?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CategoriaProgramaticaService {
   private http = inject(HttpClient);
@@ -21,4 +28,5 @@ export class CategoriaProgramaticaService {
   create(d: CategoriaProgramaticaRequest) { return this.http.post<OperationResponse<CategoriaProgramatica>>(this.apiUrl, d); }
   update(id: number, d: CategoriaProgramaticaRequest) { return this.http.put<OperationResponse<CategoriaProgramatica>>(`${this.apiUrl}/${id}`, d); }
   delete(id: number) { return this.http.delete<OperationResponse<boolean>>(`${this.apiUrl}/${id}`); }
+  bulkUpload(items: CategoriaProgramaticaBulkItem[], idOrganizacion?: number) { return this.http.post<OperationResponse<number>>(`${this.apiUrl}/upload`, { items, idOrganizacion }); }
 }

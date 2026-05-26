@@ -1,0 +1,20 @@
+<div class="mx-auto max-w-[1400px]">
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div><h1 class="text-[24px] font-[590] text-[var(--color-porcelain)]">Cotizaciones</h1><p class="text-[14px] text-[var(--color-storm-cloud)]">Administrá las subastas y procesos de compra.</p></div>
+    <div class="flex items-center gap-3">
+      <select class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [ngModel]="selectedVigenciaId()" (change)="onVigenciaChange($any($event.target).value)">@for (v of vigencias(); track v.idVigencia) {<option [value]="v.idVigencia">Ejercicio {{ v.ejercicio }} {{ v.activoEjecucion ? '(Activo)' : '' }}</option>}</select>
+      <a routerLink="/config-subastas/nueva" class="flex items-center gap-2 rounded-xl bg-[var(--color-neon-lime)] px-4 py-2.5 text-[14px] font-[590] text-black hover:brightness-110"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva Subasta</a>
+    </div>
+  </div>
+
+  <ng-template cellKey="estado" let-row>
+    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-[590]" [class.bg-emerald-500/10]="row.estado==='Publicada'" [class.text-emerald-400]="row.estado==='Publicada'" [class.bg-[var(--color-cyan-spark)]/10]="row.estado==='Programada'" [class.text-[var(--color-cyan-spark)]]="row.estado==='Programada'">{{ row.estado }}</span>
+  </ng-template>
+  <ng-template cellKey="acciones" let-row>
+    <div class="flex justify-end gap-1">
+      <a [routerLink]="['/config-subastas', row.idCotizacion]" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></a>
+    </div>
+  </ng-template>
+
+  <app-data-table [columns]="columns" [data]="items()" [totalRows]="items().length" [loading]="loading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" emptyMessage="No hay cotizaciones" emptySubMessage="Creá la primera subasta."></app-data-table>
+</div>

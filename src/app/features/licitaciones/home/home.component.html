@@ -1,49 +1,72 @@
-<div class="mx-auto max-w-4xl py-12 text-center">
-  <div class="mb-8 inline-flex size-16 items-center justify-center rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]">
-    <lucide-icon name="gavel" [size]="28" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+<div class="mx-auto max-w-[1500px]">
+  <div class="mb-6">
+    <h1 class="text-[24px] font-[590] text-[var(--color-porcelain)]">Subasta / Licitación</h1>
+    <p class="text-[14px] text-[var(--color-storm-cloud)]">Administración de procesos de compra y subastas electrónicas.</p>
   </div>
-  <h1 class="mb-3 text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)] leading-tight">
-    Sistema de Subastas Electrónicas Inversas, Directas y Licitaciones
-  </h1>
-  <p class="text-[15px] text-[var(--color-storm-cloud)]">
-    Gestión integral de procesos de compra, provisiones y subastas.
-  </p>
 
-  <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <a routerLink="/licitaciones/nota-pedido"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
-        <lucide-icon name="file-text" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+  <!-- FILTROS -->
+  <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+      <div>
+        <label class="mb-1 block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)]">Área</label>
+        <select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option value="">Consultar por Área</option></select>
       </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Nota de Pedido</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de reservas y notas de pedido.</p>
-    </a>
-
-    <a routerLink="/licitaciones/subasta"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
-        <lucide-icon name="gavel" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+      <div>
+        <label class="mb-1 block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)]">Ejercicio</label>
+        <select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="filters.idVigencia">@for (v of vigencias(); track v.idVigencia) {<option [value]="v.idVigencia">{{ v.ejercicio }}</option>}</select>
       </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Subasta</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Configuración y ejecución de subastas.</p>
-    </a>
-
-    <a routerLink="/licitaciones/informes"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
-        <lucide-icon name="bar-chart" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+      <div>
+        <label class="mb-1 block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)]">Estado</label>
+        <select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="filters.estado"><option [value]="null">Consultar por estado</option><option [value]="4">Generado</option><option [value]="39">Publicado</option><option [value]="40">Finalizado</option><option [value]="20">Anulado</option></select>
       </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Informes</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Reportes y análisis de procesos.</p>
-    </a>
-
-    <a routerLink="/licitaciones/tablero"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
-        <lucide-icon name="layout-dashboard" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+      <div>
+        <label class="mb-1 block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)]">Nro. de Subasta</label>
+        <input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="filters.nroSubasta" />
       </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Tablero</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Vista general y métricas clave.</p>
-    </a>
+      <div>
+        <label class="mb-1 block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)]">Nro. de Expte</label>
+        <input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="filters.nroExpte" />
+      </div>
+      <div>
+        <label class="mb-1 block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)]">Fecha de Inicio</label>
+        <input type="date" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" />
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <a routerLink="/licitaciones/subasta" class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-neon-lime)] px-5 py-2.5 text-[14px] font-[590] text-black hover:brightness-110"><lucide-icon name="plus" [size]="16"></lucide-icon>Nuevo</a>
+      <button (click)="buscar()" class="rounded-xl bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] font-[590] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">Ver Todas las subastas</button>
+      <button class="rounded-xl bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] font-[590] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">Ver Mí Subastas</button>
+    </div>
   </div>
+
+  <!-- GRILLA -->
+  <ng-template cellKey="estado" let-row>
+    @if (row.estado === 'Publicada') {<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[11px] font-[590]">{{ row.estado }}</span>}
+    @else if (row.estado === 'Generado') {<span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[11px] font-[590]">{{ row.estado }}</span>}
+    @else if (row.estado === 'Finalizada') {<span class="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 text-[11px] font-[590]">{{ row.estado }}</span>}
+    @else {<span class="px-2.5 py-0.5 rounded-full bg-[var(--color-charcoal-grey)]/30 text-[var(--color-storm-cloud)] text-[11px] font-[590]">{{ row.estado || '-' }}</span>}
+  </ng-template>
+  <ng-template cellKey="fechaInicio" let-row>
+    <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.fechaInicio | date:'dd/MM/yyyy HH:mm' }}</span>
+  </ng-template>
+  <ng-template cellKey="fechaFin" let-row>
+    <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.fechaFin | date:'dd/MM/yyyy HH:mm' }}</span>
+  </ng-template>
+  <ng-template cellKey="ofertas" let-row>
+    <span class="font-mono text-[13px] text-[var(--color-porcelain)]">-</span>
+  </ng-template>
+  <ng-template cellKey="acciones" let-row>
+    <div class="flex items-center justify-end gap-1">
+      <button title="Ver Detalle" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="eye" [size]="16"></lucide-icon></button>
+      <button title="Especificaciones" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-neon-lime)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
+      <button title="Proveedores" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="users" [size]="16"></lucide-icon></button>
+      <button title="Pliegos" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
+      <button title="Enviar Invitaciones" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="send" [size]="16"></lucide-icon></button>
+      <button title="Preguntas" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="help-circle" [size]="16"></lucide-icon></button>
+      <button title="Anular" class="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+    </div>
+  </ng-template>
+
+  <app-data-table [columns]="columns" [data]="items()" [totalRows]="items().length" [loading]="loading()" [pageSize]="50" [cellTemplates]="cellTemplatesMap()" emptyMessage="No se encontraron subastas" emptySubMessage="Utilizá los filtros o creá una nueva."></app-data-table>
+  @if (items().length > 0) {<p class="mt-3 text-[12px] text-[var(--color-storm-cloud)]">Se muestran los primeros 50 resultados. Refiná la búsqueda para resultados más precisos.</p>}
 </div>

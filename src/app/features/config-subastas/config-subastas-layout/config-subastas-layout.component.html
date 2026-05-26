@@ -1,0 +1,30 @@
+<div class="flex h-screen bg-[var(--color-pitch-black)] overflow-hidden">
+  @if (isSidebarOpen()) {<div (click)="isSidebarOpen.set(false)" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"></div>}
+  <aside [ngClass]="isSidebarOpen() ? 'w-72 translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[68px]'" class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/95 backdrop-blur-xl overflow-hidden transition-[width] duration-500 lg:static lg:translate-x-0">
+    <div class="flex h-16 shrink-0 items-center px-4 border-b border-[var(--color-charcoal-grey)]" [ngClass]="isSidebarOpen() ? 'justify-between' : 'justify-center'">
+      <a routerLink="/config-subastas" class="flex items-center gap-3 min-w-0">
+        <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]"><lucide-icon name="settings" [size]="18"></lucide-icon></div>
+        <span class="text-[15px] font-[590] text-[var(--color-porcelain)] truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()">Config. Subastas</span>
+      </a>
+      <button (click)="isSidebarOpen.set(false)" class="lg:hidden text-[var(--color-storm-cloud)]"><lucide-icon name="x" [size]="20"></lucide-icon></button>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+      <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Subastas</p>
+      <a routerLink="/config-subastas" routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-neon-lime)]" [routerLinkActiveOptions]="{exact:true}" (click)="closeSidebarOnMobile()" class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"><lucide-icon name="list" [size]="18" class="shrink-0"></lucide-icon><span [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Cotizaciones</span></a>
+      <a routerLink="/config-subastas/nueva" routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)]" (click)="closeSidebarOnMobile()" class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"><lucide-icon name="plus" [size]="18" class="shrink-0"></lucide-icon><span [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Nueva Subasta</span></a>
+      <div class="my-6 border-t border-[var(--color-charcoal-grey)] mx-3"></div>
+      <a routerLink="/modulos" class="flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="arrow-left" [size]="18" class="shrink-0"></lucide-icon><span [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Volver al Panel</span></a>
+    </nav>
+  </aside>
+  <div class="flex flex-1 flex-col overflow-hidden">
+    <header class="flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 z-20">
+      <div class="flex items-center gap-2">
+        <button (click)="toggleSidebar()" class="lg:hidden p-2 rounded-lg text-[var(--color-storm-cloud)]"><lucide-icon name="menu" [size]="24"></lucide-icon></button>
+        <button (click)="toggleSidebar()" class="hidden lg:flex p-2 rounded-lg text-[var(--color-storm-cloud)]"><lucide-icon [name]="isSidebarOpen() ? 'panel-left-close' : 'panel-left'" [size]="20"></lucide-icon></button>
+      </div>
+      <span class="text-[13px] font-[510] text-[var(--color-storm-cloud)]">Configuración de Subastas</span>
+    </header>
+    <main class="flex-1 overflow-y-auto p-6 lg:p-8"><router-outlet></router-outlet></main>
+    <app-footer></app-footer>
+  </div>
+</div>

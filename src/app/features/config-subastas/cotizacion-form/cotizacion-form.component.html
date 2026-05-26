@@ -1,0 +1,69 @@
+<div class="mx-auto max-w-[1400px]">
+  <div class="mb-8 flex items-center gap-4">
+    <a routerLink="/config-subastas" class="p-2 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="arrow-left" [size]="20"></lucide-icon></a>
+    <div><h1 class="text-[24px] font-[590] text-[var(--color-porcelain)]">Nueva Subasta</h1><p class="text-[14px] text-[var(--color-storm-cloud)]">Configurá los parámetros de la subasta en base a la provisión.</p></div>
+  </div>
+
+  @if (success()) {
+    <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-12 text-center mb-8">
+      <lucide-icon name="check-circle" [size]="48" class="mb-4 text-emerald-400"></lucide-icon>
+      <h2 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Subasta creada exitosamente</h2>
+      <a routerLink="/config-subastas" class="text-[var(--color-cyan-spark)] hover:underline text-[14px]">Volver a la lista</a>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- COLUMNA IZQ: Parámetros -->
+      <div class="lg:col-span-1 space-y-6">
+        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6">
+          <h3 class="text-[14px] font-[590] text-[var(--color-porcelain)] mb-4 flex items-center gap-2"><lucide-icon name="settings" [size]="16"></lucide-icon>Parámetros</h3>
+          <div class="space-y-4">
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Vigencia</label><select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [ngModel]="form.idVigencia" (change)="onVigenciaChange($any($event.target).value)">@for (v of vigencias(); track v.idVigencia) {<option [value]="v.idVigencia">Ejercicio {{ v.ejercicio }} {{ v.activoEjecucion ? '(Activo)' : '' }}</option>}</select></div>
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Tipo</label><select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="form.idTipoContratacion"><option [value]="7">Subasta Inversa</option><option [value]="9">Subasta Directa</option></select></div>
+            @if (auth.isSuperAdmin()) {<div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Organización</label><select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="form.idOrganizacion"><option [ngValue]="undefined">Global</option>@for (o of organizaciones(); track o.idOrganizacion) {<option [ngValue]="o.idOrganizacion">{{ o.nombre }}</option>}</select></div>}
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Observación</label><textarea class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" rows="2" [(ngModel)]="form.observacion"></textarea></div>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6">
+          <h3 class="text-[14px] font-[590] text-[var(--color-porcelain)] mb-4 flex items-center gap-2"><lucide-icon name="calendar" [size]="16"></lucide-icon>Fechas</h3>
+          <div class="space-y-4">
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Inicio Subasta</label><input type="datetime-local" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="form.especificacion.fechaInicioSubasta" /></div>
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Fin Subasta</label><input type="datetime-local" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="form.especificacion.fechaFinalizacionSubasta" /></div>
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Límite Consultas</label><input type="datetime-local" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="form.especificacion.fechaLimiteConsultas" /></div>
+            <div><label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Margen Mejora (%)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" [(ngModel)]="form.especificacion.margenMejora" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA: Ítems de la Reserva -->
+      <div class="lg:col-span-2">
+        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6">
+          <h3 class="text-[14px] font-[590] text-[var(--color-porcelain)] mb-4 flex items-center gap-2"><lucide-icon name="package" [size]="16"></lucide-icon>Ítems de la Reserva (Provisión) <span class="text-[var(--color-neon-lime)] text-[12px]">Seleccionados: {{ selectedReservas().size }}</span></h3>
+          @if (reservas().length === 0) {
+            <p class="text-[14px] text-[var(--color-storm-cloud)] py-8 text-center">Seleccioná una vigencia para cargar las reservas disponibles.</p>
+          } @else {
+            <div class="overflow-y-auto max-h-[60vh] rounded-xl border border-[var(--color-charcoal-grey)]">
+              <table class="w-full text-left text-[14px]">
+                <thead class="sticky top-0 bg-[var(--color-deep-slate)] text-[11px] uppercase text-[var(--color-storm-cloud)]"><tr><th class="px-4 py-3 w-12"></th><th class="px-4 py-3">Nro Reserva</th><th class="px-4 py-3">Ítem</th><th class="px-4 py-3 w-24">Cant.</th><th class="px-4 py-3 w-32">Importe</th></tr></thead>
+                <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+                  @for (r of reservas(); track r.idReserva || r.id) {
+                    <tr class="hover:bg-[var(--color-deep-slate)]/30 cursor-pointer" [class.bg-[var(--color-cyan-spark)]/5]="selectedReservas().has(r.idReserva || r.id)" (click)="toggleReserva(r.idReserva || r.id)">
+                      <td class="px-4 py-2.5"><div class="size-5 rounded border-2 flex items-center justify-center" [class.border-[var(--color-cyan-spark)]]="selectedReservas().has(r.idReserva || r.id)" [class.bg-[var(--color-cyan-spark)]]="selectedReservas().has(r.idReserva || r.id)" [class.border-[var(--color-charcoal-grey)]]="!selectedReservas().has(r.idReserva || r.id)">@if (selectedReservas().has(r.idReserva || r.id)) {<lucide-icon name="check" [size]="14" class="text-black"></lucide-icon>}</div></td>
+                      <td class="px-4 py-2.5 font-mono text-[var(--color-fog-grey)] text-[13px]">{{ r.nroReserva || '#' + (r.idReserva || r.id) }}</td>
+                      <td class="px-4 py-2.5 text-[var(--color-porcelain)]">{{ r.nombreItem || r.nItem || r.nombre || '-' }}</td>
+                      <td class="px-4 py-2.5 text-[var(--color-storm-cloud)]">{{ r.cantidad || '-' }}</td>
+                      <td class="px-4 py-2.5 text-[var(--color-storm-cloud)]">{{ r.importe || r.importeBase || '-' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
+          <a routerLink="/config-subastas" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] text-[var(--color-storm-cloud)]">Cancelar</a>
+          <button (click)="save()" [disabled]="saving() || form.detalles.length === 0" class="rounded-xl bg-[var(--color-neon-lime)] px-6 py-2.5 text-[14px] font-[590] text-black disabled:opacity-50">@if (saving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Crear Subasta</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

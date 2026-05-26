@@ -1,0 +1,27 @@
+<div class="mx-auto max-w-5xl">
+  <div class="mb-8 flex items-center justify-between">
+    <div><h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Monedas</h1><p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Catálogo de monedas disponibles para cotizaciones y reservas.</p></div>
+    <button (click)="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)]"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva Moneda</button>
+  </div>
+  @if (successMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] text-emerald-400"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
+  @if (errorMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] text-red-400"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
+
+  <ng-template cellKey="activo" let-row>
+    @if (row.activo) {<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[12px] font-[590] text-emerald-400"><span class="size-1.5 rounded-full bg-emerald-400"></span>Activo</span>}
+    @else {<span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-charcoal-grey)]/30 px-2.5 py-0.5 text-[12px] font-[590] text-[var(--color-storm-cloud)]">Inactivo</span>}
+  </ng-template>
+  <ng-template cellKey="acciones" let-row>
+    <div class="flex items-center justify-end gap-1">
+      <button (click)="openEditModal(row)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
+      @if (row.activo) {<button (click)="confirmDelete(row)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-red-400"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>}
+    </div>
+  </ng-template>
+  <app-data-table [columns]="columns" [data]="items()" [totalRows]="items().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" emptyMessage="No hay monedas registradas" emptySubMessage="Creá la primera para comenzar."></app-data-table>
+</div>
+@if (isModalOpen()) {<div class="fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div><div class="relative w-full max-w-lg rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in"><div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar' : 'Nueva' }} Moneda</h3><button (click)="closeModal()" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>
+<div class="space-y-4 px-6 py-6">
+  <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Símbolo <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.simbolo" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"/></div>
+  <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nombre <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.nombre" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"/></div>
+  <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Descripción</label><input type="text" [(ngModel)]="form.descripcion" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"/></div>
+</div>
+<div class="flex justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4"><button (click)="closeModal()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button><button (click)="save()" [disabled]="isSaving()" class="rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black disabled:opacity-50">@if (isSaving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Guardar</button></div></div></div>}

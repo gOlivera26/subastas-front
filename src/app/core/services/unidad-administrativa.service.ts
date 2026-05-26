@@ -25,6 +25,10 @@ export class UnidadAdministrativaService {
     return this.http.get<OperationResponse<UnidadAdministrativa[]>>(`${this.apiUrl}/vigencia/${idVigencia}`);
   }
 
+  getAll(): Observable<OperationResponse<UnidadAdministrativa[]>> {
+    return this.http.get<OperationResponse<UnidadAdministrativa[]>>(this.apiUrl);
+  }
+
   getById(id: number): Observable<OperationResponse<UnidadAdministrativa>> {
     return this.http.get<OperationResponse<UnidadAdministrativa>>(`${this.apiUrl}/${id}`);
   }

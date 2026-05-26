@@ -1,181 +1,72 @@
 <div class="animate-fade-in">
-
     <div class="mb-4 relative w-full md:w-80">
-        <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-            <lucide-icon name="search" class="w-4 h-4 text-gray-400"></lucide-icon>
-        </div>
-        <input
-            type="text"
-            placeholder="Buscar en la tabla..."
-            (input)="onSearchInput($event)"
-            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-white/10 rounded-lg bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all placeholder:text-gray-500"
-        >
+        <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none"><lucide-icon name="search" [size]="16" class="text-[var(--color-storm-cloud)]"></lucide-icon></div>
+        <input type="text" placeholder="Buscar en la tabla..." (input)="onSearchInput($event)"
+            class="w-full pl-10 pr-4 py-2.5 border border-[var(--color-charcoal-grey)] rounded-xl bg-[var(--color-pitch-black)] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none text-[14px] transition-all placeholder:text-[var(--color-fog-grey)]">
     </div>
 
-    <div class="relative bg-white dark:bg-[#161b22] rounded-xl shadow-sm border border-gray-200 dark:border-white/10 flex flex-col mb-0">
+    <div class="relative bg-[var(--color-graphite)] rounded-2xl shadow-sm border border-[var(--color-charcoal-grey)] flex flex-col mb-0">
         @if (loading()) {
-            <div class="absolute inset-0 z-50 bg-white/60 dark:bg-[#161b22]/80 backdrop-blur-[2px] flex items-center justify-center transition-all rounded-xl">
-                <div class="flex flex-col items-center gap-3">
-                    <lucide-icon name="loader-2" class="w-8 h-8 text-brand-600 animate-spin"></lucide-icon>
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest animate-pulse">Cargando...</span>
-                </div>
+            <div class="absolute inset-0 z-50 bg-[var(--color-graphite)]/80 backdrop-blur-[2px] flex items-center justify-center transition-all rounded-2xl">
+                <app-loading-spinner label="Cargando..."></app-loading-spinner>
             </div>
         }
-
         <div class="w-full overflow-x-auto overflow-y-hidden">
             <table class="min-w-full whitespace-nowrap text-left">
-                <thead class="bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                <thead class="bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)]">
                     <tr>
                         @for (col of columns(); track col.key) {
-                            <th (click)="handleSort(col)"
-                                class="px-6 py-3 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 select-none"
-                                [class.cursor-pointer]="col.sortable"
-                                [class.hover:text-gray-700]="col.sortable"
-                                [class.dark:hover:text-gray-200]="col.sortable">
-
-                                <div class="flex items-center gap-1">
-                                    {{ col.header }}
-                                    @if (sortColumn() === col.key) {
-                                        <lucide-icon [name]="sortDirection() === 'asc' ? 'chevron-up' : 'chevron-down'" class="w-3 h-3"></lucide-icon>
-                                    }
+                            <th (click)="handleSort(col)" class="px-6 py-3 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] select-none" [class.cursor-pointer]="col.sortable" [class.hover:text-[var(--color-porcelain)]]="col.sortable">
+                                <div class="flex items-center gap-1">{{ col.header }}
+                                    @if (sortColumn() === col.key) {<lucide-icon [name]="sortDirection() === 'asc' ? 'chevron-up' : 'chevron-down'" [size]="12"></lucide-icon>}
                                 </div>
                             </th>
                         }
-
-                        @if (actions().length > 0) {
-                            <th class="px-6 py-3 text-right text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Acciones</th>
-                        }
-
-                        @if (selectable()) {
-                            <th class="px-6 py-3 text-center w-10">
-                                <input type="checkbox"
-                                    [checked]="isAllSelected()"
-                                    (change)="toggleAll()"
-                                    class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer h-4 w-4">
-                            </th>
-                        }
+                        @if (actions().length > 0) {<th class="px-6 py-3 text-right text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Acciones</th>}
+                        @if (selectable()) {<th class="px-6 py-3 text-center w-10"><input type="checkbox" [checked]="isAllSelected()" (change)="toggleAll()" class="rounded border-[var(--color-charcoal-grey)]"></th>}
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-white/10 text-sm">
-
+                <tbody class="divide-y divide-[var(--color-charcoal-grey)] text-[14px]">
                     @for (row of paginatedData(); track $index) {
-                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                            [class.bg-blue-50]="isSelected(row)"
-                            [class.dark:bg-blue-900/10]="isSelected(row)">
-
+                        <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors" [class.bg-[var(--color-cyan-spark)]/5]="isSelected(row)">
                             @for (col of columns(); track col.key) {
-                                <td class="px-6 py-4 text-gray-900 dark:text-white" [ngSwitch]="col.type">
-
-                                    <ng-container *ngSwitchCase="'custom'">
-                                        <ng-container *ngTemplateOutlet="customTemplates()[col.key]; context: { $implicit: row }"></ng-container>
-                                    </ng-container>
-
-                                    <span *ngSwitchCase="'tag'"
-                                          class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-white/10 dark:text-gray-300 dark:ring-white/20 font-mono">
-                                        {{ row[col.key] || '-' }}
-                                    </span>
-
-                                    <span *ngSwitchCase="'currency'" class="font-mono font-bold text-green-600 dark:text-green-400">
-                                        {{ row[col.key] | currency:'ARS':'symbol-narrow':'1.2-2' }}
-                                    </span>
-
-                                    <span *ngSwitchCase="'badge'"
-                                          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                                          [ngClass]="{
-                                              'bg-green-50 text-green-700': row[col.key] === 'Activo',
-                                              'dark:bg-green-500/10 dark:text-green-400': row[col.key] === 'Activo',
-                                              'bg-red-50 text-red-700': row[col.key] !== 'Activo',
-                                              'dark:bg-red-500/10 dark:text-red-400': row[col.key] !== 'Activo'
-                                          }">
-                                        {{ row[col.key] }}
-                                    </span>
-
-                                    <ng-container *ngSwitchCase="'boolean'">
-                                        <div class="flex items-center">
-                                            @if (row[col.key]) {
-                                                <div class="p-1 rounded-full bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400">
-                                                    <lucide-icon name="check" class="w-4 h-4"></lucide-icon>
-                                                </div>
-                                            } @else {
-                                                <div class="p-1 rounded-full text-gray-300 dark:text-gray-600">
-                                                    <lucide-icon name="x" class="w-4 h-4"></lucide-icon>
-                                                </div>
-                                            }
-                                        </div>
-                                    </ng-container>
-
-                                    <span *ngSwitchDefault>
-                                        {{ row[col.key] }}
-                                    </span>
-
+                                <td class="px-6 py-4 text-[var(--color-porcelain)]" [ngSwitch]="col.type">
+                                    <ng-container *ngSwitchCase="'custom'"><ng-container *ngTemplateOutlet="customTemplates()[col.key]; context: { $implicit: row }"></ng-container></ng-container>
+                                    <span *ngSwitchCase="'tag'" class="inline-flex items-center rounded-lg bg-[var(--color-deep-slate)] px-2 py-1 text-xs font-medium text-[var(--color-storm-cloud)] font-mono">{{ row[col.key] || '-' }}</span>
+                                    <span *ngSwitchCase="'currency'" class="font-mono font-bold text-emerald-400">{{ row[col.key] | currency:'ARS':'symbol-narrow':'1.2-2' }}</span>
+                                    <span *ngSwitchCase="'badge'" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [ngClass]="{'bg-emerald-500/10 text-emerald-400': row[col.key] === 'Activo', 'bg-red-500/10 text-red-400': row[col.key] !== 'Activo'}">{{ row[col.key] }}</span>
+                                    <ng-container *ngSwitchCase="'boolean'"><div class="flex items-center">@if (row[col.key]) {<div class="p-1 rounded-full bg-emerald-500/10 text-emerald-400"><lucide-icon name="check" [size]="16"></lucide-icon></div>} @else {<div class="p-1 rounded-full text-[var(--color-storm-cloud)]"><lucide-icon name="x" [size]="16"></lucide-icon></div>}</div></ng-container>
+                                    <span *ngSwitchCase="'date'">{{ row[col.key] ? (row[col.key] | date:'dd/MM/yyyy HH:mm') : '-' }}</span>
+                                    <span *ngSwitchDefault>{{ row[col.key] }}</span>
                                 </td>
                             }
-
                             @if (actions().length > 0) {
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div class="flex items-center justify-end gap-1">
                                         @for (act of actions(); track act.action) {
-                                            <button (click)="handleAction(act.action, row)"
-                                                    class="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/10 transition-colors {{ act.color || 'text-gray-500' }}"
-                                                    [title]="act.action">
-                                                <lucide-icon [name]="act.icon" class="w-4 h-4"></lucide-icon>
-                                            </button>
+                                            <button (click)="handleAction(act.action, row)" [title]="act.tooltip" class="p-1.5 rounded-lg hover:bg-[var(--color-deep-slate)] transition-colors {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}"><lucide-icon [name]="act.icon" [size]="16"></lucide-icon></button>
                                         }
                                     </div>
                                 </td>
                             }
-
-                            @if (selectable()) {
-                                <td class="px-6 py-4 text-center">
-                                    <input type="checkbox"
-                                        [checked]="isSelected(row)"
-                                        (change)="toggleSelection(row)"
-                                        class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer h-4 w-4">
-                                </td>
-                            }
-
+                            @if (selectable()) {<td class="px-6 py-4 text-center"><input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="rounded border-[var(--color-charcoal-grey)]"></td>}
                         </tr>
                     } @empty {
-                        <tr>
-                            <td [attr.colspan]="columns().length + (actions().length ? 1 : 0) + (selectable() ? 1 : 0)" class="p-8 text-center text-gray-500 dark:text-gray-400">
-                                <div class="flex flex-col items-center justify-center">
-                                    <lucide-icon name="inbox" class="w-8 h-8 mb-2 text-gray-300 dark:text-gray-600"></lucide-icon>
-                                    <p>No se encontraron resultados.</p>
-                                </div>
-                            </td>
-                        </tr>
+                        <tr><td [attr.colspan]="columns().length + (actions().length ? 1 : 0) + (selectable() ? 1 : 0)" class="p-12 text-center text-[var(--color-storm-cloud)]">
+                            <div class="flex flex-col items-center justify-center"><lucide-icon name="inbox" [size]="32" class="mb-2 text-[var(--color-fog-grey)]"></lucide-icon><p class="text-[14px]">No se encontraron resultados.</p></div>
+                        </td></tr>
                     }
-
                 </tbody>
-                <tfoot class="bg-gray-50 dark:bg-white/5 border-t-2 border-gray-200 dark:border-white/10 font-semibold text-gray-900 dark:text-white">
-                    <ng-content select="[table-footer]"></ng-content>
-                </tfoot>
+                <tfoot class="bg-[var(--color-deep-slate)]/20 border-t-2 border-[var(--color-charcoal-grey)] font-semibold text-[var(--color-porcelain)]"><ng-content select="[table-footer]"></ng-content></tfoot>
             </table>
         </div>
-
         @if (processedData().length > 0) {
-            <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-white/5 border-t border-gray-200 dark:border-white/10">
-
-                <span class="text-sm text-gray-700 dark:text-gray-300">
-                    Mostrando <span class="font-medium">{{ rangeInfo() }}</span>
-                </span>
-
+            <div class="flex items-center justify-between px-6 py-4 bg-[var(--color-pitch-black)]/30 border-t border-[var(--color-charcoal-grey)]">
+                <span class="text-[13px] text-[var(--color-storm-cloud)]">Mostrando <span class="font-medium text-[var(--color-porcelain)]">{{ rangeInfo() }}</span></span>
                 <div class="flex items-center gap-2">
-                    <button (click)="prevPage()"
-                            [disabled]="currentPage() === 1"
-                            class="p-1.5 rounded-md hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-gray-200 dark:hover:border-white/10 text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                        <lucide-icon name="chevron-left" class="w-5 h-5"></lucide-icon>
-                    </button>
-
-                    <span class="text-sm font-medium text-gray-900 dark:text-white px-2">
-                        {{ currentPage() }} / {{ totalPages() }}
-                    </span>
-
-                    <button (click)="nextPage()"
-                            [disabled]="currentPage() === totalPages()"
-                            class="p-1.5 rounded-md hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-gray-200 dark:hover:border-white/10 text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                        <lucide-icon name="chevron-right" class="w-5 h-5"></lucide-icon>
-                    </button>
+                    <button (click)="prevPage()" [disabled]="currentPage() === 1" class="p-2 rounded-lg hover:bg-[var(--color-deep-slate)] border border-transparent text-[var(--color-storm-cloud)] disabled:opacity-50 transition-all"><lucide-icon name="chevron-left" [size]="18"></lucide-icon></button>
+                    <span class="text-[13px] font-medium text-[var(--color-porcelain)] px-2">{{ currentPage() }} / {{ totalPages() }}</span>
+                    <button (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="p-2 rounded-lg hover:bg-[var(--color-deep-slate)] border border-transparent text-[var(--color-storm-cloud)] disabled:opacity-50 transition-all"><lucide-icon name="chevron-right" [size]="18"></lucide-icon></button>
                 </div>
             </div>
         }
