@@ -36,6 +36,7 @@
                                     <span *ngSwitchCase="'currency'" class="font-mono font-bold text-emerald-400">{{ row[col.key] | currency:'ARS':'symbol-narrow':'1.2-2' }}</span>
                                     <span *ngSwitchCase="'badge'" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [ngClass]="{'bg-emerald-500/10 text-emerald-400': row[col.key] === 'Activo', 'bg-red-500/10 text-red-400': row[col.key] !== 'Activo'}">{{ row[col.key] }}</span>
                                     <ng-container *ngSwitchCase="'boolean'"><div class="flex items-center">@if (row[col.key]) {<div class="p-1 rounded-full bg-emerald-500/10 text-emerald-400"><lucide-icon name="check" [size]="16"></lucide-icon></div>} @else {<div class="p-1 rounded-full text-[var(--color-storm-cloud)]"><lucide-icon name="x" [size]="16"></lucide-icon></div>}</div></ng-container>
+                                    <span *ngSwitchCase="'date'">{{ row[col.key] ? (row[col.key] | date:'dd/MM/yyyy HH:mm') : '-' }}</span>
                                     <span *ngSwitchDefault>{{ row[col.key] }}</span>
                                 </td>
                             }

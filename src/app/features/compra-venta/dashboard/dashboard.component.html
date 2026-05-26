@@ -109,7 +109,14 @@
                   <td class="px-6 py-4 text-[var(--color-porcelain)]">{{ sub.titulo }}</td>
                   <td class="px-6 py-4 text-[var(--color-storm-cloud)]">{{ sub.tipo }}</td>
                   <td class="px-6 py-4 text-[var(--color-porcelain)]">{{ sub.fechaInicio | date:'dd/MM/yyyy' }}</td>
-                  <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[11px] font-[590]">{{ sub.estado }}</span></td>
+                  <td class="px-6 py-4">
+                    @if (sub.estado === 'Generado') {<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-[590]" style="background:rgba(148,163,184,0.1); color:#94a3b8; border:1px solid rgba(148,163,184,0.2)"><span class="size-1 rounded-full" style="background:#94a3b8"></span>Generado</span>}
+                    @else if (sub.estado === 'Enviada Pendiente') {<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-[590]" style="background:rgba(52,211,153,0.1); color:#34d399; border:1px solid rgba(52,211,153,0.2)"><span class="size-1 rounded-full animate-pulse" style="background:#34d399"></span>Enviada Pendiente</span>}
+                    @else if (sub.estado === 'Finalizada') {<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-[590]" style="background:rgba(56,189,248,0.1); color:#38bdf8; border:1px solid rgba(56,189,248,0.2)"><span class="size-1 rounded-full" style="background:#38bdf8"></span>Finalizada</span>}
+                    @else if (sub.estado === 'Anulada') {<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-[590]" style="background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.2)"><span class="size-1 rounded-full" style="background:#f87171"></span>Anulada</span>}
+                    @else if (sub.estado === 'Desistida') {<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-[590]" style="background:rgba(167,139,250,0.1); color:#a78bfa; border:1px solid rgba(167,139,250,0.2)"><span class="size-1 rounded-full" style="background:#a78bfa"></span>Desistida</span>}
+                    @else {<span class="px-2.5 py-0.5 rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[11px] font-[590]">{{ sub.estado }}</span>}
+                  </td>
                   <td class="px-6 py-4 text-right"><a [routerLink]="['/compra-venta/subastas', sub.idCotizacion]" class="text-[var(--color-cyan-spark)] hover:underline text-[13px] font-[510]">Ver</a></td>
                 </tr>
               }

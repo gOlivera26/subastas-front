@@ -68,8 +68,37 @@ export class AppCalendar implements ControlValueAccessor {
   zoomOut() { if (this.currentView() === 'day') this.currentView.set('month'); else if (this.currentView() === 'month') this.currentView.set('year'); }
   navigate(delta: number) { const d = new Date(this.currentViewDate()); if (this.currentView() === 'day') d.setMonth(d.getMonth() + delta); else if (this.currentView() === 'month') d.setFullYear(d.getFullYear() + delta); else d.setFullYear(d.getFullYear() + (delta * 12)); this.currentViewDate.set(d); }
 
-  selectDate(date: Date) { if (this.isDateDisabled(date)) return; this.selectedDate.set(date); if (!this.showTime()) { this.onChange(this.fmtIso(date)); this.isOpen.set(false); } }
-  confirmDateTime() { const d = this.selectedDate(); if (!d) return; const r = new Date(d.getFullYear(), d.getMonth(), d.getDate(), this.selectedHour(), this.selectedMinute()); this.onChange(this.fmtDtIso(r)); this.isOpen.set(false); }
+  selectDate(date: Date) { 
+    if (this.isDateDisabled(date)) return; 
+    this.selectedDate.set(date); 
+    if (!this.showTime()) { 
+      this.onChange(this.fmtIso(date)); 
+      this.isOpen.set(false); 
+    } else {
+      const r = new Date(date.getFullYear(), date.getMonth(), date.getDate(), this.selectedHour(), this.selectedMinute());
+      this.onChange(this.fmtDtIso(r));
+    }
+  }
+  
+  updateHour(h: number) {
+    this.selectedHour.set(h);
+    this.emitTimeChange();
+  }
+  
+  updateMinute(m: number) {
+    this.selectedMinute.set(m);
+    this.emitTimeChange();
+  }
+  
+  private emitTimeChange() {
+    const d = this.selectedDate();
+    if (d) {
+      const r = new Date(d.getFullYear(), d.getMonth(), d.getDate(), this.selectedHour(), this.selectedMinute());
+      this.onChange(this.fmtDtIso(r));
+    }
+  }
+
+  confirmDateTime() { this.isOpen.set(false); }
   selectMonth(m: number) { const d = new Date(this.currentViewDate()); d.setMonth(m); this.currentViewDate.set(d); this.currentView.set('day'); }
   selectYear(y: number) { const d = new Date(this.currentViewDate()); d.setFullYear(y); this.currentViewDate.set(d); this.currentView.set('month'); }
 

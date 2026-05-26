@@ -6,32 +6,57 @@
 
   <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 mb-6">
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
-      <app-custom-select label="Área" [options]="areaOptions()" placeholder="Consultar por Área" />
+      <app-custom-select label="Área" [options]="areaOptions()" placeholder="Todas" [(value)]="filterAreaId" (valueChange)="buscar()" />
       <app-custom-select label="Ejercicio" [options]="vigenciaOptions()" placeholder="Todos" [(value)]="filterVigencia" (valueChange)="buscar()" />
-      <app-custom-select label="Estado" [options]="estadoOptions" placeholder="Consultar por estado" [(value)]="filterEstado" />
-      <div><label class="block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)] ml-1 mb-1">Nro. de Subasta</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="filterNroSubasta" /></div>
-      <div><label class="block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)] ml-1 mb-1">Nro. de Expte</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="filterNroExpte" /></div>
-      <app-calendar label="Fecha de Inicio" placeholder="dd/MM/yyyy" />
+      <app-custom-select label="Estado" [options]="estadoOptions" placeholder="Todos" [(value)]="filterEstado" (valueChange)="buscar()" />
+      <div><label class="block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)] ml-1 mb-1">Nro. de Subasta</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="filterNroSubasta" (keyup.enter)="buscar()" /></div>
+      <div><label class="block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)] ml-1 mb-1">Nro. de Expte</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="filterNroExpte" (keyup.enter)="buscar()" /></div>
+      <app-calendar label="Fecha Inicio" placeholder="dd/MM/yyyy" [(ngModel)]="filterFecha" (ngModelChange)="buscar()" />
     </div>
     <div class="flex items-center gap-3">
       <button (click)="openCrear()" class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-neon-lime)] px-5 py-2.5 text-[14px] font-[590] text-black hover:brightness-110"><lucide-icon name="plus" [size]="16"></lucide-icon>Nuevo</button>
-      <button (click)="buscar()" class="rounded-xl bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] font-[590] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)]">Ver Todas las subastas</button>
     </div>
   </div>
 
   <ng-template #estadoTpl let-row>
-    @if (row.estado === 'Publicada') {<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[11px] font-[590]">{{ row.estado }}</span>}
-    @else if (row.estado === 'Generado') {<span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[11px] font-[590]">{{ row.estado }}</span>}
-    @else if (row.estado === 'Finalizada') {<span class="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 text-[11px] font-[590]">{{ row.estado }}</span>}
+    @if (row.idEstado === 4) {<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.2)"><span class="size-1.5 rounded-full" style="background:#94a3b8"></span>Generado</span>}
+    @else if (row.idEstado === 39) {<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.2)"><span class="size-1.5 rounded-full animate-pulse" style="background:#34d399"></span>Enviada Pendiente</span>}
+    @else if (row.idEstado === 40) {<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid rgba(56,189,248,0.2)"><span class="size-1.5 rounded-full" style="background:#38bdf8"></span>Finalizada</span>}
+    @else if (row.idEstado === 20) {<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(248,113,113,0.1);color:#f87171;border:1px solid rgba(248,113,113,0.2)"><span class="size-1.5 rounded-full" style="background:#f87171"></span>Anulada</span>}
+    @else if (row.idEstado === 47) {<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.2)"><span class="size-1.5 rounded-full" style="background:#a78bfa"></span>Desistida</span>}
     @else {<span class="px-2.5 py-0.5 rounded-full bg-[var(--color-charcoal-grey)]/30 text-[var(--color-storm-cloud)] text-[11px] font-[590]">{{ row.estado || '-' }}</span>}
   </ng-template>
   <ng-template #fechaTpl let-row><span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row | date:'dd/MM/yyyy HH:mm' }}</span></ng-template>
   <ng-template #ofertasTpl let-row><span class="font-mono text-[13px] text-[var(--color-porcelain)]">-</span></ng-template>
+  <ng-template #accionesTpl let-row>
+    <div class="flex items-center gap-1 justify-end">
+      @if (row.idEstado === 4) {
+        <button (click)="openEspecificaciones(row)" title="Especificaciones" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="file-text" [size]="14"></lucide-icon></button>
+        <button (click)="openProveedores(row)" title="Proveedores" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="users" [size]="14"></lucide-icon></button>
+        <button (click)="enviarInvitaciones(row)" title="Enviar Invitaciones" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="send" [size]="14"></lucide-icon></button>
+        <button (click)="anularSubasta(row)" title="Anular" class="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10"><lucide-icon name="trash-2" [size]="14"></lucide-icon></button>
+      }
+      @if (row.idEstado === 39) {
+        <button (click)="openProveedores(row)" title="Proveedores" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="users" [size]="14"></lucide-icon></button>
+        <button (click)="openProrroga(row)" title="Prórroga" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10"><lucide-icon name="clock" [size]="14"></lucide-icon></button>
+        @if (row.fechaFin && (getTimeLeftMs(row.fechaFin) <= 0)) {
+          <button (click)="finalizarSubasta(row)" title="Finalizar" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-sky-400 hover:bg-sky-500/10"><lucide-icon name="check" [size]="14"></lucide-icon></button>
+        }
+      }
+      @if (row.idEstado === 4 || row.idEstado === 39 || row.idEstado === 40) {
+        <button (click)="openPliegos(row)" title="Pliegos" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="file-text" [size]="14"></lucide-icon></button>
+        <button (click)="openPreguntas(row)" title="Mensajes" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="help-circle" [size]="14"></lucide-icon></button>
+        <button (click)="openDetalle(row)" title="Ver Detalle" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)]"><lucide-icon name="eye" [size]="14"></lucide-icon></button>
+      }
+      @if (row.idEstado === 39 || row.idEstado === 40) {
+        <button (click)="desistirSubasta(row)" title="Desistir" class="p-1.5 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"><lucide-icon name="x" [size]="14"></lucide-icon></button>
+      }
+    </div>
+  </ng-template>
 
   <app-smart-table
     [columns]="columns" [data]="items()" [actions]="actions"
-    [customTemplates]="customTemplates()" [loading]="loading()" [pageSize]="20"
-    (onAction)="onAction($event)">
+    [customTemplates]="customTemplates()" [loading]="loading()" [pageSize]="20">
   </app-smart-table>
 </div>
 
@@ -187,20 +212,31 @@
         <div class="space-y-3">
           <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Datos de la Contratación</h4>
           <app-custom-select label="Tipo de Contratación" [options]="tipoOptions" [(value)]="tipoContratacion" />
-          <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Número de Expediente</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" /></div>
+          <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Número de Expediente</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="crearNroExpediente" /></div>
           <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Objeto de la Contratación</label><textarea class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" rows="2" [(ngModel)]="observacion"></textarea></div>
         </div>
         <div class="space-y-3">
           <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Fechas y Parámetros</h4>
           <div class="grid grid-cols-2 gap-3">
-            <app-calendar label="Inicio Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="fechaInicio" />
-            <app-calendar label="Fin Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="fechaFin" />
+            <app-calendar label="Inicio Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="fechaInicio()" (ngModelChange)="fechaInicio.set($event)" />
+            <app-calendar label="Fin Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" />
           </div>
-          <app-calendar label="Límite de Consultas" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="fechaLimiteConsultas" />
+          <app-calendar label="Límite Consultas" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="fechaLimiteConsultas()" (ngModelChange)="fechaLimiteConsultas.set($event)" />
           <div class="grid grid-cols-2 gap-3">
             <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Margen de Mejora (%)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="margenMejora" /></div>
+            <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Prórroga (minutos)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="crearProrrogaMinutos" /></div>
           </div>
-          <label class="flex items-center gap-2 text-[12px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="checkbox" [(ngModel)]="permiteProrroga" class="rounded" /> Admite prórroga</label>
+          <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 text-[12px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="checkbox" [(ngModel)]="permiteProrroga" class="rounded" /> Admite prórroga</label>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Visibilidad:</span>
+              <select [(ngModel)]="crearRedeterminacion" class="rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2 py-1 text-[11px] text-[var(--color-porcelain)]">
+                <option value="1">Pública</option>
+                <option value="0">Privada</option>
+                <option value="2">Cerrada</option>
+              </select>
+            </div>
+          </div>
           <div class="rounded-xl bg-[var(--color-pitch-black)]/50 border border-[var(--color-charcoal-grey)] p-3 space-y-1">
             <p class="text-[12px] text-[var(--color-storm-cloud)]"><strong class="text-[var(--color-neon-lime)]">{{ selectedCount() }}</strong> ítems</p>
             @if (useRenglones()) {<p class="text-[12px] text-[var(--color-storm-cloud)]"><strong class="text-[var(--color-cyan-spark)]">{{ renglones().length }}</strong> renglones</p>}
@@ -231,10 +267,10 @@
         <div class="space-y-3">
           <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Fechas</h4>
           <div class="grid grid-cols-2 gap-3">
-            <app-calendar label="Inicio Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="especFechaInicio" />
-            <app-calendar label="Fin Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="especFechaFin" />
-          </div>
-          <app-calendar label="Límite Consultas" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [(ngModel)]="especFechaLimite" />
+          <app-calendar label="Inicio Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="especFechaInicio()" (ngModelChange)="especFechaInicio.set($event)" />
+          <app-calendar label="Fin Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="especFechaFin()" (ngModelChange)="especFechaFin.set($event)" />
+        </div>
+        <app-calendar label="Límite Consultas" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="especFechaLimite()" (ngModelChange)="especFechaLimite.set($event)" />
         </div>
       </div>
       <div class="grid grid-cols-2 gap-6">
@@ -284,24 +320,176 @@
 </app-modal>
 
 <!-- MODAL: Detalle -->
-<app-modal [isOpen]="showDetalle()" title="Detalle de Subasta" [subtitle]="'# ' + (detalleItem()?.nroCotizacion || '')" maxWidthClass="max-w-lg" (close)="closeDetalle()">
-  <div class="space-y-3 text-[14px]">
-    <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-4 grid grid-cols-2 gap-3">
-      <div><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Tipo</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.tipo || '-' }}</p></div>
-      <div><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Estado</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.estado || '-' }}</p></div>
-      <div><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Inicio</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.fechaInicio || '-' }}</p></div>
-      <div><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Fin</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.fechaFin || '-' }}</p></div>
-      <div class="col-span-2"><span class="text-[11px] uppercase text-[var(--color-storm-cloud)]">Objeto</span><p class="text-[var(--color-porcelain)]">{{ detalleItem()?.titulo || '-' }}</p></div>
+<app-modal [isOpen]="showDetalle()" title="Detalle de Subasta" [subtitle]="'# ' + (detalleItem()?.nroCotizacion || '')" maxWidthClass="max-w-4xl" (close)="closeDetalle()">
+  @if (loadingDetalle()) {<div class="py-12"><app-loading-spinner label="Cargando detalle..."></app-loading-spinner></div>}
+  @else if (detalleError()) {<div class="py-12 text-center"><lucide-icon name="x" [size]="32" class="mb-3 text-red-400 mx-auto"></lucide-icon><p class="text-[13px] text-red-400">Error al cargar el detalle. Verificá que la API esté disponible.</p></div>}
+  @else {
+    <div class="space-y-4">
+      <div class="grid grid-cols-3 gap-3 text-[13px]">
+        <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3">
+          <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Tipo</span>
+          <p class="text-[var(--color-porcelain)] font-[590]">{{ detalleData().tipo || detalleItem()?.tipo || '-' }}</p>
+        </div>
+        <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3">
+          <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Estado</span>
+          <p class="text-[var(--color-porcelain)] font-[590]">{{ detalleData().estado || detalleItem()?.estado || '-' }}</p>
+        </div>
+        <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3">
+          <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Modalidad</span>
+          <p class="text-[var(--color-porcelain)] font-[590]">{{ detalleData().modalidad || '-' }}</p>
+        </div>
+        <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3">
+          <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Inicio</span>
+          <p class="text-[var(--color-porcelain)]">{{ detalleData().especificacion?.fechaInicioSubasta ? (detalleData().especificacion?.fechaInicioSubasta | date:'dd/MM/yyyy HH:mm') : '-' }}</p>
+        </div>
+        <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3">
+          <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Fin</span>
+          <p class="text-[var(--color-porcelain)]">{{ detalleData().especificacion?.fechaFinalizacionSubasta ? (detalleData().especificacion?.fechaFinalizacionSubasta | date:'dd/MM/yyyy HH:mm') : '-' }}</p>
+        </div>
+        <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3">
+          <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Criterio</span>
+          <p class="text-[var(--color-porcelain)] font-[590]">{{ detalleData().especificacion?.criterioAdjudicacion === 1 ? 'Por Renglón' : 'Por Ítem' }}</p>
+        </div>
+        @if (detalleData().especificacion?.nroExpediente) {
+          <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3 col-span-2">
+            <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Nro. Expediente</span>
+            <p class="text-[var(--color-porcelain)] font-[590]">{{ detalleData().especificacion?.nroExpediente }}</p>
+          </div>
+        }
+        @if (detalleData().observacion) {
+          <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3 col-span-3">
+            <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Objeto</span>
+            <p class="text-[var(--color-porcelain)]">{{ detalleData().observacion }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 text-[13px]">
+        @if (detalleData().especificacion?.fechaLimiteConsultas) {
+          <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3">
+            <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Límite Consultas</span>
+            <p class="text-[var(--color-porcelain)]">{{ detalleData().especificacion?.fechaLimiteConsultas | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        }
+        @if (detalleData().especificacion?.margenMejora) {
+          <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3">
+            <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Margen Mejora</span>
+            <p class="text-[var(--color-porcelain)] font-[590]">{{ detalleData().especificacion?.margenMejora }}%</p>
+          </div>
+        }
+        <div class="rounded-xl bg-[var(--color-pitch-black)]/30 p-3">
+          <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Prórroga</span>
+          <p class="text-[var(--color-porcelain)] font-[590]">{{ detalleData().especificacion?.permiteProrroga ? 'Sí ('+ (detalleData().especificacion?.prorrogaMinutos || 0)+' min)' : 'No' }}</p>
+        </div>
+      </div>
+
+      @if (detalleRenglones().length > 0) {
+        <div>
+          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)] mb-2">Renglones ({{ detalleRenglones().length }})</h4>
+          <div class="space-y-2">
+            @for (ren of detalleRenglones(); track ren.id) {
+              <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30 overflow-hidden">
+                <div class="px-3 py-2 bg-[var(--color-deep-slate)]/30 border-b border-[var(--color-charcoal-grey)] flex items-center gap-2">
+                  <span class="text-[13px] font-[590] text-[var(--color-porcelain)]">{{ ren.nombre }}</span>
+                  <span class="text-[11px] text-[var(--color-storm-cloud)]">({{ ren.items.length }} ítems)</span>
+                </div>
+                <div class="divide-y divide-[var(--color-charcoal-grey)]">
+                  @for (item of ren.items; track item.idCotizacionDetalle) {
+                    <div class="px-4 py-2 flex items-center justify-between text-[12px]">
+                      <div class="flex-1">
+                        <span class="text-[var(--color-porcelain)]">{{ item.nItem || 'Ítem #'+item.idItem }}</span>
+                        @if (item.nroReserva) {<span class="text-[10px] text-[var(--color-storm-cloud)] ml-2">(Res. {{ item.nroReserva }})</span>}
+                      </div>
+                      <span class="text-[var(--color-storm-cloud)] mx-4">x{{ item.cantidad }}</span>
+                      <span class="font-mono text-[var(--color-porcelain)]">${{ item.importeBase | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      } @else if (detalleItems().length > 0) {
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
+          <div class="px-3 py-2 bg-[var(--color-deep-slate)]/30 border-b border-[var(--color-charcoal-grey)]">
+            <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Ítems ({{ detalleItems().length }})</h4>
+          </div>
+          <div class="divide-y divide-[var(--color-charcoal-grey)] max-h-[250px] overflow-y-auto">
+            @for (item of detalleItems(); track item.idCotizacionDetalle) {
+              <div class="px-4 py-2 flex items-center justify-between text-[12px] hover:bg-[var(--color-deep-slate)]/20">
+                <div class="flex-1">
+                  <span class="text-[var(--color-porcelain)]">{{ item.nItem || 'Ítem #'+item.idItem }}</span>
+                  @if (item.nroReserva) {<span class="text-[10px] text-[var(--color-storm-cloud)] ml-2">(Res. {{ item.nroReserva }})</span>}
+                </div>
+                <span class="text-[var(--color-storm-cloud)] mx-4">x{{ item.cantidad }}</span>
+                <span class="font-mono text-[var(--color-porcelain)]">${{ item.importeBase | number:'1.2-2' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <p class="text-[12px] text-[var(--color-storm-cloud)] text-center py-4">Sin ítems registrados.</p>
+      }
+
+      <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
+        <div class="px-3 py-2 bg-[var(--color-deep-slate)]/30 border-b border-[var(--color-charcoal-grey)]">
+          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Proveedores ({{ detalleProveedores().length }})</h4>
+        </div>
+        @if (detalleProveedores().length > 0) {
+          <div class="divide-y divide-[var(--color-charcoal-grey)] max-h-[200px] overflow-y-auto">
+            @for (p of detalleProveedores(); track p.idCotizacionProveedor) {
+              <div class="px-4 py-2 flex items-center justify-between text-[12px]">
+                <span class="text-[var(--color-porcelain)]">{{ p._nombre === null ? 'Cargando...' : (p._nombre || 'Proveedor #'+p.idProveedor) }}</span>
+                @if (p.ganadora === 'E') {<span class="text-[var(--color-neon-lime)] text-[11px] font-[590]">Ganador</span>}
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="text-[12px] text-[var(--color-storm-cloud)] text-center py-4">Sin proveedores asignados.</p>
+        }
+      </div>
     </div>
-    <div class="flex justify-end"><button (click)="closeDetalle()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cerrar</button></div>
-  </div>
+  }
 </app-modal>
 
 <!-- MODAL: Proveedores -->
-<app-modal [isOpen]="showProveedores()" title="Proveedores" [subtitle]="'Subasta #' + (provItem()?.nroCotizacion || '')" maxWidthClass="max-w-2xl" (close)="closeProveedores()">
-  <div class="py-12 text-center text-[var(--color-storm-cloud)]">
-    <lucide-icon name="users" [size]="32" class="mb-3"></lucide-icon>
-    <p>Próximamente: gestión de proveedores por subasta.</p>
+<app-modal [isOpen]="showProveedores()" title="Proveedores" [subtitle]="'Subasta #' + (provItem()?.nroCotizacion || '')" maxWidthClass="max-w-3xl" (close)="closeProveedores()">
+  <div class="space-y-4">
+    <div class="relative">
+      <lucide-icon name="search" [size]="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+      <input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] pl-9 pr-3 py-2.5 text-[13px] text-[var(--color-porcelain)]" placeholder="Buscar por CUIT o Razón Social..." [(ngModel)]="provSearchTerm" (input)="buscarProveedores()" />
+    </div>
+    @if (provSearchFiltered().length > 0) {
+      <div class="max-h-[250px] overflow-y-auto space-y-1 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/20 p-2">
+        @for (p of provSearchFiltered(); track p.idProveedor || p.id) {
+          <div class="flex items-center justify-between rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 px-3 py-2">
+            <div class="flex-1">
+              <p class="text-[13px] text-[var(--color-porcelain)]">{{ p.razonSocial || p.razon_social || p.nombre || 'Proveedor #'+p.idProveedor || 'Proveedor #'+p.id }}</p>
+              <p class="text-[10px] text-[var(--color-fog-grey)]">CUIT: {{ p.cuit || p.cup || '-' }}</p>
+            </div>
+            <button (click)="agregarProveedor(p)" [disabled]="savingProv()" class="rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] px-3 py-1 text-[11px] font-[590] hover:bg-[var(--color-cyan-spark)] hover:text-black transition-colors">Agregar</button>
+          </div>
+        }
+      </div>
+    } @else if (!loadingProv()) {
+      <p class="text-[13px] text-[var(--color-storm-cloud)] text-center py-2">{{ provSearchTerm() ? 'Sin resultados.' : 'No hay proveedores disponibles.' }}</p>
+    }
+    @if (loadingProv() && provSearchFiltered().length === 0) {<app-loading-spinner label="Buscando..."></app-loading-spinner>}
+    <div class="border-t border-[var(--color-charcoal-grey)] pt-3">
+      <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)] mb-2">Asignados a esta subasta ({{ provList().length }})</h4>
+      @if (provList().length > 0) {
+        <div class="space-y-1 max-h-[200px] overflow-y-auto">
+            @for (p of provList(); track p.idCotizacionProveedor) {
+              <div class="flex items-center justify-between rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30 px-3 py-2">
+                <span class="text-[13px] text-[var(--color-porcelain)]">{{ p._nombre === null ? 'Cargando...' : (p._nombre || 'Proveedor #'+p.idProveedor) }}</span>
+                <button (click)="quitarProveedor(p)" class="p-1 text-[var(--color-storm-cloud)] hover:text-red-400"><lucide-icon name="trash-2" [size]="14"></lucide-icon></button>
+              </div>
+            }
+        </div>
+      } @else {
+        <p class="text-[12px] text-[var(--color-storm-cloud)] text-center py-3">Sin proveedores asignados.</p>
+      }
+    </div>
   </div>
 </app-modal>
 
@@ -313,10 +501,39 @@
   </div>
 </app-modal>
 
-<!-- MODAL: Preguntas -->
-<app-modal [isOpen]="showPreguntas()" title="Preguntas" [subtitle]="'Subasta #' + (preguntaItem()?.nroCotizacion || '')" maxWidthClass="max-w-2xl" (close)="closePreguntas()">
-  <div class="py-12 text-center text-[var(--color-storm-cloud)]">
-    <lucide-icon name="help-circle" [size]="32" class="mb-3"></lucide-icon>
-    <p>Próximamente: preguntas y respuestas de proveedores.</p>
+<!-- MODAL: Mensajes -->
+<app-modal [isOpen]="showPreguntas()" title="Mensajes" [subtitle]="'Subasta #' + (preguntaItem()?.nroCotizacion || '')" maxWidthClass="max-w-2xl" (close)="closePreguntas()">
+  <div class="flex flex-col rounded-xl overflow-hidden border border-[var(--color-charcoal-grey)]" style="height:62vh; background:#0d1117">
+    <div class="flex-1 overflow-y-auto p-4 space-y-1">
+      @if (loadingMensajes()) {<div class="flex items-center justify-center h-full"><app-loading-spinner label="Cargando conversación..."></app-loading-spinner></div>}
+      @else if (chatMessages().length === 0) {<div class="flex flex-col items-center justify-center h-full text-center gap-2"><lucide-icon name="help-circle" [size]="32" class="text-gray-600"></lucide-icon><p class="text-[13px] text-gray-400">Sin mensajes. Escribí el primero.</p></div>}
+      @else {
+        @for (m of chatMessages(); track m.idMensaje || m.fecIng) {
+          @if (m.usuario === authUsername) {
+            <div class="flex justify-end mb-1.5"><div class="max-w-[70%]"><div class="px-3.5 py-2 rounded-2xl rounded-br-md text-[13px] leading-snug text-white" style="background:#1d9bf0">{{ m.contenido }}</div><p class="text-[10px] text-gray-500 text-right mt-0.5 mr-1">{{ m.fecIng | date:'HH:mm' }}</p></div></div>
+          } @else {
+            <div class="flex items-start gap-2 mb-1.5"><div class="shrink-0 size-7 rounded-full flex items-center justify-center text-[10px] font-semibold text-gray-300 mt-0.5" style="background:#21262d">{{ (m.usuario || '?')[0].toUpperCase() }}</div><div class="max-w-[65%]"><p class="text-[10px] text-gray-400 mb-0.5 ml-1">{{ m.usuario }}</p><div class="px-3.5 py-2 rounded-2xl rounded-tl-md text-[13px] leading-snug text-gray-200" style="background:#21262d">{{ m.contenido }}</div><p class="text-[10px] text-gray-500 ml-1 mt-0.5">{{ m.fecIng | date:'HH:mm' }}</p></div></div>
+          }
+        }
+        @if (signalR.usuarioEscribiendo(); as user) {<div class="flex items-center gap-2 pl-9 py-1"><span class="text-[11px] text-gray-500 italic">escribiendo...</span></div>}
+      }
+    </div>
+    <div class="flex items-end gap-2 p-3 border-t border-gray-800" style="background:#161b22">
+      <textarea class="flex-1 rounded-xl border-0 bg-[#0d1117] px-4 py-2.5 text-[13px] text-gray-200 resize-none placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#1d9bf0]" rows="1" placeholder="Mensaje..." [(ngModel)]="mensajeNuevo" (keydown.enter)="$event.preventDefault(); enviarMensaje()" (input)="onTyping()"></textarea>
+      <button (click)="enviarMensaje()" [disabled]="!mensajeNuevo().trim()" class="shrink-0 size-9 rounded-full flex items-center justify-center transition-all" [class.opacity-100]="mensajeNuevo().trim()" [class.opacity-30]="!mensajeNuevo().trim()" style="background:#1d9bf0"><lucide-icon name="send" [size]="14" class="text-white"></lucide-icon></button>
+    </div>
+  </div>
+</app-modal>
+
+<!-- MODAL: Prorroga -->
+<app-modal [isOpen]="showProrroga()" title="Prórroga" [subtitle]="'Subasta #' + (prorrogaItem()?.nroCotizacion || '')" maxWidthClass="max-w-md" (close)="closeProrroga()">
+  <div class="space-y-4 text-center">
+    <lucide-icon name="clock" [size]="36" class="text-amber-400 mx-auto"></lucide-icon>
+    <p class="text-[14px] text-[var(--color-porcelain)]">¿Extender la fecha de finalización?</p>
+    <p class="text-[12px] text-[var(--color-storm-cloud)]">Se usará la configuración de prórroga del alta ({{ prorrogaItem()?.prorrogaMinutos || 15 }} minutos).</p>
+    <div class="flex justify-center gap-3">
+      <button (click)="closeProrroga()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
+      <button (click)="aplicarProrroga()" [disabled]="savingProrroga()" class="rounded-xl bg-amber-500 px-5 py-2 text-[13px] font-[590] text-black disabled:opacity-50">@if (savingProrroga()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1"></lucide-icon>}Extender</button>
+    </div>
   </div>
 </app-modal>
