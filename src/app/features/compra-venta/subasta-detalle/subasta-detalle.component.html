@@ -1,111 +1,322 @@
-<div class="mx-auto max-w-[1200px]">
+<div class="mx-auto max-w-[1500px]">
   <span class="hidden">{{ tick() }}</span>
 
   @if (loading()) {
-    <app-loading-spinner label="Cargando subasta..."></app-loading-spinner>
+    <app-loading-spinner label="Conectando a la Sala de Subastas..."></app-loading-spinner>
   } @else if (!subasta()) {
-    <div class="py-20 text-center text-[var(--color-storm-cloud)]">Subasta no encontrada</div>
+    <div class="py-20 text-center text-[var(--color-storm-cloud)]">
+      <lucide-icon name="alert-triangle" [size]="48" class="mx-auto mb-4 opacity-50"></lucide-icon>
+      Subasta no encontrada
+    </div>
   } @else {
-    <div class="mb-8">
-      <a routerLink="/compra-venta" class="inline-flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] mb-4">
+    <div class="mb-6">
+      <a routerLink="/compra-venta" class="inline-flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] mb-4 transition-colors">
         <lucide-icon name="arrow-left" [size]="16"></lucide-icon> Volver al Dashboard
       </a>
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 class="text-[24px] font-[590] text-[var(--color-porcelain)]">{{ subasta()!.titulo }}</h1>
-          <p class="text-[14px] text-[var(--color-storm-cloud)]">#{{ subasta()!.nroCotizacion }} · {{ subasta()!.tipo }}</p>
+          <p class="text-[14px] text-[var(--color-storm-cloud)]">#{{ subasta()!.nroCotizacion }} · {{ subasta()!.tipo }} · Margen de Mejora: <strong class="text-[var(--color-cyan-spark)]">{{ subasta()!.especificacion?.margenMejora }}%</strong></p>
         </div>
         <div class="flex items-center gap-3">
           @if (isLive) {
-            <span class="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 text-[14px] font-[590] border border-emerald-500/20">
+            <span class="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 text-[14px] font-[590] border border-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.15)]">
               <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>En vivo
             </span>
           } @else {
-            <span class="px-4 py-2 rounded-full bg-[var(--color-charcoal-grey)] text-[var(--color-storm-cloud)] text-[14px]">Finalizada</span>
+            <span class="px-4 py-2 rounded-full bg-[var(--color-charcoal-grey)] text-[var(--color-storm-cloud)] text-[14px] font-[590]">Finalizada</span>
           }
         </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 space-y-6">
-        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6">
-          <h2 class="text-[18px] font-[590] text-[var(--color-porcelain)] mb-4">Tiempo Restante</h2>
-          <div class="flex items-center gap-3 mb-2">
-            <lucide-icon name="clock" [size]="28" class="text-[var(--color-neon-lime)]"></lucide-icon>
-            <span class="text-[36px] font-mono font-[590] text-[var(--color-neon-lime)]">{{ timeLeft }}</span>
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
+      
+      <div class="xl:col-span-3 space-y-6">
+        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 shadow-lg overflow-hidden relative">
+          
+          @if (!isLive) {
+            <div class="absolute inset-0 z-20 bg-[var(--color-pitch-black)]/60 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
+              <lucide-icon name="lock" [size]="40" class="text-[var(--color-storm-cloud)] mb-2 opacity-50"></lucide-icon>
+              <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">Sala Cerrada</p>
+              <p class="text-[13px] text-[var(--color-storm-cloud)]">La subasta ha finalizado o aún no comienza.</p>
+            </div>
+          }
+
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-[16px] font-[590] uppercase tracking-widest text-[var(--color-porcelain)] flex items-center gap-2">
+              <lucide-icon name="list" [size]="18" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+              Panel de Ofertas ({{ isPorRenglon ? 'Por Renglón' : 'Por Ítem' }})
+            </h2>
+            <button (click)="enviarOfertasSeleccionadas()" [disabled]="ofertando() || !isLive" class="relative z-30 rounded-xl bg-[var(--color-neon-lime)] px-6 py-2.5 text-[13px] font-[590] text-black transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-[0_0_15px_rgba(228,242,34,0.15)]">
+              @if (ofertando()) {
+                <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon> Procesando...
+              } @else {
+                <lucide-icon name="send" [size]="16"></lucide-icon> Confirmar Pujas
+              }
+            </button>
           </div>
-          @if (subasta()!.fechaFin) {
-            <p class="text-[12px] text-[var(--color-storm-cloud)]">Finaliza: {{ subasta()!.fechaFin | date:'dd/MM/yyyy HH:mm' }}</p>
+
+          <div class="overflow-x-auto rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]">
+            <table class="w-full text-left text-[13px] whitespace-nowrap">
+              <thead class="bg-[var(--color-deep-slate)]/80 text-[11px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
+                <tr>
+                  <th class="px-4 py-3.5 w-10"></th>
+                  <th class="px-4 py-3.5">Detalle</th>
+                  <th class="px-4 py-3.5 text-center">Cant.</th>
+                  <th class="px-4 py-3.5 text-right border-r border-[var(--color-charcoal-grey)]">Precio Base</th>
+                  <th class="px-4 py-3.5 text-right bg-emerald-500/5 text-emerald-400 border-r border-[var(--color-charcoal-grey)]">Mejor Oferta Actual</th>
+                  <th class="px-4 py-3.5 bg-[var(--color-cyan-spark)]/5">Mi Precio Unit.</th>
+                  <th class="px-4 py-3.5 bg-[var(--color-cyan-spark)]/5">Moneda Oferta</th>
+                  <th class="px-4 py-3.5 text-right bg-[var(--color-cyan-spark)]/5 border-r border-[var(--color-charcoal-grey)]">Mi Total</th>
+                  <th class="px-4 py-3.5 text-center">Pujar</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-charcoal-grey)] relative z-10">
+                @for (item of elementosOfertables(); track isPorRenglon ? item.idRenglon : item.idCotizacionDetalle) {
+                  @let rowId = isPorRenglon ? item.idRenglon : item.idCotizacionDetalle;
+                  @let rowState = ofertasForm()[rowId];
+                  @let mejorActual = getMejorOferta(rowId);
+
+                  <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors" [class.bg-[var(--color-neon-lime)]/5]="rowState.ofertar">
+                    <td class="px-4 py-3 text-center">
+                      <button title="Ver historial de este ítem" class="p-1.5 rounded-lg text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors">
+                        <lucide-icon name="history" [size]="16"></lucide-icon>
+                      </button>
+                    </td>
+                    <td class="px-4 py-3">
+                      <p class="font-[590] text-[var(--color-porcelain)]">{{ item.nItem || item.descripcion || 'Sin nombre' }}</p>
+                      @if (isPorRenglon) {<p class="text-[11px] text-[var(--color-storm-cloud)]">Renglón #{{ item.numeroRenglon }}</p>}
+                    </td>
+                    <td class="px-4 py-3 text-center text-[var(--color-storm-cloud)]">{{ isPorRenglon ? '-' : item.cantidad }}</td>
+                    <td class="px-4 py-3 text-right font-mono text-[var(--color-fog-grey)] border-r border-[var(--color-charcoal-grey)]">
+                      {{ (isPorRenglon ? 0 : item.importeBase) | currency }}
+                    </td>
+                    
+                    <td class="px-4 py-3 text-right font-mono font-bold bg-emerald-500/5 border-r border-[var(--color-charcoal-grey)] transition-all" [class.text-emerald-400]="mejorActual !== null" [class.text-[var(--color-storm-cloud)]]="mejorActual === null">
+                      {{ mejorActual !== null ? (mejorActual | currency) : 'Sin ofertas' }}
+                    </td>
+
+                    <td class="px-4 py-3 bg-[var(--color-cyan-spark)]/5">
+                      <div class="relative w-32">
+                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]">$</span>
+                        <input type="number" min="0" step="0.01" [(ngModel)]="rowState.miImporte" [disabled]="!isLive"
+                          class="w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] pl-6 pr-3 py-1.5 text-[13px] font-mono text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none disabled:opacity-50 transition-colors" />
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 bg-[var(--color-cyan-spark)]/5">
+                      <select [(ngModel)]="rowState.idMoneda" [disabled]="!isLive" class="w-28 rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-2 py-1.5 text-[12px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none disabled:opacity-50">
+                        @for (m of monedas(); track m.idMoneda) {
+                          <option [value]="m.idMoneda">{{ m.simbolo }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td class="px-4 py-3 text-right font-mono font-[590] text-[var(--color-neon-lime)] bg-[var(--color-cyan-spark)]/5 border-r border-[var(--color-charcoal-grey)]">
+                      {{ calcularTotalFila(rowId) | currency }}
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                      <div class="inline-flex rounded-lg border border-[var(--color-charcoal-grey)] p-0.5 bg-[var(--color-pitch-black)] relative z-20">
+                        <button (click)="toggleOfertar(rowId, true)" [disabled]="!isLive"
+                                [class]="rowState.ofertar ? 'bg-[var(--color-neon-lime)] text-black font-[590]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"
+                                class="px-3 py-1 text-[11px] rounded-md transition-colors disabled:opacity-50">Sí</button>
+                        <button (click)="toggleOfertar(rowId, false)" [disabled]="!isLive"
+                                [class]="!rowState.ofertar ? 'bg-red-500/20 text-red-400 font-[590]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"
+                                class="px-3 py-1 text-[11px] rounded-md transition-colors disabled:opacity-50">No</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="xl:col-span-1 space-y-6 sticky top-6">
+        
+        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-center shadow-lg">
+          <h2 class="text-[13px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-4">Tiempo Restante</h2>
+          <div class="flex items-center justify-center gap-3 mb-2">
+            <lucide-icon name="clock" [size]="28" [class.text-[var(--color-neon-lime)]]="isLive" [class.text-[var(--color-storm-cloud)]]="!isLive"></lucide-icon>
+            <span class="text-[36px] font-mono font-[590] transition-colors" [class.text-[var(--color-neon-lime)]]="isLive" [class.text-[var(--color-storm-cloud)]]="!isLive">{{ timeLeft }}</span>
+          </div>
+          @if (subasta()!.especificacion?.fechaFinalizacionSubasta) {
+            <p class="text-[12px] text-[var(--color-fog-grey)]">Cierra: {{ subasta()!.especificacion.fechaFinalizacionSubasta | date:'dd/MM/yyyy HH:mm:ss' }}</p>
           }
         </div>
 
-        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-[18px] font-[590] text-[var(--color-porcelain)]">Ofertas en Tiempo Real</h2>
-            <span class="text-[12px] text-[var(--color-storm-cloud)]">{{ ofertas().length }} ofertas</span>
+        @if (isLive || subasta()?.estado === 'Finalizada') {
+          <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6 shadow-[0_0_15px_rgba(245,158,11,0.05)]">
+            <div class="flex flex-col items-center text-center gap-3">
+              <lucide-icon name="shield-alert" [size]="32" class="text-amber-400"></lucide-icon>
+              <div>
+                <h3 class="text-[15px] font-[590] text-[var(--color-porcelain)] mb-1">Garantía / Pagaré</h3>
+                <p class="text-[12px] text-[var(--color-storm-cloud)] mb-4">Requisito obligatorio para validar tus ofertas.</p>
+                <button (click)="openGarantiasModal()" class="w-full rounded-xl bg-amber-500 px-5 py-2.5 text-[13px] font-[590] text-black transition-all hover:brightness-110 shadow-md">
+                  Gestionar Garantías
+                </button>
+              </div>
+            </div>
           </div>
+        }
+
+        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 shadow-lg flex flex-col" style="max-height: calc(100vh - 450px);">
+          <div class="flex items-center justify-between mb-4 pb-4 border-b border-[var(--color-charcoal-grey)] shrink-0">
+            <h2 class="text-[14px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2">
+              <lucide-icon name="activity" [size]="16" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+              Feed de Pujas
+            </h2>
+            <span class="text-[11px] bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] px-2 py-0.5 rounded-full">{{ ofertas().length }}</span>
+          </div>
+
           @if (ofertas().length === 0) {
-            <div class="py-12 text-center text-[var(--color-storm-cloud)]">
-              <lucide-icon name="inbox" [size]="32" class="mb-3"></lucide-icon>
-              <p>Aún no hay ofertas para esta subasta</p>
+            <div class="py-12 text-center text-[var(--color-storm-cloud)] flex-1">
+              <lucide-icon name="inbox" [size]="32" class="mx-auto mb-3 opacity-50"></lucide-icon>
+              <p class="text-[13px]">Aún no hay actividad en la sala.</p>
             </div>
           } @else {
-            <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
-              @for (oferta of ofertas().slice(-20).reverse(); track $index) {
-                <div class="flex items-center justify-between rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/30 px-4 py-3" [class.border-[var(--color-neon-lime)]/20]="mejorOferta() === oferta">
-                  <div class="flex items-center gap-3">
-                    <div class="size-8 rounded-full bg-[var(--color-cyan-spark)]/10 flex items-center justify-center">
-                      <lucide-icon name="user" [size]="14" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-                    </div>
-                    <div>
-                      <p class="text-[13px] text-[var(--color-porcelain)]">Proveedor #{{ oferta.idProveedor }}</p>
-                      <p class="text-[11px] text-[var(--color-fog-grey)]">{{ oferta.fecha | date:'HH:mm:ss' }}</p>
-                    </div>
+            <div class="space-y-3 overflow-y-auto pr-2 flex-1 custom-scrollbar">
+              @for (oferta of ofertas().slice(-50).reverse(); track $index) {
+                <div class="flex items-start gap-3 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-3 relative overflow-hidden group">
+                  <div class="absolute left-0 top-0 bottom-0 w-1 bg-[var(--color-charcoal-grey)] group-hover:bg-[var(--color-cyan-spark)] transition-colors"></div>
+                  
+                  <div class="size-8 rounded-full bg-[var(--color-deep-slate)] flex items-center justify-center shrink-0 border border-[var(--color-charcoal-grey)]">
+                    <lucide-icon name="user" [size]="14" class="text-[var(--color-storm-cloud)]"></lucide-icon>
                   </div>
-                  <div class="text-right">
-                    <p class="text-[20px] font-mono font-[590] text-[var(--color-neon-lime)]">${{ oferta.monto | number:'1.2-2' }}</p>
-                    @if (mejorOferta() === oferta) {
-                      <span class="text-[10px] text-[var(--color-neon-lime)]">Mejor oferta</span>
-                    }
+                  
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                      <p class="text-[12px] font-[590] text-[var(--color-porcelain)] truncate">
+                        {{ isDirecta ? 'Oferente' : 'Proveedor' }} #{{ oferta.idProveedor }}
+                      </p>
+                      <span class="text-[10px] text-[var(--color-fog-grey)]">{{ oferta.fecha | date:'HH:mm:ss' }}</span>
+                    </div>
+                    <div class="flex items-end justify-between mt-1">
+                      <p class="text-[10px] text-[var(--color-storm-cloud)] uppercase tracking-wider">Monto ofertado</p>
+                      <p class="text-[15px] font-mono font-[590] text-[var(--color-cyan-spark)]">${{ oferta.monto | number:'1.2-2' }}</p>
+                    </div>
                   </div>
                 </div>
               }
             </div>
           }
         </div>
-      </div>
-
-      <div>
-        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 sticky top-6">
-          <h2 class="text-[18px] font-[590] text-[var(--color-porcelain)] mb-4">Enviar Oferta</h2>
-          @if (!signalR.connected()) {
-            <p class="text-[13px] text-[var(--color-storm-cloud)]">Conectando al servidor de subastas...</p>
-          } @else if (!isLive) {
-            <p class="text-[13px] text-[var(--color-storm-cloud)]">Subasta finalizada</p>
-          } @else {
-            <div class="space-y-4">
-              <div>
-                <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Monto de tu oferta</label>
-                <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]">$</span>
-                  <input type="number" [ngModel]="montoOferta()" (ngModelChange)="montoOferta.set($event)" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] pl-8 pr-4 py-3 text-[16px] font-mono text-[var(--color-porcelain)]" placeholder="0.00" step="0.01" min="0" />
-                </div>
-                @if (mejorOferta()) {
-                  <p class="mt-1 text-[11px] text-[var(--color-storm-cloud)]">Mejor oferta actual: ${{ mejorOferta()!.monto | number:'1.2-2' }}</p>
-                }
-              </div>
-              <button (click)="enviarOferta()" [disabled]="ofertando() || !montoOferta()" class="w-full rounded-xl bg-[var(--color-neon-lime)] py-3 text-[14px] font-[590] text-black transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed">
-                @if (ofertando()) {
-                  <span class="flex items-center justify-center gap-2"><lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>Enviando...</span>
-                } @else {
-                  <span class="flex items-center justify-center gap-2"><lucide-icon name="send" [size]="16"></lucide-icon>Enviar Oferta</span>
-                }
-              </button>
-            </div>
-          }
-        </div>
+        
       </div>
     </div>
   }
 </div>
+
+<app-modal [isOpen]="isGarantiasModalOpen()" title="Garantías / Pagarés de Mantenimiento" subtitle="Adjuntá la documentación requerida" maxWidthClass="max-w-3xl" (close)="closeGarantiasModal()">
+  <div class="p-6">
+    <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-5 mb-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="mb-1 block text-[11px] uppercase tracking-widest text-[var(--color-storm-cloud)]">Tipo de Documento</label>
+          <select [(ngModel)]="garantiaForm.idTipoDocumento" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]">
+            <option [value]="0">-- Seleccionar --</option>
+            <option [value]="1">Póliza de Caución</option>
+            <option [value]="2">Pagaré</option>
+          </select>
+        </div>
+        
+        @if (garantiaForm.idTipoDocumento === 1 || garantiaForm.idTipoDocumento === 2) {
+          <div>
+            <label class="mb-1 block text-[11px] uppercase tracking-widest text-[var(--color-storm-cloud)]">Moneda</label>
+            <select [(ngModel)]="garantiaForm.idMoneda" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]">
+              <option [value]="0">-- Seleccione la moneda --</option>
+              @for (m of monedas(); track m.idMoneda) { <option [value]="m.idMoneda">{{ m.nombre }}</option> }
+            </select>
+          </div>
+        }
+      </div>
+
+      @if (garantiaForm.idTipoDocumento === 1) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 animate-fade-in">
+          <div>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Compañía Aseguradora</label>
+            <input type="text" [(ngModel)]="garantiaForm.companiaAseguradora" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Número de Póliza</label>
+            <input type="text" [(ngModel)]="garantiaForm.nroPoliza" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Monto Caución</label>
+            <input type="number" [(ngModel)]="garantiaForm.montoCaucion" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Observaciones</label>
+            <input type="text" [(ngModel)]="garantiaForm.observacion" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
+          </div>
+        </div>
+      }
+
+      @if (garantiaForm.idTipoDocumento === 2) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 animate-fade-in">
+          <div>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Monto Pagaré</label>
+            <input type="number" [(ngModel)]="garantiaForm.montoPagare" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Fecha de Confección</label>
+            <input type="date" [(ngModel)]="garantiaForm.fechaPagare" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
+          </div>
+        </div>
+      }
+
+      @if (garantiaForm.idTipoDocumento !== 0) {
+        <div class="mt-6 flex items-center gap-4">
+          <div class="flex-1">
+            <input type="file" id="fileGuaranty" class="hidden" (change)="onFileGarantiaSelected($event)" accept=".pdf,.png,.jpg,.jpeg">
+            <label for="fileGuaranty" class="flex items-center justify-center gap-2 w-full rounded-xl border-2 border-dashed border-[var(--color-cyan-spark)]/40 bg-[var(--color-cyan-spark)]/5 px-4 py-6 text-[13px] font-[590] text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors cursor-pointer">
+              <lucide-icon name="upload" [size]="18"></lucide-icon>
+              {{ garantiaForm.archivo ? garantiaForm.archivo.name : 'Subir Archivo Digitalizado (Máx 20MB)' }}
+            </label>
+          </div>
+          <button (click)="guardarGarantia()" [disabled]="!garantiaForm.archivo || savingGarantia()" class="rounded-xl bg-[var(--color-neon-lime)] px-8 py-6 text-[14px] font-[590] text-black transition-all hover:brightness-110 disabled:opacity-50">
+            @if (savingGarantia()) { <lucide-icon name="loader-2" [size]="18" class="animate-spin"></lucide-icon> }
+            @else { Guardar }
+          </button>
+        </div>
+      }
+    </div>
+
+    <h4 class="text-[13px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3">Documentos Registrados</h4>
+    <div class="overflow-x-auto rounded-xl border border-[var(--color-charcoal-grey)]">
+      <table class="w-full text-left text-[13px]">
+        <thead class="bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
+          <tr>
+            <th class="px-4 py-3">Tipo</th>
+            <th class="px-4 py-3">Aseguradora / Fecha</th>
+            <th class="px-4 py-3 text-right">Monto</th>
+            <th class="px-4 py-3 text-center">Archivo</th>
+            <th class="px-4 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30">
+          @for (g of garantiasList(); track g.idGarantia) {
+            <tr class="hover:bg-[var(--color-deep-slate)]/40 transition-colors">
+              <td class="px-4 py-3 font-[590] text-[var(--color-porcelain)]">{{ g.idTipoDocumento === 1 ? 'Póliza' : 'Pagaré' }}</td>
+              <td class="px-4 py-3 text-[var(--color-light-steel)]">{{ g.companiaAseguradora || (g.fechaPagare | date:'dd/MM/yyyy') }}</td>
+              <td class="px-4 py-3 text-right font-mono text-[var(--color-cyan-spark)]">${{ (g.montoCaucion || g.montoPagare) | number:'1.2-2' }}</td>
+              <td class="px-4 py-3 text-center">
+                <a [href]="g.urlArchivo" target="_blank" title="Descargar" class="inline-flex items-center gap-1 text-[var(--color-cyan-spark)] hover:underline">
+                  <lucide-icon name="download" [size]="14"></lucide-icon>
+                </a>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button (click)="eliminarGarantia(g.idGarantia)" class="p-1.5 rounded bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors">
+                  <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="px-4 py-8 text-center text-[var(--color-storm-cloud)]">Aún no cargaste ninguna garantía.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</app-modal>
