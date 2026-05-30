@@ -42,6 +42,7 @@ export interface ReservaDetalle {
   plazoEntregaHasta?: string;
   idEstado?: number;
   descripcionEstado?: string;
+  cantidadRestante?: number;
 }
 
 export interface ReservaDetalleRequest {

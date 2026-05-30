@@ -1,0 +1,179 @@
+<div class="mx-auto max-w-7xl py-6">
+  <div class="mb-6">
+    <h1 class="text-[24px] font-[590] tracking-tight text-[var(--color-porcelain)]">Listado de Subastas</h1>
+    <p class="text-[14px] text-[var(--color-storm-cloud)]">Buscá subastas por ejercicio, número, fechas o expediente</p>
+  </div>
+
+  <div class="mb-6 rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] p-5">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div>
+        <label class="mb-1 block text-[12px] font-[500] text-[var(--color-storm-cloud)] uppercase tracking-widest">Ejercicio</label>
+        <select class="w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 py-2 text-[13px] text-[var(--color-porcelain)] focus:border-[var(--color-neon-lime)] focus:outline-none" [ngModel]="filtros.idVigencia" (ngModelChange)="onVigenciaChange($event)">
+          <option [ngValue]="null">Todos</option>
+          <option *ngFor="let v of vigencias()" [ngValue]="v.idVigencia">{{ v.ejercicio }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-[12px] font-[500] text-[var(--color-storm-cloud)] uppercase tracking-widest">Número</label>
+        <input type="text" placeholder="Nro." class="w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 py-2 text-[13px] text-[var(--color-porcelain)] placeholder-[var(--color-storm-cloud)] focus:border-[var(--color-neon-lime)] focus:outline-none" [ngModel]="filtros.nro" (ngModelChange)="filtros.nro = $event" />
+      </div>
+      <div>
+        <label class="mb-1 block text-[12px] font-[500] text-[var(--color-storm-cloud)] uppercase tracking-widest">Fecha Inicio</label>
+        <input type="date" class="w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 py-2 text-[13px] text-[var(--color-porcelain)] focus:border-[var(--color-neon-lime)] focus:outline-none" [ngModel]="filtros.fechaDesde" (ngModelChange)="filtros.fechaDesde = $event" />
+      </div>
+      <div>
+        <label class="mb-1 block text-[12px] font-[500] text-[var(--color-storm-cloud)] uppercase tracking-widest">Fecha Fin</label>
+        <input type="date" class="w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 py-2 text-[13px] text-[var(--color-porcelain)] focus:border-[var(--color-neon-lime)] focus:outline-none" [ngModel]="filtros.fechaHasta" (ngModelChange)="filtros.fechaHasta = $event" />
+      </div>
+      <div>
+        <label class="mb-1 block text-[12px] font-[500] text-[var(--color-storm-cloud)] uppercase tracking-widest">Expediente</label>
+        <input type="text" placeholder="Nro. Expte." class="w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 py-2 text-[13px] text-[var(--color-porcelain)] placeholder-[var(--color-storm-cloud)] focus:border-[var(--color-neon-lime)] focus:outline-none" [ngModel]="filtros.expte" (ngModelChange)="filtros.expte = $event" />
+      </div>
+    </div>
+    <div class="mt-4 flex justify-end">
+      <button class="rounded-lg bg-[var(--color-neon-lime)] px-8 py-2.5 text-[13px] font-[600] text-[var(--color-pitch-black)] hover:bg-[var(--color-neon-lime)]/90 flex items-center gap-2 transition-all" (click)="buscar()">
+        <lucide-icon name="search" [size]="16"></lucide-icon> Buscar
+      </button>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] overflow-hidden">
+    
+    <div *ngIf="loading()" class="flex items-center justify-center py-16">
+      <lucide-icon name="loader-2" [size]="32" class="animate-spin text-[var(--color-neon-lime)]"></lucide-icon>
+    </div>
+
+    <div *ngIf="!loading() && listado().length === 0" class="py-16 text-center">
+      <lucide-icon name="search-x" [size]="48" class="mx-auto mb-4 text-[var(--color-storm-cloud)] opacity-50"></lucide-icon>
+      <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">No se encontraron subastas</p>
+      <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Intentá ajustando los filtros de búsqueda.</p>
+    </div>
+
+    <div *ngIf="!loading() && listado().length > 0" class="overflow-x-auto">
+      <table class="w-full text-[13px]">
+        <thead>
+          <tr class="border-b border-[var(--color-charcoal-grey)] bg-[#448b54] text-white">
+            <th class="px-4 py-3.5 text-left font-[600] uppercase tracking-wider text-[11px]">Número</th>
+            <th class="px-4 py-3.5 text-left font-[600] uppercase tracking-wider text-[11px]">Área</th>
+            <th class="px-4 py-3.5 text-left font-[600] uppercase tracking-wider text-[11px]">Objeto Contratación</th>
+            <th class="px-4 py-3.5 text-left font-[600] uppercase tracking-wider text-[11px]">Tipo</th>
+            <th class="px-4 py-3.5 text-center font-[600] uppercase tracking-wider text-[11px]">Adjudicación</th>
+            <th class="px-4 py-3.5 text-left font-[600] uppercase tracking-wider text-[11px] w-28">Fechas</th>
+            <th class="px-4 py-3.5 text-right font-[600] uppercase tracking-wider text-[11px] min-w-[200px]">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--color-charcoal-grey)]/50">
+          <tr *ngFor="let item of listado()" class="hover:bg-[var(--color-graphite)]/40 transition-colors">
+            <td class="px-4 py-4 font-[590] text-[var(--color-porcelain)] whitespace-nowrap">{{ item.nroCotizacion }}</td>
+            <td class="px-4 py-4 text-[var(--color-light-steel)]">{{ item.unidadAdm || '-' }}</td>
+            <td class="px-4 py-4 text-[var(--color-porcelain)]" [title]="item.objetoContratacion">
+              {{ reducirTexto(item.objetoContratacion || item.titulo) }}
+            </td>
+            <td class="px-4 py-4 text-[var(--color-light-steel)]">{{ item.tipoContratacion }}</td>
+            <td class="px-4 py-4 text-center">
+              <span class="inline-flex rounded border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2 py-0.5 text-[11px] text-[var(--color-storm-cloud)]">
+                {{ item.criterioAdjudicacion === 1 ? 'Por renglón' : 'Por ítem' }}
+              </span>
+            </td>
+            <td class="px-4 py-4">
+                <p class="text-[12px] text-[var(--color-porcelain)] whitespace-nowrap"><span class="text-[var(--color-storm-cloud)] text-[10px] uppercase">Inicio:</span> {{ formatearFechaYHora(item.fechaInicio) }}</p>
+                <p class="text-[12px] text-[var(--color-porcelain)] whitespace-nowrap"><span class="text-[var(--color-storm-cloud)] text-[10px] uppercase">Cierre:</span> {{ formatearFechaYHora(item.fechaFin) }}</p>
+            </td>
+            
+            <td class="px-4 py-4">
+              <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                
+                <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verObservaciones(item.fechaLimiteImpugnar)" 
+                        (click)="accionNoImplementada('Observaciones Proveedor')" 
+                        class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-neon-lime)] hover:bg-[var(--color-graphite)] transition-colors" title="Ingresar Observaciones">
+                  <lucide-icon name="message-circle" [size]="18"></lucide-icon>
+                </button>
+
+                <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verSobre2(item.fechaAperturaSobreDos) && item.tipoSobre === 'D'" 
+                        (click)="accionNoImplementada('Ofertas Proveedor Lic')" 
+                        class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-graphite)] transition-colors" title="Ver ofertas Proveedores">
+                  <lucide-icon name="circle-dollar-sign" [size]="18"></lucide-icon>
+                </button>
+
+                <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verSobre1(item.fechaAperturaSobreUno) && item.tipoSobre === 'S'" 
+                        (click)="accionNoImplementada('Ofertas Proveedor Lic')" 
+                        class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-graphite)] transition-colors" title="Ver ofertas Proveedores">
+                  <lucide-icon name="circle-dollar-sign" [size]="18"></lucide-icon>
+                </button>
+
+                <button *ngIf="(item.verInformeFinal || auth.isSuperAdmin()) && verActaPrelacion(item.fechaFinSubasta) && item.idTipoContratacion === TIPO_INVERSA" 
+                        (click)="accionNoImplementada('Acta Prelación')" 
+                        class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-emerald-400 hover:bg-[var(--color-graphite)] transition-colors" title="Informe final de subasta">
+                  <lucide-icon name="file-badge" [size]="18"></lucide-icon>
+                </button>
+
+                <a *ngIf="(item.idTipoContratacion === TIPO_INVERSA && item.idTipoContratacion !== TIPO_LICITACION && item.idTipoContratacion !== TIPO_COMPULSA)" 
+                   [routerLink]="['/compra-venta/subastas', item.idCotizacion]"
+                   class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-graphite)] transition-colors" title="Subastar (Inversa)">
+                  <lucide-icon name="list" [size]="18"></lucide-icon>
+                </a>
+
+                <a *ngIf="item.idTipoContratacion === TIPO_DIRECTA" 
+                   [routerLink]="['/compra-venta/subastas', item.idCotizacion]"
+                   class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-graphite)] transition-colors" title="Subastar (Directa)">
+                  <lucide-icon name="list" [size]="18"></lucide-icon>
+                </a>
+
+                <button (click)="accionNoImplementada('Preguntas')" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-graphite)] transition-colors" title="Preguntas">
+                  <lucide-icon name="help-circle" [size]="18"></lucide-icon>
+                </button>
+
+                <button (click)="accionNoImplementada('Pliegos')" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-graphite)] transition-colors" title="Pliegos">
+                  <lucide-icon name="file-text" [size]="18"></lucide-icon>
+                </button>
+
+                <button *ngIf="item.idEstado === 40" 
+                        (click)="accionNoImplementada('Cargar Documentación')" 
+                        class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-neon-lime)] hover:bg-[var(--color-graphite)] transition-colors" title="Cargar Documentación">
+                  <lucide-icon name="upload" [size]="18"></lucide-icon>
+                </button>
+
+                <button *ngIf="item.idTipoContratacion === TIPO_CONT_DIRECTA" 
+                        (click)="accionNoImplementada('Contratación Directa')" 
+                        class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-aether-blue)] hover:bg-[var(--color-graphite)] transition-colors" title="Contratación Directa">
+                  <lucide-icon name="briefcase" [size]="18"></lucide-icon>
+                </button>
+
+                <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA)" 
+                        (click)="accionNoImplementada('Cargar Licitación')" 
+                        class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-aether-blue)] hover:bg-[var(--color-graphite)] transition-colors" title="Licitación">
+                  <lucide-icon name="briefcase" [size]="18"></lucide-icon>
+                </button>
+
+                <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verSobre1(item.fechaAperturaSobreUno)" 
+                        (click)="accionNoImplementada('Actas Sobre 1')" 
+                        class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-emerald-400 hover:bg-[var(--color-graphite)] transition-colors" title="Actas (Sobre 1)">
+                  <lucide-icon name="mail" [size]="18"></lucide-icon>
+                </button>
+
+                <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verSobre2(item.fechaAperturaSobreDos)" 
+                        (click)="accionNoImplementada('Actas Sobre 2')" 
+                        class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-emerald-400 hover:bg-[var(--color-graphite)] transition-colors" title="Actas (Sobre 2)">
+                  <lucide-icon name="mail-open" [size]="18"></lucide-icon>
+                </button>
+
+                <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION && item.mostrarBotonMejora)" 
+                        (click)="accionNoImplementada('Mejora Precio')" 
+                        class="p-1.5 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-[var(--color-graphite)] transition-colors" title="Mejora de Precio">
+                  <lucide-icon name="trending-down" [size]="18"></lucide-icon>
+                </button>
+
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="!loading() && listado().length > 0" class="border-t border-[var(--color-charcoal-grey)] px-4 py-3 bg-[var(--color-pitch-black)]/30">
+      <p class="text-[12px] text-[var(--color-storm-cloud)]">
+        Mostrando {{ listado().length }} resultado{{ listado().length !== 1 ? 's' : '' }}. Refiná la búsqueda para obtener resultados más precisos.
+      </p>
+    </div>
+  </div>
+</div>

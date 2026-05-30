@@ -112,4 +112,8 @@ export class ReservaService {
   getCategoriasProgramaticas(): Observable<OperationResponse<any[]>> {
     return this.http.get<OperationResponse<any[]>>(`${this.apiUrl}/CategoriaProgramatica`);
   }
+
+  desautorizarItem(idDetalle: number): Observable<OperationResponse<boolean>> {
+    return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/ReservaDetalle/${idDetalle}/desautorizar`, {});
+  }
 }
