@@ -87,4 +87,20 @@ export class CotizacionService {
   eliminarGarantia(id: number): Observable<OperationResponse<boolean>> {
     return this.http.delete<OperationResponse<boolean>>(`${environment.apiUrl}/Garantia/${id}`);
   }
+
+  desistirParticipacion(idCotizacion: number): Observable<OperationResponse<boolean>> {
+    return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/${idCotizacion}/proveedor-desistir`, {});
+  }
+
+  getDocumentos(idCotizacion: number): Observable<OperationResponse<any[]>> {
+    return this.http.get<OperationResponse<any[]>>(`${this.apiUrl}/${idCotizacion}/Documento`);
+  }
+
+  subirDocumento(idCotizacion: number, formData: FormData): Observable<OperationResponse<any>> {
+    return this.http.post<OperationResponse<any>>(`${this.apiUrl}/${idCotizacion}/Documento`, formData);
+  }
+
+  eliminarDocumento(idCotizacion: number, idDocumento: number): Observable<OperationResponse<boolean>> {
+    return this.http.delete<OperationResponse<boolean>>(`${this.apiUrl}/${idCotizacion}/Documento/${idDocumento}`);
+  }
 }

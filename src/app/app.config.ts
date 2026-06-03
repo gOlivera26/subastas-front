@@ -9,7 +9,8 @@ import {
   Play, Plus, Trash2, Building, Building2, ChevronDown, Info, Sun, Moon, PanelLeft, PanelLeftClose,
   List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
   Banknote, Network, Upload, LayoutDashboard, Clock, Construction, BarChart, RotateCcw, Copy, Send, HelpCircle, SearchX, Inbox,
-  FileBadge, History, TrendingDown, MessageSquareDashed, ShieldAlert, MailOpen,Image, PieChart
+  FileBadge, History, TrendingDown, MessageSquareDashed, ShieldAlert, MailOpen,Image, PieChart, MessageSquare, Download,
+  FileX
 
 } from 'lucide-angular/src/icons';
 import { routes } from './app.routes';
@@ -33,8 +34,8 @@ export const appConfig: ApplicationConfig = {
         Calendar, CheckCircle, AlertCircle, Play, Plus, Trash2, Building, Building2, ChevronDown, Info,
         Sun, Moon, PanelLeft, PanelLeftClose, List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
         Banknote, Network, Upload, LayoutDashboard, Clock, Construction, BarChart, RotateCcw, Copy, Send, HelpCircle, SearchX, Inbox,
-        FileBadge, History, TrendingDown, MessageSquareDashed, ShieldAlert, MailOpen,
-        Image, PieChart
+        FileBadge, History, TrendingDown, MessageSquareDashed, ShieldAlert, MailOpen, MessageSquare,
+        Image, PieChart, Download, FileX
       }),
       multi: true,
     },
