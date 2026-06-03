@@ -10,21 +10,32 @@
     </div>
   } @else {
     <div class="mb-6">
-      <a routerLink="/compra-venta" class="inline-flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] mb-4 transition-colors">
-        <lucide-icon name="arrow-left" [size]="16"></lucide-icon> Volver al Dashboard
+      <a routerLink="/compra-venta/subastas" class="inline-flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] mb-4 transition-colors">
+        <lucide-icon name="arrow-left" [size]="16"></lucide-icon> Volver al Listado
       </a>
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 class="text-[24px] font-[590] text-[var(--color-porcelain)]">{{ subasta()!.titulo }}</h1>
-          <p class="text-[14px] text-[var(--color-storm-cloud)]">#{{ subasta()!.nroCotizacion }} · {{ subasta()!.tipo }} · Margen de Mejora: <strong class="text-[var(--color-cyan-spark)]">{{ subasta()!.especificacion?.margenMejora }}%</strong></p>
+          <h1 class="text-[24px] font-[590] text-[var(--color-porcelain)] tracking-tight">{{ subasta()!.titulo }}</h1>
+          <p class="text-[14px] text-[var(--color-storm-cloud)] font-mono mt-1">
+            TERMINAL ID: #{{ subasta()!.nroCotizacion }} <span class="mx-2">|</span> {{ subasta()!.tipo }} <span class="mx-2">|</span> MARGEN: <strong class="text-[var(--color-cyan-spark)]">{{ subasta()!.especificacion?.margenMejora }}%</strong>
+          </p>
         </div>
         <div class="flex items-center gap-3">
+          
+          @if (isLive && !haDesistido() && !auth.isSuperAdmin()) {
+            <button (click)="desistirDeSubasta()" [disabled]="desistiendo()" class="rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-2 text-[12px] font-[600] uppercase tracking-wider text-red-400 transition-all hover:bg-red-500 hover:text-white disabled:opacity-50 flex items-center gap-2">
+              @if (desistiendo()) { <lucide-icon name="loader-2" [size]="14" class="animate-spin"></lucide-icon> }
+              @else { <lucide-icon name="user-minus" [size]="14"></lucide-icon> }
+              Desistir
+            </button>
+          }
+
           @if (isLive) {
-            <span class="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 text-[14px] font-[590] border border-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.15)]">
-              <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>En vivo
+            <span class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)] text-[14px] font-[600] border border-[var(--color-neon-lime)]/30 tracking-widest uppercase shadow-[0_0_15px_rgba(228,242,34,0.15)]">
+              <span class="size-2 rounded-full bg-[var(--color-neon-lime)] animate-pulse"></span>En vivo
             </span>
           } @else {
-            <span class="px-4 py-2 rounded-full bg-[var(--color-charcoal-grey)] text-[var(--color-storm-cloud)] text-[14px] font-[590]">Finalizada</span>
+            <span class="px-4 py-2 rounded-lg bg-[var(--color-charcoal-grey)] text-[var(--color-storm-cloud)] text-[14px] font-[600] uppercase tracking-widest">Finalizada</span>
           }
         </div>
       </div>
@@ -33,173 +44,252 @@
     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
       
       <div class="xl:col-span-3 space-y-6">
+        
         <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 shadow-lg overflow-hidden relative">
           
           @if (!isLive) {
-            <div class="absolute inset-0 z-20 bg-[var(--color-pitch-black)]/60 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
-              <lucide-icon name="lock" [size]="40" class="text-[var(--color-storm-cloud)] mb-2 opacity-50"></lucide-icon>
-              <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">Sala Cerrada</p>
-              <p class="text-[13px] text-[var(--color-storm-cloud)]">La subasta ha finalizado o aún no comienza.</p>
+            <div class="absolute inset-0 z-20 bg-[var(--color-pitch-black)]/70 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-none">
+              <lucide-icon name="lock" [size]="48" class="text-[var(--color-storm-cloud)] mb-4 opacity-50"></lucide-icon>
+              <p class="text-[18px] font-[590] uppercase tracking-widest text-[var(--color-porcelain)]">Sala Cerrada</p>
+              <p class="text-[13px] text-[var(--color-storm-cloud)] mt-2">La subasta ha finalizado o aún no comienza.</p>
             </div>
           }
 
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-[16px] font-[590] uppercase tracking-widest text-[var(--color-porcelain)] flex items-center gap-2">
-              <lucide-icon name="list" [size]="18" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-              Panel de Ofertas ({{ isPorRenglon ? 'Por Renglón' : 'Por Ítem' }})
-            </h2>
-            <button (click)="enviarOfertasSeleccionadas()" [disabled]="ofertando() || !isLive" class="relative z-30 rounded-xl bg-[var(--color-neon-lime)] px-6 py-2.5 text-[13px] font-[590] text-black transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-[0_0_15px_rgba(228,242,34,0.15)]">
-              @if (ofertando()) {
-                <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon> Procesando...
-              } @else {
-                <lucide-icon name="send" [size]="16"></lucide-icon> Confirmar Pujas
-              }
-            </button>
-          </div>
-
-          <div class="overflow-x-auto rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]">
-            <table class="w-full text-left text-[13px] whitespace-nowrap">
-              <thead class="bg-[var(--color-deep-slate)]/80 text-[11px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
-                <tr>
-                  <th class="px-4 py-3.5 w-10"></th>
-                  <th class="px-4 py-3.5">Detalle</th>
-                  <th class="px-4 py-3.5 text-center">Cant.</th>
-                  <th class="px-4 py-3.5 text-right border-r border-[var(--color-charcoal-grey)]">Precio Base</th>
-                  <th class="px-4 py-3.5 text-right bg-emerald-500/5 text-emerald-400 border-r border-[var(--color-charcoal-grey)]">Mejor Oferta Actual</th>
-                  <th class="px-4 py-3.5 bg-[var(--color-cyan-spark)]/5">Mi Precio Unit.</th>
-                  <th class="px-4 py-3.5 bg-[var(--color-cyan-spark)]/5">Moneda Oferta</th>
-                  <th class="px-4 py-3.5 text-right bg-[var(--color-cyan-spark)]/5 border-r border-[var(--color-charcoal-grey)]">Mi Total</th>
-                  <th class="px-4 py-3.5 text-center">Pujar</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-[var(--color-charcoal-grey)] relative z-10">
-                @for (item of elementosOfertables(); track isPorRenglon ? item.idRenglon : item.idCotizacionDetalle) {
-                  @let rowId = isPorRenglon ? item.idRenglon : item.idCotizacionDetalle;
-                  @let rowState = ofertasForm()[rowId];
-                  @let mejorActual = getMejorOferta(rowId);
-
-                  <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors" [class.bg-[var(--color-neon-lime)]/5]="rowState.ofertar">
-                    <td class="px-4 py-3 text-center">
-                      <button title="Ver historial de este ítem" class="p-1.5 rounded-lg text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors">
-                        <lucide-icon name="history" [size]="16"></lucide-icon>
-                      </button>
-                    </td>
-                    <td class="px-4 py-3">
-                      <p class="font-[590] text-[var(--color-porcelain)]">{{ item.nItem || item.descripcion || 'Sin nombre' }}</p>
-                      @if (isPorRenglon) {<p class="text-[11px] text-[var(--color-storm-cloud)]">Renglón #{{ item.numeroRenglon }}</p>}
-                    </td>
-                    <td class="px-4 py-3 text-center text-[var(--color-storm-cloud)]">{{ isPorRenglon ? '-' : item.cantidad }}</td>
-                    <td class="px-4 py-3 text-right font-mono text-[var(--color-fog-grey)] border-r border-[var(--color-charcoal-grey)]">
-                      {{ (isPorRenglon ? 0 : item.importeBase) | currency }}
-                    </td>
-                    
-                    <td class="px-4 py-3 text-right font-mono font-bold bg-emerald-500/5 border-r border-[var(--color-charcoal-grey)] transition-all" [class.text-emerald-400]="mejorActual !== null" [class.text-[var(--color-storm-cloud)]]="mejorActual === null">
-                      {{ mejorActual !== null ? (mejorActual | currency) : 'Sin ofertas' }}
-                    </td>
-
-                    <td class="px-4 py-3 bg-[var(--color-cyan-spark)]/5">
-                      <div class="relative w-32">
-                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]">$</span>
-                        <input type="number" min="0" step="0.01" [(ngModel)]="rowState.miImporte" [disabled]="!isLive"
-                          class="w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] pl-6 pr-3 py-1.5 text-[13px] font-mono text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none disabled:opacity-50 transition-colors" />
-                      </div>
-                    </td>
-                    <td class="px-4 py-3 bg-[var(--color-cyan-spark)]/5">
-                      <select [(ngModel)]="rowState.idMoneda" [disabled]="!isLive" class="w-28 rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-2 py-1.5 text-[12px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none disabled:opacity-50">
-                        @for (m of monedas(); track m.idMoneda) {
-                          <option [value]="m.idMoneda">{{ m.simbolo }}</option>
-                        }
-                      </select>
-                    </td>
-                    <td class="px-4 py-3 text-right font-mono font-[590] text-[var(--color-neon-lime)] bg-[var(--color-cyan-spark)]/5 border-r border-[var(--color-charcoal-grey)]">
-                      {{ calcularTotalFila(rowId) | currency }}
-                    </td>
-                    <td class="px-4 py-3 text-center">
-                      <div class="inline-flex rounded-lg border border-[var(--color-charcoal-grey)] p-0.5 bg-[var(--color-pitch-black)] relative z-20">
-                        <button (click)="toggleOfertar(rowId, true)" [disabled]="!isLive"
-                                [class]="rowState.ofertar ? 'bg-[var(--color-neon-lime)] text-black font-[590]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"
-                                class="px-3 py-1 text-[11px] rounded-md transition-colors disabled:opacity-50">Sí</button>
-                        <button (click)="toggleOfertar(rowId, false)" [disabled]="!isLive"
-                                [class]="!rowState.ofertar ? 'bg-red-500/20 text-red-400 font-[590]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"
-                                class="px-3 py-1 text-[11px] rounded-md transition-colors disabled:opacity-50">No</button>
-                      </div>
-                    </td>
-                  </tr>
+          @if (haDesistido()) {
+            <div class="flex flex-col items-center justify-center py-16 text-center">
+              <div class="mb-4 flex size-20 items-center justify-center rounded-full bg-red-500/10 text-red-400 ring-8 ring-red-500/5">
+                <lucide-icon name="user-minus" [size]="36"></lucide-icon>
+              </div>
+              <h2 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Has desistido de esta subasta</h2>
+              <p class="text-[14px] text-[var(--color-storm-cloud)] max-w-md mx-auto">
+                Declinaste tu participación. Tu decisión ha sido registrada y el panel de pujas se ha bloqueado de forma permanente.
+              </p>
+            </div>
+          } @else {
+            <div class="flex items-center justify-between mb-5 border-b border-[var(--color-charcoal-grey)] pb-4">
+              <h2 class="text-[14px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)] flex items-center gap-2">
+                <lucide-icon name="list" [size]="18" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+                Panel de Ofertas ({{ isPorRenglon ? 'Por Renglón' : 'Por Ítem' }})
+              </h2>
+              <button (click)="enviarOfertasSeleccionadas()" [disabled]="ofertando() || !isLive" class="relative z-30 rounded-lg bg-[var(--color-neon-lime)] px-8 py-3 text-[13px] font-[600] text-black uppercase tracking-wider transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-[0_0_20px_rgba(228,242,34,0.2)]">
+                @if (ofertando()) {
+                  <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon> Procesando
+                } @else {
+                  <lucide-icon name="send" [size]="16"></lucide-icon> Colocar Oferta
                 }
-              </tbody>
-            </table>
+              </button>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]">
+              <table class="w-full text-left text-[13px] whitespace-nowrap">
+                <thead class="bg-[var(--color-deep-slate)]/80 text-[10px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
+                  <tr>
+                    <th class="px-4 py-4 w-10"></th>
+                    <th class="px-4 py-4">Lote / Detalle</th>
+                    <th class="px-4 py-4 text-center">Cant.</th>
+                    <th class="px-4 py-4 text-right border-r border-[var(--color-charcoal-grey)]">Precio Base</th>
+                    <th class="px-4 py-4 text-right text-[var(--color-neon-lime)] bg-[var(--color-neon-lime)]/5 border-r border-[var(--color-charcoal-grey)]">Mejor Oferta Actual</th>
+                    <th class="px-4 py-4">Ingresar Nueva Oferta</th>
+                    <th class="px-4 py-4">Moneda</th>
+                    <th class="px-4 py-4 text-right border-r border-[var(--color-charcoal-grey)]">Mi Total</th>
+                    <th class="px-4 py-4 text-center">Confirmar</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[var(--color-charcoal-grey)] relative z-10">
+                  @for (item of elementosOfertables(); track isPorRenglon ? item.idRenglon : item.idCotizacionDetalle) {
+                    @let rowId = isPorRenglon ? item.idRenglon : item.idCotizacionDetalle;
+                    @let rowState = ofertasForm()[rowId];
+                    @let mejorActual = getMejorOferta(rowId);
+
+                    <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors" [class.bg-[var(--color-neon-lime)]/5]="rowState.ofertar" [class.bg-red-500/5]="rowState.textoError">
+                      <td class="px-4 py-4 text-center">
+                        <button title="Ver historial de este ítem" class="p-1.5 rounded-lg text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors">
+                          <lucide-icon name="history" [size]="16"></lucide-icon>
+                        </button>
+                      </td>
+                      <td class="px-4 py-4">
+                        <p class="font-[600] text-[var(--color-porcelain)] text-[14px] uppercase">{{ item.nItem || item.descripcion || 'Sin nombre' }}</p>
+                        @if (isPorRenglon) {<p class="text-[11px] text-[var(--color-storm-cloud)] mt-1 font-mono">LOTE #{{ item.numeroRenglon }}</p>}
+                      </td>
+                      <td class="px-4 py-4 text-center font-mono text-[var(--color-storm-cloud)]">{{ isPorRenglon ? '-' : item.cantidad }}</td>
+                      <td class="px-4 py-4 text-right font-mono text-[var(--color-fog-grey)] border-r border-[var(--color-charcoal-grey)]">
+                        {{ (isPorRenglon ? 0 : item.importeBase) | currency }}
+                      </td>
+                      
+                      <td class="px-4 py-4 text-right font-mono text-[16px] font-bold bg-[var(--color-neon-lime)]/5 border-r border-[var(--color-charcoal-grey)] transition-all" [class.text-[var(--color-neon-lime)]]="mejorActual !== null" [class.text-[var(--color-storm-cloud)]]="mejorActual === null">
+                        {{ mejorActual !== null ? (mejorActual | currency) : '---' }}
+                      </td>
+
+                      <td class="px-4 py-4">
+                        <div class="relative w-40">
+                          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)] font-mono">$</span>
+                          <input type="number" min="0" step="0.01" [(ngModel)]="rowState.miImporte" [disabled]="!isLive"
+                            (input)="rowState.textoError = null"
+                            class="w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] pl-7 pr-3 py-2 text-[14px] font-mono font-bold text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none disabled:opacity-50 transition-colors"
+                            [class.border-red-500]="rowState.textoError" />
+                        </div>
+                      </td>
+                      <td class="px-4 py-4">
+                        <select [(ngModel)]="rowState.idMoneda" disabled class="w-24 rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/60 px-2 py-2 text-[12px] font-mono text-[var(--color-fog-grey)] outline-none cursor-not-allowed">
+                          @for (m of monedas(); track m.idMoneda) {
+                            <option [value]="m.idMoneda">{{ m.simbolo }}</option>
+                          }
+                        </select>
+                      </td>
+                      <td class="px-4 py-4 text-right font-mono font-[600] text-[var(--color-neon-lime)] border-r border-[var(--color-charcoal-grey)]">
+                        {{ calcularTotalFila(rowId) | currency }}
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <div class="inline-flex rounded-lg border border-[var(--color-charcoal-grey)] p-1 bg-[var(--color-pitch-black)] relative z-20">
+                          <button (click)="toggleOfertar(rowId, true)" [disabled]="!isLive"
+                                  [class]="rowState.ofertar ? 'bg-[var(--color-neon-lime)] text-black font-[600]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"
+                                  class="px-4 py-1 text-[11px] uppercase tracking-wider rounded transition-colors disabled:opacity-50">Sí</button>
+                          <button (click)="toggleOfertar(rowId, false)" [disabled]="!isLive"
+                                  [class]="!rowState.ofertar ? 'bg-red-500/20 text-red-400 font-[600]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"
+                                  class="px-4 py-1 text-[11px] uppercase tracking-wider rounded transition-colors disabled:opacity-50">No</button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    @if (rowState.textoError) {
+                      <tr class="animate-fade-in">
+                        <td colspan="9" class="px-4 py-3 bg-red-500/10 border-b border-[var(--color-charcoal-grey)]">
+                          <div class="flex items-center justify-end gap-2 text-red-400 text-[12px] font-[510]">
+                            <lucide-icon name="alert-circle" [size]="14"></lucide-icon>
+                            {{ rowState.textoError }}
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 shadow-lg">
+          <div class="flex items-center justify-between mb-4 pb-4 border-b border-[var(--color-charcoal-grey)]">
+            <h2 class="text-[14px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)] flex items-center gap-2">
+              <lucide-icon name="trending-down" [size]="18" [class.text-[var(--color-cyan-spark)]]="isDirecta" [class.text-[var(--color-neon-lime)]]="!isDirecta"></lucide-icon>
+              Tendencia de Ofertas
+            </h2>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded bg-[var(--color-neon-lime)]/20 text-[var(--color-neon-lime)] text-[10px] font-bold uppercase tracking-widest animate-pulse">Live Tracking</span>
+            </div>
+          </div>
+          
+          <div class="h-[350px] w-full relative">
+            @if (ofertas().length === 0) {
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-[var(--color-storm-cloud)]">
+                <lucide-icon name="bar-chart" [size]="48" class="mb-4 opacity-30"></lucide-icon>
+                <p class="text-[14px] font-[510]">Esperando actividad de mercado...</p>
+                <p class="text-[12px] mt-1 opacity-70">El gráfico se dibujará al ingresar la primera puja.</p>
+              </div>
+            } @else {
+              <apx-chart
+                [series]="chartOptions.series!"
+                [chart]="chartOptions.chart!"
+                [xaxis]="chartOptions.xaxis!"
+                [yaxis]="chartOptions.yaxis!"
+                [stroke]="chartOptions.stroke!"
+                [colors]="chartOptions.colors!"
+                [fill]="chartOptions.fill!"
+                [dataLabels]="chartOptions.dataLabels!"
+                [theme]="chartOptions.theme!"
+                [tooltip]="chartOptions.tooltip!"
+                class="h-full w-full block">
+              </apx-chart>
+            }
           </div>
         </div>
+
       </div>
 
       <div class="xl:col-span-1 space-y-6 sticky top-6">
         
-        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-center shadow-lg">
-          <h2 class="text-[13px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-4">Tiempo Restante</h2>
-          <div class="flex items-center justify-center gap-3 mb-2">
-            <lucide-icon name="clock" [size]="28" [class.text-[var(--color-neon-lime)]]="isLive" [class.text-[var(--color-storm-cloud)]]="!isLive"></lucide-icon>
-            <span class="text-[36px] font-mono font-[590] transition-colors" [class.text-[var(--color-neon-lime)]]="isLive" [class.text-[var(--color-storm-cloud)]]="!isLive">{{ timeLeft }}</span>
-          </div>
-          @if (subasta()!.especificacion?.fechaFinalizacionSubasta) {
-            <p class="text-[12px] text-[var(--color-fog-grey)]">Cierra: {{ subasta()!.especificacion.fechaFinalizacionSubasta | date:'dd/MM/yyyy HH:mm:ss' }}</p>
-          }
+        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-center shadow-lg relative overflow-hidden transition-all duration-500"
+          [class.border-red-500]="isFinishingSoon" [class.shadow-[0_0_20px_rgba(239,68,68,0.2)]]="isFinishingSoon">
+        
+        <div class="absolute top-0 left-0 w-full h-1 transition-colors duration-500" 
+            [class.bg-[var(--color-neon-lime)]]="isLive && !isFinishingSoon" 
+            [class.bg-red-500]="isFinishingSoon || !isLive"></div>
+        
+        <h2 class="text-[11px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-4"
+            [class.text-red-400]="isFinishingSoon" [class.animate-pulse]="isFinishingSoon">Tiempo Restante</h2>
+        
+        <div class="flex items-center justify-center gap-3 mb-2">
+          <span class="text-[40px] font-mono font-bold tracking-tight transition-colors duration-500" 
+                [class.text-[var(--color-neon-lime)]]="isLive && !isFinishingSoon" 
+                [class.text-red-500]="isFinishingSoon"
+                [class.animate-pulse]="isFinishingSoon"
+                [class.text-[var(--color-storm-cloud)]]="!isLive">
+            {{ timeLeft }}
+          </span>
         </div>
+        @if (subasta()!.especificacion?.fechaFinalizacionSubasta) {
+          <p class="text-[11px] uppercase tracking-widest mt-3 transition-colors"
+             [class.text-red-400]="isFinishingSoon" [class.text-[var(--color-fog-grey)]]="!isFinishingSoon">
+            Cierra: {{ subasta()!.especificacion.fechaFinalizacionSubasta | date:'dd/MM/yyyy HH:mm:ss' }}
+          </p>
+        }
+      </div>
 
         @if (isLive || subasta()?.estado === 'Finalizada') {
-          <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6 shadow-[0_0_15px_rgba(245,158,11,0.05)]">
-            <div class="flex flex-col items-center text-center gap-3">
-              <lucide-icon name="shield-alert" [size]="32" class="text-amber-400"></lucide-icon>
-              <div>
-                <h3 class="text-[15px] font-[590] text-[var(--color-porcelain)] mb-1">Garantía / Pagaré</h3>
-                <p class="text-[12px] text-[var(--color-storm-cloud)] mb-4">Requisito obligatorio para validar tus ofertas.</p>
-                <button (click)="openGarantiasModal()" class="w-full rounded-xl bg-amber-500 px-5 py-2.5 text-[13px] font-[590] text-black transition-all hover:brightness-110 shadow-md">
-                  Gestionar Garantías
-                </button>
+          <div class="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-lg">
+            <div class="flex items-center gap-4 mb-4 pb-4 border-b border-amber-500/20">
+              <div class="p-3 rounded-xl bg-amber-500/10">
+                <lucide-icon name="shield-alert" [size]="24" class="text-amber-400"></lucide-icon>
+              </div>
+              <div class="text-left">
+                <h3 class="text-[13px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)]">Garantía / Pagaré</h3>
+                <p class="text-[11px] text-[var(--color-storm-cloud)] mt-1">Requisito validador</p>
               </div>
             </div>
+            <button (click)="openGarantiasModal()" class="w-full rounded-lg bg-amber-500/10 border border-amber-500/30 px-4 py-2.5 text-[12px] font-[600] uppercase tracking-wider text-amber-400 transition-all hover:bg-amber-500 hover:text-black">
+              Gestionar Documentos
+            </button>
           </div>
         }
 
-        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 shadow-lg flex flex-col" style="max-height: calc(100vh - 450px);">
-          <div class="flex items-center justify-between mb-4 pb-4 border-b border-[var(--color-charcoal-grey)] shrink-0">
-            <h2 class="text-[14px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2">
-              <lucide-icon name="activity" [size]="16" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-              Feed de Pujas
+        <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 shadow-lg flex flex-col overflow-hidden" style="max-height: calc(100vh - 400px); min-height: 450px;">
+          
+          <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/40 shrink-0">
+            <h2 class="text-[12px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)] flex items-center gap-2">
+              <lucide-icon name="activity" [size]="16" class="text-[var(--color-storm-cloud)]"></lucide-icon>
+              Resumen de Ofertas
             </h2>
-            <span class="text-[11px] bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] px-2 py-0.5 rounded-full">{{ ofertas().length }}</span>
+            <span class="text-[11px] bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] px-2 py-0.5 rounded font-mono">{{ ofertas().length }}</span>
           </div>
 
-          @if (ofertas().length === 0) {
-            <div class="py-12 text-center text-[var(--color-storm-cloud)] flex-1">
-              <lucide-icon name="inbox" [size]="32" class="mx-auto mb-3 opacity-50"></lucide-icon>
-              <p class="text-[13px]">Aún no hay actividad en la sala.</p>
-            </div>
-          } @else {
-            <div class="space-y-3 overflow-y-auto pr-2 flex-1 custom-scrollbar">
-              @for (oferta of ofertas().slice(-50).reverse(); track $index) {
-                <div class="flex items-start gap-3 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-3 relative overflow-hidden group">
-                  <div class="absolute left-0 top-0 bottom-0 w-1 bg-[var(--color-charcoal-grey)] group-hover:bg-[var(--color-cyan-spark)] transition-colors"></div>
-                  
-                  <div class="size-8 rounded-full bg-[var(--color-deep-slate)] flex items-center justify-center shrink-0 border border-[var(--color-charcoal-grey)]">
-                    <lucide-icon name="user" [size]="14" class="text-[var(--color-storm-cloud)]"></lucide-icon>
-                  </div>
-                  
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between mb-1">
+          <div class="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[var(--color-pitch-black)]/20">
+            @if (ofertas().length === 0) {
+              <div class="h-full flex flex-col items-center justify-center text-center text-[var(--color-storm-cloud)]">
+                <lucide-icon name="inbox" [size]="28" class="mb-3 opacity-40"></lucide-icon>
+                <p class="text-[12px]">Sin transacciones registradas.</p>
+              </div>
+            } @else {
+              <div class="space-y-2">
+                @for (oferta of ofertas().slice().reverse(); track $index) {
+                  <div class="flex items-center gap-3 rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/60 p-3 relative group hover:border-[var(--color-cyan-spark)]/30 transition-colors">
+                    
+                    <div class="flex flex-col items-center justify-center shrink-0 pr-3 border-r border-[var(--color-charcoal-grey)] w-16">
+                      <span class="text-[10px] font-mono text-[var(--color-storm-cloud)]">{{ oferta.fecha | date:'HH:mm' }}</span>
+                      <span class="text-[9px] font-mono text-[var(--color-fog-grey)]">{{ oferta.fecha | date:'ss' }}s</span>
+                    </div>
+                    
+                    <div class="flex-1 min-w-0 flex items-center justify-between">
                       <p class="text-[12px] font-[590] text-[var(--color-porcelain)] truncate">
                         {{ isDirecta ? 'Oferente' : 'Proveedor' }} #{{ oferta.idProveedor }}
                       </p>
-                      <span class="text-[10px] text-[var(--color-fog-grey)]">{{ oferta.fecha | date:'HH:mm:ss' }}</span>
+                      <p class="text-[14px] font-mono font-bold" [class.text-[var(--color-neon-lime)]]="!isDirecta" [class.text-[var(--color-cyan-spark)]]="isDirecta">${{ oferta.monto | number:'1.2-2' }}</p>
                     </div>
-                    <div class="flex items-end justify-between mt-1">
-                      <p class="text-[10px] text-[var(--color-storm-cloud)] uppercase tracking-wider">Monto ofertado</p>
-                      <p class="text-[15px] font-mono font-[590] text-[var(--color-cyan-spark)]">${{ oferta.monto | number:'1.2-2' }}</p>
-                    </div>
+
                   </div>
-                </div>
-              }
-            </div>
-          }
+                }
+              </div>
+            }
+          </div>
         </div>
         
       </div>
@@ -214,24 +304,24 @@
         <div>
           <label class="mb-1 block text-[11px] uppercase tracking-widest text-[var(--color-storm-cloud)]">Tipo de Documento</label>
           <select [(ngModel)]="garantiaForm.idTipoDocumento" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]">
-            <option [value]="0">-- Seleccionar --</option>
-            <option [value]="1">Póliza de Caución</option>
-            <option [value]="2">Pagaré</option>
+            <option value="0">-- Seleccionar --</option>
+            <option value="1">Póliza de Caución</option>
+            <option value="2">Pagaré</option>
           </select>
         </div>
         
-        @if (garantiaForm.idTipoDocumento === 1 || garantiaForm.idTipoDocumento === 2) {
+        @if (garantiaForm.idTipoDocumento === '1' || garantiaForm.idTipoDocumento === '2') {
           <div>
             <label class="mb-1 block text-[11px] uppercase tracking-widest text-[var(--color-storm-cloud)]">Moneda</label>
             <select [(ngModel)]="garantiaForm.idMoneda" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]">
-              <option [value]="0">-- Seleccione la moneda --</option>
+              <option value="0">-- Seleccione la moneda --</option>
               @for (m of monedas(); track m.idMoneda) { <option [value]="m.idMoneda">{{ m.nombre }}</option> }
             </select>
           </div>
         }
       </div>
 
-      @if (garantiaForm.idTipoDocumento === 1) {
+      @if (garantiaForm.idTipoDocumento === '1') {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 animate-fade-in">
           <div>
             <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Compañía Aseguradora</label>
@@ -252,7 +342,7 @@
         </div>
       }
 
-      @if (garantiaForm.idTipoDocumento === 2) {
+      @if (garantiaForm.idTipoDocumento === '2') {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 animate-fade-in">
           <div>
             <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Monto Pagaré</label>
@@ -265,7 +355,7 @@
         </div>
       }
 
-      @if (garantiaForm.idTipoDocumento !== 0) {
+      @if (garantiaForm.idTipoDocumento !== '0') {
         <div class="mt-6 flex items-center gap-4">
           <div class="flex-1">
             <input type="file" id="fileGuaranty" class="hidden" (change)="onFileGarantiaSelected($event)" accept=".pdf,.png,.jpg,.jpeg">
@@ -318,5 +408,24 @@
       </table>
     </div>
 
+  </div>
+</app-modal>
+
+<app-modal [isOpen]="showErroresPujaModal()" title="Resultado de las Ofertas" maxWidthClass="max-w-xl" (close)="closeErroresPujaModal()">
+  <div class="space-y-4 p-2">
+    @for (err of erroresPujaList(); track $index) {
+      <div class="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 animate-fade-in">
+        <lucide-icon name="alert-triangle" [size]="20" class="text-red-400 shrink-0 mt-0.5"></lucide-icon>
+        <div>
+          <h4 class="text-[13px] font-[590] text-red-400">{{ err.item }}</h4>
+          <p class="text-[13px] text-red-300/80 mt-1">{{ err.error }}</p>
+        </div>
+      </div>
+    }
+  </div>
+  <div class="mt-6 flex justify-end border-t border-[var(--color-charcoal-grey)] pt-4">
+    <button (click)="closeErroresPujaModal()" class="rounded-xl bg-[var(--color-deep-slate)] px-6 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] hover:text-white">
+      Entendido
+    </button>
   </div>
 </app-modal>

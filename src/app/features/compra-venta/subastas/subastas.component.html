@@ -119,11 +119,11 @@
                   <lucide-icon name="list" [size]="18"></lucide-icon>
                 </a>
 
-                <button (click)="accionNoImplementada('Preguntas')" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-graphite)] transition-colors" title="Preguntas">
+                <button (click)="abrirModalConsultas(item.idCotizacion)" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-graphite)] transition-colors" title="Preguntas y Aclaraciones">
                   <lucide-icon name="help-circle" [size]="18"></lucide-icon>
                 </button>
 
-                <button (click)="accionNoImplementada('Pliegos')" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-graphite)] transition-colors" title="Pliegos">
+                <button (click)="isAdmin() ? openDictamen(item) : openPliegos(item)" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-graphite)] transition-colors" title="Pliegos">
                   <lucide-icon name="file-text" [size]="18"></lucide-icon>
                 </button>
 
@@ -177,3 +177,197 @@
     </div>
   </div>
 </div>
+
+<app-modal [isOpen]="isConsultasModalOpen()" title="Foro de Aclaraciones" subtitle="Consultas técnicas sobre el pliego y condiciones de la subasta." maxWidthClass="max-w-4xl" (close)="cerrarModalConsultas()">
+  <div class="flex flex-col" style="height: 70vh;">
+    
+    <div class="flex-1 overflow-y-auto p-6 bg-[var(--color-pitch-black)]/40 custom-scrollbar space-y-6">
+      
+      @if (consultas().length === 0) {
+        <div class="h-full flex flex-col items-center justify-center text-center text-[var(--color-storm-cloud)]">
+          <lucide-icon name="message-square" [size]="48" class="mb-4 opacity-30"></lucide-icon>
+          <p class="text-[15px] font-[590] text-[var(--color-porcelain)]">No hay consultas registradas</p>
+          <p class="text-[13px] mt-1 opacity-70">Sé el primero en realizar una pregunta a la administración.</p>
+        </div>
+      }
+
+      @for (c of consultas(); track c.idMensaje) {
+        <div class="flex flex-col gap-3">
+          
+          <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/50 p-4 relative ml-4 shadow-sm">
+            <div class="absolute -left-2 top-4 w-4 h-4 bg-[var(--color-deep-slate)] border-l border-t border-[var(--color-charcoal-grey)] rotate-[-45deg] z-0"></div>
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[12px] font-[600] text-[var(--color-cyan-spark)] uppercase tracking-wider flex items-center gap-2">
+                  <lucide-icon name="user" [size]="14"></lucide-icon>
+                  {{ isAdmin() ? c.usuarioPregunta : (c.idProveedor === currentProviderId() ? 'Mi Consulta' : 'Proveedor (Anónimo)') }}
+                </span>
+                <span class="text-[10px] text-[var(--color-fog-grey)] font-mono">{{ c.fechaPregunta | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <p class="text-[14px] text-[var(--color-porcelain)] leading-relaxed">{{ c.pregunta }}</p>
+            </div>
+          </div>
+
+          @if (c.respondida) {
+            <div class="rounded-xl border border-[var(--color-neon-lime)]/30 bg-[var(--color-neon-lime)]/5 p-4 relative mr-4 ml-12 shadow-[0_0_15px_rgba(228,242,34,0.05)]">
+              <div class="absolute -right-2 top-4 w-4 h-4 bg-[#1d1f21] border-r border-t border-[var(--color-neon-lime)]/30 rotate-45 z-0"></div>
+              <div class="relative z-10">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[12px] font-[600] text-[var(--color-neon-lime)] uppercase tracking-wider flex items-center gap-2">
+                    <lucide-icon name="shield-check" [size]="14"></lucide-icon>
+                    Respuesta Oficial
+                  </span>
+                  <span class="text-[10px] text-[var(--color-fog-grey)] font-mono">{{ c.fechaRespuesta | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+                <p class="text-[14px] text-[var(--color-porcelain)] leading-relaxed whitespace-pre-wrap">{{ c.respuesta }}</p>
+              </div>
+            </div>
+          } 
+          @else if (isAdmin()) {
+            <div class="ml-12 mr-4 flex flex-col gap-2">
+              <textarea [(ngModel)]="respuestaTexto[c.idMensaje]" placeholder="Escribe la respuesta oficial aquí..." rows="2" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-3 text-[13px] text-[var(--color-porcelain)] focus:border-[var(--color-neon-lime)] outline-none resize-none transition-colors custom-scrollbar"></textarea>
+              <div class="flex justify-end">
+                <button (click)="responderPregunta(c.idMensaje)" [disabled]="!respuestaTexto[c.idMensaje]" class="rounded-lg bg-[var(--color-neon-lime)] px-4 py-1.5 text-[12px] font-[600] text-black uppercase tracking-wider transition-all hover:brightness-110 disabled:opacity-50 flex items-center gap-1">
+                  <lucide-icon name="send" [size]="14"></lucide-icon> Responder
+                </button>
+              </div>
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+
+    @if (!isAdmin()) {
+      <div class="border-t border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/80 p-5 shrink-0">
+        <label class="block text-[11px] font-[600] text-[var(--color-storm-cloud)] uppercase tracking-widest mb-2">Realizar una Consulta</label>
+        <div class="flex gap-3">
+          <textarea [(ngModel)]="nuevaPregunta" placeholder="Escribe tu duda técnica o administrativa aquí..." rows="2" class="flex-1 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] p-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none resize-none transition-colors custom-scrollbar"></textarea>
+          <button (click)="enviarPregunta()" [disabled]="!nuevaPregunta() || enviandoConsulta()" class="rounded-xl bg-[var(--color-cyan-spark)] px-6 text-[13px] font-[600] text-black uppercase tracking-wider transition-all hover:brightness-110 disabled:opacity-50 flex items-center gap-2 self-stretch shadow-[0_0_15px_rgba(2,184,204,0.2)]">
+            @if (enviandoConsulta()) {
+              <lucide-icon name="loader-2" [size]="18" class="animate-spin"></lucide-icon>
+            } @else {
+              <lucide-icon name="send" [size]="18"></lucide-icon> Enviar
+            }
+          </button>
+        </div>
+        <p class="text-[11px] text-[var(--color-fog-grey)] mt-3 flex items-center gap-1.5">
+          <lucide-icon name="info" [size]="14"></lucide-icon>
+          Tu pregunta se enviará de forma anónima para los demás proveedores, pero el administrador sabrá quién eres.
+        </p>
+      </div>
+    }
+
+  </div>
+</app-modal>
+
+<app-modal [isOpen]="showDictamen()" title="Dictamen / Informe" [subtitle]="'Subasta #' + (dictamenItem()?.nroCotizacion || '')" maxWidthClass="max-w-4xl" (close)="closeDictamen()">
+  <div class="space-y-6">
+    <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-5">
+      <label class="mb-2 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Subir Nuevo Documento Oficial</label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+         <select [(ngModel)]="dictamenForm.tipo" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none">
+            <option value="">-- Seleccionar Tipo --</option>
+            <option value="S/D">Pliego</option>
+            <option value="DIC">Dictamen</option>
+            <option value="ANX">Informe</option>
+            <option value="ANT">Informe Técnico / Acta de Evaluación Técnica</option>
+            <option value="INS">Notas Aclaratorias</option>
+            <option value="ACP">Acta de Preadjudicación</option>
+            <option value="ACT">Acta de Adjudicación</option>
+            <option value="ASE">Asesoramiento</option>
+            <option value="RES">Resolución</option>
+            <option value="REF">Resolución Final</option>
+          </select>
+        </div>
+        <div>
+          <input type="file" id="fileDictamen" class="hidden" (change)="onFileDictamenSelected($event)" accept=".pdf,.doc,.docx,.xls,.xlsx">
+          <label for="fileDictamen" class="flex items-center justify-center gap-2 w-full rounded-xl border border-dashed border-[var(--color-cyan-spark)]/40 bg-[var(--color-cyan-spark)]/5 px-4 py-2.5 text-[13px] font-[590] text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors cursor-pointer">
+            <lucide-icon name="upload" [size]="16"></lucide-icon>
+            {{ dictamenForm.archivo ? dictamenForm.archivo.name : 'Seleccionar Archivo (Máx 20MB)' }}
+          </label>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button (click)="guardarDictamen()" [disabled]="!dictamenForm.tipo || !dictamenForm.archivo || savingDictamen()" class="rounded-xl bg-[var(--color-neon-lime)] px-5 py-2 text-[13px] font-[590] text-black disabled:opacity-50 transition-all hover:brightness-110">
+          @if (savingDictamen()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1 inline"></lucide-icon>}
+          Subir a la Nube
+        </button>
+      </div>
+    </div>
+    
+    <div>
+      <h4 class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3">Documentos Registrados</h4>
+      <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
+        <table class="w-full text-left text-[13px]">
+          <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
+            <tr><th class="px-4 py-3">Nombre del Archivo</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Fecha</th><th class="px-4 py-3 text-right">Acciones</th></tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+            @for (doc of dictamenList(); track doc.idCotDocumento) {
+              <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors">
+                <td class="px-4 py-3 text-[var(--color-porcelain)] font-[510] max-w-[200px] truncate" [title]="doc.nombreArchivo">{{ doc.nombreArchivo }}</td>
+                <td class="px-4 py-3 text-[var(--color-storm-cloud)]">{{ doc.tipoLabel }}</td>
+                <td class="px-4 py-3 text-[var(--color-storm-cloud)] font-mono text-[11px]">{{ doc.fecIng | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="px-4 py-3 text-right">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <a [href]="doc.urlArchivo" target="_blank" title="Descargar Documento" class="p-1.5 rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)] hover:text-black transition-colors inline-flex">
+                      <lucide-icon name="download" [size]="16"></lucide-icon>
+                    </a>
+                    <button (click)="eliminarDictamen(doc.idCotDocumento)" title="Eliminar" class="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors">
+                      <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="px-4 py-8 text-center text-[var(--color-storm-cloud)] italic">No hay documentos registrados para esta subasta.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</app-modal>
+
+<app-modal [isOpen]="showPliegos()" title="Pliegos y Documentación" [subtitle]="'Subasta #' + (pliegoItem()?.nroCotizacion || '')" maxWidthClass="max-w-3xl" (close)="closePliegos()">
+  <div class="space-y-4">
+    <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-4 flex items-center gap-3">
+      <lucide-icon name="info" [size]="20" class="text-[var(--color-cyan-spark)] shrink-0"></lucide-icon>
+      <p class="text-[13px] text-[var(--color-porcelain)]">A continuación se listan todos los pliegos, resoluciones y anexos oficiales correspondientes a esta cotización.</p>
+    </div>
+
+    <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-graphite)]/50">
+      <table class="w-full text-left text-[13px]">
+        <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
+          <tr>
+            <th class="px-4 py-3">Documento</th>
+            <th class="px-4 py-3">Tipo</th>
+            <th class="px-4 py-3">Fecha de Carga</th>
+            <th class="px-4 py-3 text-right">Descargar</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+          @for (doc of dictamenList(); track doc.idCotDocumento) {
+            <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors group">
+              <td class="px-4 py-4 font-[590] text-[var(--color-porcelain)]">{{ doc.nombreArchivo }}</td>
+              <td class="px-4 py-4 text-[var(--color-light-steel)]">{{ doc.tipoLabel }}</td>
+              <td class="px-4 py-4 text-[var(--color-storm-cloud)] font-mono text-[11px]">{{ doc.fecIng | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="px-4 py-4 text-right">
+                <a [href]="doc.urlArchivo" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)] hover:text-black transition-colors opacity-70 group-hover:opacity-100">
+                  <lucide-icon name="download" [size]="14"></lucide-icon> <span class="text-[11px] font-[590] uppercase tracking-wider">Bajar</span>
+                </a>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="px-4 py-10 text-center text-[var(--color-storm-cloud)]">
+              <lucide-icon name="file-x" [size]="32" class="mx-auto mb-2 opacity-50"></lucide-icon>
+              El organismo aún no ha publicado los pliegos.
+            </td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</app-modal>

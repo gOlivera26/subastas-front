@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { environment } from '../../../environments/environment';
+import { Consulta } from './consulta.service';
+
 
 export interface OfertaEnVivo {
   idCotizacion: number;
@@ -19,12 +21,19 @@ export interface MensajeEnVivo {
   fecIng: string;
 }
 
+export interface ProrrogaEnVivo {
+  idCotizacion: number;
+  nuevaFechaFin: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SignalRService {
   private connection: signalR.HubConnection | null = null;
   ofertas = signal<OfertaEnVivo[]>([]);
   mensajes = signal<MensajeEnVivo[]>([]);
+  consultas = signal<Consulta[]>([]);
   usuarioEscribiendo = signal<string | null>(null);
+  prorrogaEvent = signal<ProrrogaEnVivo | null>(null); // Escucha de alargue
   connected = signal(false);
   error = signal<string | null>(null);
 
@@ -45,6 +54,11 @@ export class SignalRService {
       this.ofertas.update(arr => [...arr.slice(-49), oferta]);
     });
 
+    // Escuchar cuando el servidor patea la hora de cierre
+    this.connection.on('ProrrogaAplicada', (evento: ProrrogaEnVivo) => {
+      this.prorrogaEvent.set(evento);
+    });
+
     this.connection.on('MensajeRecibido', (msg: MensajeEnVivo) => {
       this.mensajes.update(arr => [...arr, msg]);
     });
@@ -52,6 +66,14 @@ export class SignalRService {
     this.connection.on('UsuarioEscribiendo', (usuario: string) => {
       this.usuarioEscribiendo.set(usuario);
       setTimeout(() => { if (this.usuarioEscribiendo() === usuario) this.usuarioEscribiendo.set(null); }, 3000);
+    });
+
+    this.connection.on('PreguntaRecibida', (consulta: Consulta) => {
+      this.consultas.update(arr => [...arr, consulta]);
+    });
+
+    this.connection.on('RespuestaRecibida', (consulta: Consulta) => {
+      this.consultas.update(arr => arr.map(item => item.idMensaje === consulta.idMensaje ? consulta : item));
     });
 
     this.connection.onreconnected(() => this.connected.set(true));
@@ -78,19 +100,6 @@ export class SignalRService {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
       await this.connection.invoke('SalirSubasta', idCotizacion);
     }
-  }
-
-  async enviarOferta(
-    idCotizacion: number,
-    idCotizacionDetalle: number | null,
-    idRenglon: number | null,
-    monto: number,
-    idProveedor: number
-  ): Promise<boolean> {
-    if (this.connection?.state !== signalR.HubConnectionState.Connected) return false;
-    return await this.connection.invoke<boolean>(
-      'EnviarOferta', idCotizacion, idCotizacionDetalle, idRenglon, monto, idProveedor
-    );
   }
 
   clearOfertas(): void { this.ofertas.set([]); }
