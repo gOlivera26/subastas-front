@@ -67,7 +67,9 @@
       }
 
       @if (isDesistible(row)) {
-        <button (click)="desistirSubasta(row)" title="Desistir Subasta" class="p-1.5 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-colors"><lucide-icon name="x" [size]="16"></lucide-icon></button>
+        <button (click)="desistirSubasta(row)" title="Declarar Fracasada" class="p-1.5 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-colors">
+          <lucide-icon name="x" [size]="16"></lucide-icon>
+        </button>
       }
 
       @if (row.idEstado === 40 && row.idTipoContratacion !== TIPO_DIRECTA) {

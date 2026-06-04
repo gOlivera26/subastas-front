@@ -650,7 +650,7 @@ export class SubastaComponent implements OnInit {
   }
 
   desistirSubasta(item: any) {
-    if (!confirm(`¿Desistir de la subasta #${item.nroCotizacion}?`)) return;
+    if (!confirm(`¿Declarar desierta/fracasada la subasta #${item.nroCotizacion}?`)) return;
     this.http.post(`${this.api}/Cotizacion/${item.idCotizacion}/desistir`, {}).subscribe({
       next: (r: any) => { if (r?.success) { this.notify.showSuccess('Subasta desistida.'); this.buscar(); } else this.notify.showWarning(r?.message || 'Error'); },
       error: () => this.notify.showError('Error al desistir.')
