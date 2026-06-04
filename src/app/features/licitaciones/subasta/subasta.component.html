@@ -35,7 +35,7 @@
       <button (click)="openDetalle(row)" title="Ver Detalle" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="eye" [size]="16"></lucide-icon></button>
 
       @if (row.idEstado === 4 || row.idEstado === 39 || row.idEstado === 40) {
-        <button (click)="openPliegos(row)" title="Pliegos" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
+        <button (click)="openDictamen(row)" title="Pliegos" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
       }
 
       @if ((row.idEstado === 4 || row.idEstado === 39 || row.idEstado === 40) && auth.isSuperAdmin()) {
@@ -76,8 +76,6 @@
       }
 
       @if ((row.idTipoContratacion === TIPO_LICITACION || row.idTipoContratacion === TIPO_COMPULSA) && auth.isSuperAdmin()) {
-        <button (click)="openDictamen(row)" title="Dictamen / Informe" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-badge" [size]="16"></lucide-icon></button>
-        
         <button (click)="openObservaciones(row, 'TECNICA')" title="Observación Técnica" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="message-circle" [size]="16"></lucide-icon></button>
         
         @if (row.tipoSobre === 'D') {
@@ -135,7 +133,7 @@
           @if (renglones().length > 0) {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               @for (r of renglones(); track r.id) {
-                <div class="flex items-center justify-between rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 px-3 py-2">
+                <div class="flex items-center justify-between rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 px-3 py-2">
                   <div class="flex items-center gap-2">
                     <span class="size-5 rounded bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[10px] font-[590] flex items-center justify-center">{{ r.id }}</span>
                     <span class="text-[13px] text-[var(--color-porcelain)]">{{ r.nombre }}</span>
@@ -296,79 +294,77 @@
   }
 
   @if (pasoCrear() === 3) {
-    <div class="space-y-6">
-      @if (useRenglones()) {
-        <div class="rounded-xl border border-[var(--color-cyan-spark)]/20 bg-[var(--color-cyan-spark)]/5 p-4">
-          <h4 class="text-[13px] font-[590] text-[var(--color-porcelain)] mb-3 flex items-center gap-2"><span class="size-5 rounded-md bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[10px] font-[590] flex items-center justify-center">3</span> Asignar ítems a cada grupo</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-            @for (renglon of renglones(); track renglon.id) {
-              <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 overflow-hidden">
-                <div class="px-3 py-2 bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)] flex items-center gap-2">
-                  <span class="size-5 rounded bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] text-[10px] font-[590] flex items-center justify-center">{{ renglon.id }}</span>
-                  <span class="text-[13px] font-[590] text-[var(--color-porcelain)] truncate flex-1">{{ renglon.nombre }}</span>
-                  <span class="text-[11px] text-[var(--color-storm-cloud)]">{{ renglon.itemIds.length }} ítems</span>
-                </div>
-                <div class="px-3 py-1 max-h-[160px] overflow-y-auto">
-                  @for (item of selectedItems(); track item.id) {
-                    <label class="flex items-center gap-2 py-1 px-1 rounded hover:bg-[var(--color-deep-slate)]/30 cursor-pointer text-[11px]">
-                      <input type="checkbox" [checked]="isItemInRenglon(renglon.id, item.id)" (change)="toggleItemInRenglon(renglon.id, item.id)" class="rounded" />
-                      <span class="text-[var(--color-storm-cloud)] truncate flex-1">{{ item.nItem || 'Ítem #' + item.idItem }}</span>
-                      <span class="text-[var(--color-fog-grey)]">x{{ item._cantidadEditada !== undefined ? item._cantidadEditada : (item.cantidadRestante ?? item.cantidad) }}</span>
-                    </label>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-          @if (itemsSinRenglon().length > 0) {
-            <div class="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 flex items-center gap-2">
-              <lucide-icon name="alert-circle" [size]="14" class="text-amber-400 shrink-0"></lucide-icon>
-              <p class="text-[11px] text-amber-400">{{ itemsSinRenglon().length }} ítems sin grupo. Asignalos antes de continuar.</p>
-            </div>
-          }
-        </div>
-      }
+    }
+</app-modal>
 
-      <div class="grid grid-cols-2 gap-6">
-        <div class="space-y-3">
-          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Datos de la Contratación</h4>
-          <app-custom-select label="Tipo de Contratación" [options]="tipoOptions" [(value)]="tipoContratacion" />
-          <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Número de Expediente</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="crearNroExpediente" /></div>
-          <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Objeto de la Contratación</label><textarea class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" rows="2" [(ngModel)]="observacion"></textarea></div>
+<app-modal [isOpen]="showDictamen()" title="Dictamen / Pliegos e Informes" [subtitle]="'Administración de archivos de la Subasta #' + (dictamenItem()?.nroCotizacion || '')" maxWidthClass="max-w-4xl" (close)="closeDictamen()">
+  <div class="space-y-6">
+    <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-5">
+      <label class="mb-2 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Subir Nuevo Documento Oficial</label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <select [(ngModel)]="dictamenForm.tipo" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none">
+            <option value="">-- Seleccionar Tipo --</option>
+            <option value="S/D">Pliego</option>
+            <option value="DIC">Dictamen</option>
+            <option value="ANX">Informe</option>
+            <option value="ANT">Informe Técnico / Acta de Evaluación Técnica</option>
+            <option value="INS">Notas Aclaratorias</option>
+            <option value="ACP">Acta de Preadjudicación</option>
+            <option value="ACT">Acta de Adjudicación</option>
+            <option value="ASE">Asesoramiento</option>
+            <option value="RES">Resolución</option>
+            <option value="REF">Resolución Final</option>
+          </select>
         </div>
-        <div class="space-y-3">
-          <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Fechas y Parámetros</h4>
-          <div class="grid grid-cols-2 gap-3">
-            <app-calendar label="Inicio Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="fechaInicio()" (ngModelChange)="fechaInicio.set($event)" />
-            <app-calendar label="Fin Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" />
-          </div>
-          <app-calendar label="Límite Consultas" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="fechaLimiteConsultas()" (ngModelChange)="fechaLimiteConsultas.set($event)" />
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Margen de Mejora (%)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="margenMejora" /></div>
-            <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Prórroga (minutos)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="crearProrrogaMinutos" /></div>
-          </div>
-          <div class="flex items-center gap-4">
-            <label class="flex items-center gap-2 text-[12px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="checkbox" [(ngModel)]="permiteProrroga" class="rounded" /> Admite prórroga</label>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] uppercase text-[var(--color-storm-cloud)]">Visibilidad:</span>
-              <select [(ngModel)]="crearRedeterminacion" class="rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2 py-1 text-[11px] text-[var(--color-porcelain)]">
-                <option value="1">Pública</option>
-                <option value="0">Privada</option>
-                <option value="2">Cerrada</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="col-span-2 flex justify-end gap-3 mt-4">
-          <button (click)="volver()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">← Volver</button>
-          <button (click)="closeCrear()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
-          <button (click)="grabar()" [disabled]="saving()" class="rounded-xl bg-[var(--color-neon-lime)] px-6 py-2 text-[13px] font-[590] text-black disabled:opacity-50">
-            @if (saving()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1"></lucide-icon>}Grabar Subasta
-          </button>
+        <div>
+          <input type="file" id="fileDictamen" class="hidden" (change)="onFileDictamenSelected($event)" accept=".pdf,.doc,.docx,.xls,.xlsx">
+          <label for="fileDictamen" class="flex items-center justify-center gap-2 w-full rounded-xl border border-dashed border-[var(--color-cyan-spark)]/40 bg-[var(--color-cyan-spark)]/5 px-4 py-2.5 text-[13px] font-[590] text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors cursor-pointer">
+            <lucide-icon name="upload" [size]="16"></lucide-icon>
+            {{ dictamenForm.archivo ? dictamenForm.archivo.name : 'Seleccionar Archivo (Máx 20MB)' }}
+          </label>
         </div>
       </div>
+      <div class="flex justify-end">
+        <button (click)="guardarDictamen()" [disabled]="!dictamenForm.tipo || !dictamenForm.archivo || savingDictamen()" class="rounded-xl bg-[var(--color-neon-lime)] px-5 py-2 text-[13px] font-[590] text-black disabled:opacity-50 transition-all hover:brightness-110">
+          @if (savingDictamen()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1 inline"></lucide-icon>}
+          Subir a la Nube
+        </button>
+      </div>
     </div>
-  }
+    
+    <div>
+      <h4 class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3">Documentos Registrados</h4>
+      <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
+        <table class="w-full text-left text-[13px]">
+          <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
+            <tr><th class="px-4 py-3">Nombre del Archivo</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Fecha</th><th class="px-4 py-3 text-right">Acciones</th></tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+            @for (doc of dictamenList(); track doc.idCotDocumento) {
+              <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors">
+                <td class="px-4 py-3 text-[var(--color-porcelain)] font-[510] max-w-[200px] truncate" [title]="doc.nombreArchivo">{{ doc.nombreArchivo }}</td>
+                <td class="px-4 py-3 text-[var(--color-storm-cloud)]">{{ doc.tipoLabel }}</td>
+                <td class="px-4 py-3 text-[var(--color-storm-cloud)] font-mono text-[11px]">{{ doc.fecIng | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="px-4 py-3 text-right">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <a [href]="doc.urlArchivo" target="_blank" title="Descargar Documento" class="p-1.5 rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)] hover:text-black transition-colors inline-flex">
+                      <lucide-icon name="download" [size]="16"></lucide-icon>
+                    </a>
+                    <button (click)="eliminarDictamen(doc.idCotDocumento)" title="Eliminar" class="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors">
+                      <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="px-4 py-8 text-center text-[var(--color-storm-cloud)] italic">No hay documentos registrados para esta subasta.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </app-modal>
 
 <app-modal [isOpen]="showEspec()" [title]="isDirectaProp ? 'Especificaciones Subasta Directa' : 'Especificaciones'" [subtitle]="'Subasta #' + (especItem()?.nroCotizacion || '')" maxWidthClass="max-w-3xl" (close)="closeEspec()">
@@ -638,18 +634,19 @@
   </div>
 </app-modal>
 
-<app-modal [isOpen]="showDictamen()" title="Dictamen / Informe" [subtitle]="'Subasta #' + (dictamenItem()?.nroCotizacion || '')" maxWidthClass="max-w-3xl" (close)="closeDictamen()">
+<app-modal [isOpen]="showDictamen()" title="Dictamen / Pliegos e Informes" [subtitle]="'Administración de archivos de la Subasta #' + (dictamenItem()?.nroCotizacion || '')" maxWidthClass="max-w-4xl" (close)="closeDictamen()">
   <div class="space-y-6">
     <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-5">
-      <label class="mb-2 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Subir Nuevo Documento</label>
+      <label class="mb-2 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Subir Nuevo Documento Oficial</label>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
           <select [(ngModel)]="dictamenForm.tipo" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none">
             <option value="">-- Seleccionar Tipo --</option>
+            <option value="S/D">Pliego</option>
             <option value="DIC">Dictamen</option>
-            <option value="ANX">Informe Técnico</option>
-            <option value="ANT">Informe Técnico / Acta de evaluación técnica</option>
-            <option value="INS">Nota Aclaratorias</option>
+            <option value="ANX">Informe</option>
+            <option value="ANT">Informe Técnico / Acta de Evaluación Técnica</option>
+            <option value="INS">Notas Aclaratorias</option>
             <option value="ACP">Acta de Preadjudicación</option>
             <option value="ACT">Acta de Adjudicación</option>
             <option value="ASE">Asesoramiento</option>
@@ -658,17 +655,17 @@
           </select>
         </div>
         <div>
-          <input type="file" id="fileDictamen" class="hidden" (change)="onFileDictamenSelected($event)" accept=".pdf">
+          <input type="file" id="fileDictamen" class="hidden" (change)="onFileDictamenSelected($event)" accept=".pdf,.doc,.docx,.xls,.xlsx">
           <label for="fileDictamen" class="flex items-center justify-center gap-2 w-full rounded-xl border border-dashed border-[var(--color-cyan-spark)]/40 bg-[var(--color-cyan-spark)]/5 px-4 py-2.5 text-[13px] font-[590] text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors cursor-pointer">
             <lucide-icon name="upload" [size]="16"></lucide-icon>
-            {{ dictamenForm.archivo ? dictamenForm.archivo.name : 'Seleccionar Archivo' }}
+            {{ dictamenForm.archivo ? dictamenForm.archivo.name : 'Seleccionar Archivo (Máx 20MB)' }}
           </label>
         </div>
       </div>
       <div class="flex justify-end">
         <button (click)="guardarDictamen()" [disabled]="!dictamenForm.tipo || !dictamenForm.archivo || savingDictamen()" class="rounded-xl bg-[var(--color-neon-lime)] px-5 py-2 text-[13px] font-[590] text-black disabled:opacity-50 transition-all hover:brightness-110">
-          @if (savingDictamen()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1"></lucide-icon>}
-          Subir Documento
+          @if (savingDictamen()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1 inline"></lucide-icon>}
+          Subir a la Nube
         </button>
       </div>
     </div>
@@ -678,19 +675,27 @@
       <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
         <table class="w-full text-left text-[13px]">
           <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
-            <tr><th class="px-4 py-3">Nombre</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3 text-right">Acciones</th></tr>
+            <tr><th class="px-4 py-3">Nombre del Archivo</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Fecha</th><th class="px-4 py-3 text-right">Acciones</th></tr>
           </thead>
           <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
-            @for (doc of dictamenList(); track doc.id) {
-              <tr class="hover:bg-[var(--color-deep-slate)]/30">
-                <td class="px-4 py-3 text-[var(--color-porcelain)]">{{ doc.nombre }}</td>
-                <td class="px-4 py-3 text-[var(--color-storm-cloud)]">{{ doc.tipo }}</td>
+            @for (doc of dictamenList(); track doc.idCotDocumento) {
+              <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors">
+                <td class="px-4 py-3 text-[var(--color-porcelain)] font-[510] max-w-[200px] truncate" [title]="doc.nombreArchivo">{{ doc.nombreArchivo }}</td>
+                <td class="px-4 py-3 text-[var(--color-storm-cloud)]">{{ doc.tipoLabel }}</td>
+                <td class="px-4 py-3 text-[var(--color-storm-cloud)] font-mono text-[11px]">{{ doc.fecIng | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td class="px-4 py-3 text-right">
-                   <button class="p-1.5 rounded bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors"><lucide-icon name="trash-2" [size]="14"></lucide-icon></button>
+                  <div class="flex items-center justify-end gap-1.5">
+                    <a [href]="doc.urlArchivo" target="_blank" title="Descargar Documento" class="p-1.5 rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)] hover:text-black transition-colors inline-flex">
+                      <lucide-icon name="download" [size]="16"></lucide-icon>
+                    </a>
+                    <button (click)="eliminarDictamen(doc.idCotDocumento)" title="Eliminar" class="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors">
+                      <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                    </button>
+                  </div>
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="3" class="px-4 py-6 text-center text-[var(--color-storm-cloud)] italic">No hay documentos registrados.</td></tr>
+              <tr><td colspan="4" class="px-4 py-8 text-center text-[var(--color-storm-cloud)] italic">No hay documentos registrados para esta subasta.</td></tr>
             }
           </tbody>
         </table>
@@ -831,71 +836,175 @@
 
 <app-modal [isOpen]="showGraficosModal()" title="Análisis de Ahorro" [subtitle]="'Subasta #' + (graficosItem()?.nroCotizacion || '')" maxWidthClass="max-w-3xl" (close)="closeGraficos()">
   @if (loadingGraficos()) {
-    <div class="py-16"><app-loading-spinner label="Generando métricas..."></app-loading-spinner></div>
-  } @else {
+    <div class="py-16"><app-loading-spinner label="Generando métricas y consolidando pujas..."></app-loading-spinner></div>
+  } @else if (metricasAhorro()) {
     <div class="space-y-6">
-      <div class="grid grid-cols-3 gap-4 text-center">
-        <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-4">
-          <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-2">Presupuesto Base</p>
-          <p class="text-[20px] font-mono text-[var(--color-porcelain)]">$ --</p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center animate-fade-in-up">
+        
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-5 shadow-sm">
+          <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-2 flex items-center justify-center gap-1.5"><lucide-icon name="building-2" [size]="14"></lucide-icon> Presupuesto Oficial</p>
+          <p class="text-[20px] font-mono text-[var(--color-porcelain)]">${{ metricasAhorro().presupuestoBase | number:'1.2-2' }}</p>
         </div>
-        <div class="rounded-xl border border-[var(--color-cyan-spark)]/30 bg-[var(--color-cyan-spark)]/5 p-4">
-          <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-cyan-spark)] mb-2">Mejor Oferta Final</p>
-          <p class="text-[20px] font-mono font-bold text-[var(--color-cyan-spark)]">$ --</p>
+        
+        <div class="rounded-xl border border-[var(--color-cyan-spark)]/30 bg-[var(--color-cyan-spark)]/5 p-5 shadow-[0_0_15px_rgba(2,184,204,0.05)]">
+          <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-cyan-spark)] mb-2 flex items-center justify-center gap-1.5"><lucide-icon name="gavel" [size]="14"></lucide-icon> Adjudicación Total</p>
+          <p class="text-[20px] font-mono font-bold text-[var(--color-cyan-spark)]">${{ metricasAhorro().mejorOfertaFinal | number:'1.2-2' }}</p>
         </div>
-        <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-          <p class="text-[10px] font-[590] uppercase tracking-widest text-emerald-400 mb-2">Ahorro Generado</p>
-          <p class="text-[20px] font-mono font-bold text-emerald-400">-- %</p>
+        
+        <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 shadow-[0_0_15px_rgba(16,185,129,0.05)]">
+          <p class="text-[10px] font-[590] uppercase tracking-widest text-emerald-400 mb-2 flex items-center justify-center gap-1.5"><lucide-icon name="trending-down" [size]="14"></lucide-icon> Ahorro Generado</p>
+          <p class="text-[22px] font-mono font-bold text-emerald-400">
+            {{ metricasAhorro().ahorroPorcentaje | number:'1.2-2' }}%
+          </p>
         </div>
+
       </div>
       
-      <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-12 text-center">
-        <lucide-icon name="pie-chart" [size]="48" class="mx-auto mb-4 text-[var(--color-storm-cloud)] opacity-50"></lucide-icon>
-        <p class="text-[14px] text-[var(--color-porcelain)]">El gráfico comparativo se renderizará aquí.</p>
-        <p class="text-[12px] text-[var(--color-storm-cloud)] mt-1">Conectando librería de gráficos en la próxima iteración.</p>
+      <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-6 pt-8 pb-4 text-center animate-scale-in flex justify-center">
+        @if (metricasAhorro().presupuestoBase === 0) {
+          <div class="py-12">
+            <lucide-icon name="pie-chart" [size]="48" class="mx-auto mb-4 text-[var(--color-storm-cloud)] opacity-50"></lucide-icon>
+            <p class="text-[14px] text-[var(--color-porcelain)]">No se puede calcular el gráfico.</p>
+            <p class="text-[12px] text-[var(--color-storm-cloud)] mt-1">La subasta no tiene importes base cargados en sus ítems.</p>
+          </div>
+        } @else {
+          <div class="w-full max-w-[450px]">
+            <apx-chart
+              [series]="chartOptionsAhorro.series!"
+              [chart]="chartOptionsAhorro.chart!"
+              [labels]="chartOptionsAhorro.labels!"
+              [colors]="chartOptionsAhorro.colors!"
+              [stroke]="chartOptionsAhorro.stroke!"
+              [dataLabels]="chartOptionsAhorro.dataLabels!"
+              [tooltip]="chartOptionsAhorro.tooltip!"
+              [legend]="chartOptionsAhorro.legend!"
+              [plotOptions]="chartOptionsAhorro.plotOptions!">
+            </apx-chart>
+          </div>
+        }
       </div>
     </div>
   }
 </app-modal>
 
-<app-modal [isOpen]="showDocProvModal()" title="Documentación del Adjudicatario" [subtitle]="'Subasta #' + (docProvItem()?.nroCotizacion || '')" maxWidthClass="max-w-4xl" (close)="closeVerDocProveedor()">
+<app-modal [isOpen]="showDocProvModal()" title="Documentación de Proveedores" [subtitle]="'Subasta #' + (docProvItem()?.nroCotizacion || '')" maxWidthClass="max-w-5xl" (close)="closeVerDocProveedor()">
   @if (loadingDocProv()) {
-    <div class="py-16"><app-loading-spinner label="Recuperando documentos..."></app-loading-spinner></div>
+    <div class="py-16"><app-loading-spinner label="Recopilando documentación y garantías..."></app-loading-spinner></div>
   } @else {
     <div class="space-y-4">
-      <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-4 flex items-center gap-3">
-        <lucide-icon name="info" [size]="20" class="text-[var(--color-cyan-spark)] shrink-0"></lucide-icon>
-        <p class="text-[13px] text-[var(--color-porcelain)]">Documentación fiscal y legal respaldatoria subida por los proveedores ganadores de esta subasta.</p>
+      
+      <div class="flex gap-2 mb-4 border-b border-[var(--color-charcoal-grey)] pb-px">
+        <button (click)="docProvTab.set('GARANTIAS')" 
+                class="px-5 py-2.5 text-[13px] font-[590] uppercase tracking-wider transition-all border-b-2"
+                [ngClass]="docProvTab() === 'GARANTIAS' ? 'text-[var(--color-cyan-spark)] border-[var(--color-cyan-spark)] bg-[var(--color-cyan-spark)]/5 rounded-t-lg' : 'text-[var(--color-storm-cloud)] border-transparent hover:text-[var(--color-porcelain)]'">
+          Garantías y Pagarés
+          @if (docProvGarantias().length > 0) { <span class="ml-2 bg-[var(--color-cyan-spark)]/20 text-[var(--color-cyan-spark)] py-0.5 px-2 rounded-full text-[10px]">{{ docProvGarantias().length }}</span> }
+        </button>
+        <button (click)="docProvTab.set('ITEMS')" 
+                class="px-5 py-2.5 text-[13px] font-[590] uppercase tracking-wider transition-all border-b-2"
+                [ngClass]="docProvTab() === 'ITEMS' ? 'text-[var(--color-cyan-spark)] border-[var(--color-cyan-spark)] bg-[var(--color-cyan-spark)]/5 rounded-t-lg' : 'text-[var(--color-storm-cloud)] border-transparent hover:text-[var(--color-porcelain)]'">
+          Documentación por Ítems
+          @if (docProvItems().length > 0) { <span class="ml-2 bg-[var(--color-cyan-spark)]/20 text-[var(--color-cyan-spark)] py-0.5 px-2 rounded-full text-[10px]">{{ docProvItems().length }}</span> }
+        </button>
       </div>
 
-      <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-graphite)]/50">
-        <table class="w-full text-left text-[13px]">
-          <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
-            <tr>
-              <th class="px-4 py-3">Proveedor</th>
-              <th class="px-4 py-3">Tipo de Documento</th>
-              <th class="px-4 py-3">Fecha de Carga</th>
-              <th class="px-4 py-3 text-right">Descargar</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
-            @for (doc of docProvList(); track doc.id) {
-              <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors">
-                <td class="px-4 py-3 font-[590] text-[var(--color-porcelain)]">{{ doc.proveedor }}</td>
-                <td class="px-4 py-3 text-[var(--color-light-steel)]">{{ doc.tipo }}</td>
-                <td class="px-4 py-3 text-[var(--color-storm-cloud)]">{{ doc.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td class="px-4 py-3 text-right">
-                  <button class="p-1.5 rounded bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)] hover:text-black transition-colors" title="Descargar PDF">
-                    <lucide-icon name="download" [size]="16"></lucide-icon>
-                  </button>
-                </td>
+      @if (docProvTab() === 'GARANTIAS') {
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-4 flex items-center gap-3 mb-4">
+          <lucide-icon name="shield-check" [size]="20" class="text-amber-400 shrink-0"></lucide-icon>
+          <p class="text-[13px] text-[var(--color-porcelain)]">Documentación de respaldo económico y garantías de mantenimiento de oferta subidas por los proveedores.</p>
+        </div>
+
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-graphite)]/50">
+          <table class="w-full text-left text-[13px] whitespace-nowrap">
+            <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
+              <tr>
+                <th class="px-4 py-3">Proveedor</th>
+                <th class="px-4 py-3">Tipo / Aseguradora</th>
+                <th class="px-4 py-3 text-right">Monto</th>
+                <th class="px-4 py-3">Fecha de Carga</th>
+                <th class="px-4 py-3 text-right">Descargar</th>
               </tr>
-            } @empty {
-              <tr><td colspan="4" class="px-4 py-8 text-center text-[var(--color-storm-cloud)] italic">No se encontraron documentos para esta subasta.</td></tr>
-            }
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+              @for (garantia of docProvGarantias(); track garantia.idGarantia) {
+                <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors">
+                  <td class="px-4 py-3 font-[590] text-[var(--color-porcelain)] truncate max-w-[200px]" [title]="garantia._nombreProveedor">{{ garantia._nombreProveedor }}</td>
+                  <td class="px-4 py-3 text-[var(--color-light-steel)]">
+                    <span class="block font-[590]">{{ garantia.idTipoDocumento === 1 ? 'Póliza de Caución' : 'Pagaré' }}</span>
+                    <span class="text-[11px] text-[var(--color-storm-cloud)]">{{ garantia.companiaAseguradora || 'N/A' }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-mono text-[var(--color-cyan-spark)]">${{ (garantia.montoCaucion || garantia.montoPagare) | number:'1.2-2' }}</td>
+                  <td class="px-4 py-3 text-[var(--color-storm-cloud)] font-mono text-[11px]">{{ garantia.fecIng | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="px-4 py-3 text-right">
+                    <a [href]="garantia.urlArchivo" target="_blank" title="Descargar Documento" class="inline-flex items-center gap-2 p-1.5 px-3 rounded bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)] hover:text-black transition-colors">
+                      <lucide-icon name="download" [size]="14"></lucide-icon> <span class="text-[11px] font-[590] uppercase tracking-wider">Ver</span>
+                    </a>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="px-4 py-12 text-center text-[var(--color-storm-cloud)] italic">No se registraron garantías o pagarés para esta subasta.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (docProvTab() === 'ITEMS') {
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-4 flex items-center gap-3 mb-4">
+          <lucide-icon name="package" [size]="20" class="text-[#448b54] shrink-0"></lucide-icon>
+          <p class="text-[13px] text-[var(--color-porcelain)]">Documentación técnica, folletería y anexos subidos por los proveedores, vinculados específicamente a un ítem o renglón.</p>
+        </div>
+
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-graphite)]/50">
+          <table class="w-full text-left text-[13px]">
+            <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
+              <tr>
+                <th class="px-4 py-3">Proveedor</th>
+                <th class="px-4 py-3 w-1/3">Ítem / Renglón</th>
+                <th class="px-4 py-3">Archivo</th>
+                <th class="px-4 py-3 text-center">Estado de Envío</th>
+                <th class="px-4 py-3 text-right">Descargar</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+              @for (doc of docProvItems(); track doc.idDocItem) {
+                <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors">
+                  <td class="px-4 py-4 font-[590] text-[var(--color-porcelain)] truncate max-w-[150px]" [title]="doc._nombreProveedor">{{ doc._nombreProveedor }}</td>
+                  <td class="px-4 py-4">
+                    <p class="text-[var(--color-porcelain)] font-[510] leading-tight">{{ doc._nombreElemento }}</p>
+                   
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-2">
+                      <lucide-icon name="file-text" [size]="14" class="text-[var(--color-fog-grey)] shrink-0"></lucide-icon>
+                      <span class="text-[var(--color-light-steel)] truncate max-w-[150px]" [title]="doc.nombreArchivo">{{ doc.nombreArchivo }}</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4 text-center">
+                    @if (doc.enviado) {
+                      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-[590] uppercase tracking-wider border border-emerald-500/20">
+                        <lucide-icon name="check-circle" [size]="12"></lucide-icon> Definitivo
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 text-[10px] font-[590] uppercase tracking-wider border border-amber-500/20">
+                        <lucide-icon name="clock" [size]="12"></lucide-icon> Borrador
+                      </span>
+                    }
+                  </td>
+                  <td class="px-4 py-4 text-right">
+                    <a [href]="doc.urlArchivo" target="_blank" title="Descargar PDF" class="inline-flex items-center gap-2 p-1.5 px-3 rounded bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)] hover:text-black transition-colors">
+                      <lucide-icon name="download" [size]="14"></lucide-icon> <span class="text-[11px] font-[590] uppercase tracking-wider">Ver</span>
+                    </a>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="px-4 py-12 text-center text-[var(--color-storm-cloud)] italic">No se subió documentación técnica por ítem para esta subasta.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
     </div>
   }
 </app-modal>

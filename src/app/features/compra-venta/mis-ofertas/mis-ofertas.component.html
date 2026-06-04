@@ -1,0 +1,64 @@
+<div class="mx-auto max-w-[1400px] py-6">
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)] flex items-center gap-3">
+        <lucide-icon name="handshake" [size]="28" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+        Mis Ofertas
+      </h1>
+      <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Historial y trazabilidad de todas tus pujas y participaciones en el portal.</p>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <button (click)="cargarHistorial()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)]">
+        <lucide-icon name="rotate-ccw" [size]="16" [class.animate-spin]="loading()"></lucide-icon>
+        Refrescar
+      </button>
+    </div>
+  </div>
+
+  <ng-template cellKey="fechaOferta" let-row>
+    <div class="flex items-center gap-2">
+      <lucide-icon name="calendar" [size]="14" class="text-[var(--color-fog-grey)]"></lucide-icon>
+      <span class="text-[13px] text-[var(--color-porcelain)]">{{ row.fechaOferta | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+    </div>
+  </ng-template>
+
+  <ng-template cellKey="cotizacion" let-row>
+    <span class="font-mono text-[13px] font-[590] text-[var(--color-cyan-spark)]">#{{ row.cotizacion }}</span>
+  </ng-template>
+
+  <ng-template cellKey="detalle" let-row>
+    <span class="text-[13px] text-[var(--color-porcelain)] uppercase truncate block max-w-[400px]" [title]="row.detalle">
+      {{ row.detalle }}
+    </span>
+  </ng-template>
+
+  <ng-template cellKey="monto" let-row>
+    <span class="font-mono text-[14px] font-bold text-[var(--color-neon-lime)]">
+      {{ row.monto | currency:'ARS':'symbol-narrow':'1.2-2' }}
+    </span>
+  </ng-template>
+
+  <ng-template cellKey="estado" let-row>
+    <span class="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-[590] uppercase tracking-wider border border-emerald-500/20">
+      Ingresada
+    </span>
+  </ng-template>
+
+  <app-data-table 
+    [columns]="columns" 
+    [data]="ofertas()" 
+    [totalRows]="ofertas().length" 
+    [loading]="loading()" 
+    [pageSize]="50" 
+    [cellTemplates]="cellTemplatesMap()" 
+    emptyMessage="No registramos pujas en tu historial" 
+    emptySubMessage="Tus ofertas aprobadas aparecerán aquí.">
+  </app-data-table>
+  
+  @if (ofertas().length > 0) {
+    <p class="mt-3 text-[12px] text-[var(--color-storm-cloud)] text-right">
+      Se muestran las últimas 50 pujas registradas en el sistema.
+    </p>
+  }
+</div>

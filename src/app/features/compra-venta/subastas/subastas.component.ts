@@ -12,11 +12,13 @@ import { SignalRService } from '../../../core/services/signalr.service';
 import { ConsultaService } from '../../../core/services/consulta.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Modal } from '../../../shared/ui/modal/modal';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { ConfirmationModal } from '../../../shared/ui/confirmation-modal/confirmation-modal';
 
 @Component({
   selector: 'app-subastas',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, Modal],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, Modal, LoadingSpinnerComponent, ConfirmationModal],
   templateUrl: './subastas.component.html',
 })
 export class SubastasComponent implements OnInit {
@@ -58,11 +60,23 @@ export class SubastasComponent implements OnInit {
   
   enviandoConsulta = signal(false);
 
+  // === ESTADOS DEL MODAL DE DOCUMENTACION POR ITEM ===
+  showDocItemModal = signal(false);
+  docItemCotizacion = signal<any>(null);
+  docItemElementos = signal<any[]>([]);
+  docItemArchivos = signal<any[]>([]);
+  loadingDocItem = signal(false);
+  savingDocItem = signal(false);
+  docItemFile = signal<Record<number, File | null>>({});
+
+  // Señales para los modales de confirmación
+  docItemToDelete = signal<number | null>(null);
+  docItemToSubmit = signal<any>(null);
+
   // Computeds del Foro
   isAdmin = computed(() => {
     const user: any = this.auth.currentUser();
     if (!user) return false;
-    // Soporta tu nuevo SuperAdmin (idRol = 1 o la funcion isSuperAdmin) y el Legacy (5)
     return user.idRol === 1 || 
            user.roles?.some((r: any) => r.rolId === 1 || r.rolId === 5) || 
            this.auth.isSuperAdmin();
@@ -182,7 +196,7 @@ export class SubastasComponent implements OnInit {
     this.activeCotizacionId.set(idCotizacion);
     this.isConsultasModalOpen.set(true);
     this.nuevaPregunta.set('');
-    this.respuestaTexto = {}; // Limpiamos el objeto
+    this.respuestaTexto = {}; 
     this.signalR.consultas.set([]); 
     
     this.consultaService.getConsultas(idCotizacion).subscribe(res => {
@@ -232,14 +246,14 @@ export class SubastasComponent implements OnInit {
 
   responderPregunta(idMensaje: number) {
     const id = this.activeCotizacionId();
-    const texto = this.respuestaTexto[idMensaje]?.trim(); // Leemos del objeto normal
+    const texto = this.respuestaTexto[idMensaje]?.trim();
     if (!id || !texto) return;
 
     this.consultaService.responder(id, idMensaje, texto).subscribe({
       next: (res: any) => {
         if (res.success) {
           this.notify.showSuccess('Respuesta publicada correctamente.');
-          delete this.respuestaTexto[idMensaje]; // Limpiamos el input
+          delete this.respuestaTexto[idMensaje]; 
         } else {
           this.notify.showError(res.message);
         }
@@ -352,7 +366,6 @@ export class SubastasComponent implements OnInit {
     });
   }
 
-  // Vista de solo lectura (Proveedores)
   openPliegos(item: any) { 
     this.pliegoItem.set(item); 
     this.dictamenList.set([]);
@@ -361,4 +374,165 @@ export class SubastasComponent implements OnInit {
   }
   closePliegos() { this.showPliegos.set(false); }
 
+  // ==========================================
+  // LÓGICA DE DOCUMENTACIÓN POR ÍTEM/RENGLÓN
+  // ==========================================
+
+  openCargarDocumentacionItem(item: any) {
+    this.docItemCotizacion.set(item);
+    this.showDocItemModal.set(true);
+    this.cargarItemsYDocumentos(item.idCotizacion);
+  }
+
+  closeDocItemModal() {
+    this.showDocItemModal.set(false);
+    this.docItemCotizacion.set(null);
+    this.docItemElementos.set([]);
+    this.docItemArchivos.set([]);
+    this.docItemFile.set({});
+  }
+
+  cargarItemsYDocumentos(idCotizacion: number) {
+    this.loadingDocItem.set(true);
+    
+    this.cotizacionService.getById(idCotizacion).subscribe({
+      next: (resSubasta: any) => {
+        if (resSubasta.success && resSubasta.data) {
+           const isRenglon = resSubasta.data.especificacion?.criterioAdjudicacion === 1;
+           const elementos = isRenglon ? resSubasta.data.renglones : resSubasta.data.detalles;
+           
+           this.docItemElementos.set(elementos.map((e: any) => ({
+              ...e,
+              isRenglon: isRenglon,
+              idElemento: isRenglon ? e.idRenglon : e.idCotizacionDetalle,
+              nombreDisplay: isRenglon ? e.descripcion : e.nItem
+           })));
+
+           this.cotizacionService.getDocumentosItem(idCotizacion).subscribe({
+             next: (resDocs: any) => {
+               this.loadingDocItem.set(false);
+               if (resDocs.success && resDocs.data) {
+                 this.docItemArchivos.set(resDocs.data);
+               }
+             },
+             error: () => this.loadingDocItem.set(false)
+           });
+        } else {
+           this.loadingDocItem.set(false);
+        }
+      },
+      error: () => {
+        this.loadingDocItem.set(false);
+        this.notify.showError('Error al cargar la información de la subasta.');
+      }
+    });
+  }
+
+  getArchivosPorElemento(idElemento: number, isRenglon: boolean) {
+    return this.docItemArchivos().filter(d => isRenglon ? d.idRenglon === idElemento : d.idCotizacionDetalle === idElemento);
+  }
+
+  yaEnviadoDefinitivo(idElemento: number, isRenglon: boolean): boolean {
+    const archivos = this.getArchivosPorElemento(idElemento, isRenglon);
+    return archivos.some(a => a.enviado === true);
+  }
+
+  onFileDocItemSelected(event: any, idElemento: number) {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > 20 * 1024 * 1024) { 
+        this.notify.showError('El archivo supera los 20MB permitidos.'); 
+        return; 
+      }
+      this.docItemFile.update(state => ({ ...state, [idElemento]: file }));
+    }
+  }
+
+  subirDocumentoItem(elemento: any) {
+    const file = this.docItemFile()[elemento.idElemento];
+    if (!file) return;
+
+    this.savingDocItem.set(true);
+    const formData = new FormData();
+    formData.append('Archivo', file);
+    if (elemento.isRenglon) {
+      formData.append('IdRenglon', elemento.idElemento.toString());
+    } else {
+      formData.append('IdCotizacionDetalle', elemento.idElemento.toString());
+    }
+
+    this.cotizacionService.subirDocumentoItem(this.docItemCotizacion().idCotizacion, formData).subscribe({
+      next: (res: any) => {
+        this.savingDocItem.set(false);
+        if (res.success) {
+          this.notify.showSuccess('Documento subido correctamente.');
+          this.docItemFile.update(state => ({ ...state, [elemento.idElemento]: null }));
+          this.cargarItemsYDocumentos(this.docItemCotizacion().idCotizacion);
+        } else {
+          this.notify.showError(res.message || 'Error al subir documento.');
+        }
+      },
+      error: (err) => {
+        this.savingDocItem.set(false);
+        this.notify.showError(err.error?.message || 'Error al procesar la subida.');
+      }
+    });
+  }
+
+  eliminarDocumentoItem(idDocItem: number) {
+    this.docItemToDelete.set(idDocItem);
+  }
+
+  confirmEliminarDocumentoItem() {
+    const idDocItem = this.docItemToDelete();
+    if (!idDocItem) return;
+
+    this.cotizacionService.eliminarDocumentoItem(this.docItemCotizacion().idCotizacion, idDocItem).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.notify.showSuccess('Documento eliminado.');
+          this.cargarItemsYDocumentos(this.docItemCotizacion().idCotizacion);
+        } else {
+          this.notify.showError(res.message);
+        }
+        this.docItemToDelete.set(null);
+      },
+      error: () => {
+        this.notify.showError('Error al eliminar el documento.');
+        this.docItemToDelete.set(null);
+      }
+    });
+  }
+
+  enviarDocumentacionDefinitiva(elemento: any) {
+    this.docItemToSubmit.set(elemento);
+  }
+
+  confirmEnviarDocumentacionDefinitiva() {
+    const elemento = this.docItemToSubmit();
+    if (!elemento) return;
+    
+    this.savingDocItem.set(true);
+    const idCot = this.docItemCotizacion().idCotizacion;
+    const idCotDet = !elemento.isRenglon ? elemento.idElemento : undefined;
+    const idRenglon = elemento.isRenglon ? elemento.idElemento : undefined;
+
+    this.cotizacionService.enviarDocumentacionItemDefinitiva(idCot, idCotDet, idRenglon).subscribe({
+      next: (res: any) => {
+        this.savingDocItem.set(false);
+        if (res.success) {
+          this.notify.showSuccess('Documentación enviada definitivamente.');
+          this.cargarItemsYDocumentos(idCot);
+        } else {
+          this.notify.showError(res.message);
+        }
+        this.docItemToSubmit.set(null);
+      },
+      error: (err) => {
+        this.savingDocItem.set(false);
+        this.notify.showError(err.error?.message || 'Error al enviar documentación.');
+        this.docItemToSubmit.set(null);
+      }
+    });
+  }
 }
