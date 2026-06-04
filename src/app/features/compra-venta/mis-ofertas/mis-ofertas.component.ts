@@ -1,22 +1,58 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren, Directive, Input } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
+import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
+import { CotizacionService } from '../../../core/services/cotizacion.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-mis-ofertas',
   standalone: true,
-  imports: [LucideAngularModule],
-  template: `
-    <div class="mx-auto max-w-5xl py-12 text-center">
-      <div class="mb-8 inline-flex size-16 items-center justify-center rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]">
-        <lucide-icon name="handshake" [size]="28" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-      </div>
-      <h1 class="mb-3 text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Mis Ofertas</h1>
-      <p class="text-[15px] text-[var(--color-storm-cloud)]">Seguimiento de tus ofertas realizadas en subastas.</p>
-      <div class="mt-8 rounded-2xl border border-dashed border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30 p-12">
-        <lucide-icon name="construction" [size]="32" class="mb-3 text-[var(--color-storm-cloud)]"></lucide-icon>
-        <p class="text-[14px] text-[var(--color-storm-cloud)]">Próximamente</p>
-      </div>
-    </div>
-  `
+  imports: [CommonModule, LucideAngularModule, DataTableComponent, CellTemplateDirective, DatePipe],
+  templateUrl: './mis-ofertas.component.html',
 })
-export class MisOfertasComponent {}
+export class MisOfertasComponent implements OnInit {
+  private cotizacionService = inject(CotizacionService);
+  private notify = inject(NotificationService);
+
+  ofertas = signal<any[]>([]);
+  loading = signal(true);
+
+  cellTemplateDirectives = viewChildren(CellTemplateDirective);
+  cellTemplatesMap = computed(() => {
+    const map: Record<string, TemplateRef<any>> = {};
+    this.cellTemplateDirectives().forEach((d: any) => { map[d.cellKey] = d.templateRef; });
+    return map;
+  });
+
+  columns: TableColumn[] = [
+    { key: 'fechaOferta', label: 'Fecha y Hora', width: '180px' },
+    { key: 'cotizacion', label: 'Subasta (Nro)', width: '150px' },
+    { key: 'detalle', label: 'Bien, Servicio o Lote' },
+    { key: 'monto', label: 'Importe Ofertado', align: 'right', width: '180px' },
+    { key: 'estado', label: 'Estado', align: 'center', width: '120px' }
+  ];
+
+  ngOnInit() {
+    this.cargarHistorial();
+  }
+
+  cargarHistorial() {
+    this.loading.set(true);
+    this.cotizacionService.getMisOfertas().subscribe({
+      next: (res) => {
+        this.loading.set(false);
+        if (res.success && res.data) {
+          this.ofertas.set(res.data);
+        } else {
+          this.ofertas.set([]);
+        }
+      },
+      error: () => {
+        this.loading.set(false);
+        this.notify.showError('No se pudo cargar el historial de ofertas.');
+      }
+    });
+  }
+}

@@ -6,6 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { VigenciaService } from '../../../core/services/vigencia.service';
 import { CotizacionService, SubastaDashboard } from '../../../core/services/cotizacion.service';
 import { Vigencia } from '../../../core/models/vigencia.model';
+import { TimeService } from '../../../core/services/time.service';
 
 @Component({
   selector: 'app-dashboard-compra-venta',
@@ -16,6 +17,8 @@ import { Vigencia } from '../../../core/models/vigencia.model';
 export class DashboardCompraVentaComponent implements OnInit, OnDestroy {
   private vigenciaService = inject(VigenciaService);
   private cotizacionService = inject(CotizacionService);
+  private timeService = inject(TimeService);
+  
   private timerInterval: any;
   tick = signal(0);
 
@@ -30,6 +33,7 @@ export class DashboardCompraVentaComponent implements OnInit, OnDestroy {
   loading = signal(false);
 
   ngOnInit() {
+    this.timeService.syncWithServer();
     this.timerInterval = setInterval(() => this.tick.update(v => v + 1), 1000);
     this.fechaFin.set(new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0]);
     this.loadVigencias();
@@ -68,12 +72,21 @@ export class DashboardCompraVentaComponent implements OnInit, OnDestroy {
 
   getTimeLeft(endDate?: string): string {
     if (!endDate) return '--:--:--';
-    const diff = new Date(endDate).getTime() - Date.now();
-    if (diff <= 0) return 'Finalizada';
+    const diff = new Date(endDate).getTime() - this.timeService.now();
+    if (diff <= 0) return '00:00:00';
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  getDaysLeft(startDate?: string): string {
+    if (!startDate) return '';
+    const diff = new Date(startDate).getTime() - this.timeService.now();
+    if (diff <= 0) return 'Hoy';
+    const days = Math.ceil(diff / (1000 * 3600 * 24));
+    if (days === 1) return 'Mañana';
+    return `En ${days} días`;
   }
 
   onVigenciaChange(val: any) { this.selectedVigenciaId.set(+val); this.loadDashboard(); }

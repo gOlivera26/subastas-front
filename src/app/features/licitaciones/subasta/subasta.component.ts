@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal, computed, TemplateRef, viewChild } f
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { CotizacionService, SubastaDashboard } from '../../../core/services/cotizacion.service';
 import { VigenciaService } from '../../../core/services/vigencia.service';
@@ -19,13 +18,27 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { TableColumn, TableAction } from '../../../shared/ui/smart-table/table.models';
 import { environment } from '../../../../environments/environment';
 import { TimeService } from '../../../core/services/time.service';
+import { forkJoin } from 'rxjs';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 interface RenglonItem { id: number; nombre: string; itemIds: number[]; }
 
+export interface DonutChartOptions {
+  series: any;
+  chart: any;
+  labels: any;
+  colors: any;
+  stroke: any;
+  dataLabels: any;
+  tooltip: any;
+  legend: any;
+  plotOptions: any;
+}
+
 @Component({
-  selector: 'app-subasta', 
+  selector: 'app-subasta',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, CustomSelect, AppCalendar, SmartTableComponent, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, CustomSelect, AppCalendar, SmartTableComponent, LoadingSpinnerComponent, NgApexchartsModule],
   templateUrl: './subasta.component.html',
 })
 export class SubastaComponent implements OnInit {
@@ -63,13 +76,13 @@ export class SubastaComponent implements OnInit {
   obsData = signal<any>({});
   loadingObs = signal(false);
   savingObs = signal(false);
-  
+
   estadoOptions: SelectOption[] = [
-    { label: 'Todos', value: null }, 
-    { label: 'Generado', value: 4 }, 
-    { label: 'Enviada Pendiente', value: 39 }, 
-    { label: 'Finalizada', value: 40 }, 
-    { label: 'Anulada', value: 20 }, 
+    { label: 'Todos', value: null },
+    { label: 'Generado', value: 4 },
+    { label: 'Enviada Pendiente', value: 39 },
+    { label: 'Finalizada', value: 40 },
+    { label: 'Anulada', value: 20 },
     { label: 'Desistida', value: 47 }
   ];
 
@@ -82,23 +95,16 @@ export class SubastaComponent implements OnInit {
   fechaInicio = signal(''); fechaFin = signal('');
   fechaLimiteConsultas = signal(''); margenMejora = signal(5);
   permiteProrroga = signal(false); crearProrrogaMinutos = signal<number | null>(null);
-  tipoOptions: SelectOption[] = [
-    { label: 'Subasta Electrónica Inversa', value: 7 },
-    { label: 'Subasta Electrónica Directa', value: 9 },
-    { label: 'Subasta Inversa Monto Fijo', value: 13 },
-    { label: 'Subasta Inversa SEEC', value: 15 },
-  ];
 
   useRenglones = signal(false);
   renglones = signal<RenglonItem[]>([]);
   renglonCounter = signal(1);
   renglonNombre = signal('');
 
- itemsDisponibles = computed(() => {
+  itemsDisponibles = computed(() => {
     const selected = new Set(this.selectedIds());
-    // Solo mostramos los que no están seleccionados Y que tienen stock disponible
-    return this.reservas().filter(r => 
-      !selected.has(r.id) && 
+    return this.reservas().filter(r =>
+      !selected.has(r.id) &&
       (r.cantidadRestante === undefined || r.cantidadRestante > 0)
     );
   });
@@ -119,48 +125,29 @@ export class SubastaComponent implements OnInit {
   estadoTpl = viewChild<TemplateRef<any>>('estadoTpl');
   ofertasTpl = viewChild<TemplateRef<any>>('ofertasTpl');
   accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
-  
-  customTemplates = computed(() => { 
-    const m: Record<string, TemplateRef<any>> = {}; 
-    const st = this.estadoTpl(); if (st) m['estado'] = st; 
-    const ot = this.ofertasTpl(); if (ot) m['ofertas'] = ot; 
-    const at = this.accionesTpl(); if (at) m['acciones'] = at; 
-    return m; 
+
+  customTemplates = computed(() => {
+    const m: Record<string, TemplateRef<any>> = {};
+    const st = this.estadoTpl(); if (st) m['estado'] = st;
+    const ot = this.ofertasTpl(); if (ot) m['ofertas'] = ot;
+    const at = this.accionesTpl(); if (at) m['acciones'] = at;
+    return m;
   });
 
   columns: TableColumn[] = [
-    { header: 'Número', key: 'nroCotizacion', sortable: true }, 
-    { header: 'Expediente / Objeto', key: 'titulo', sortable: true }, 
-    { header: 'Tipo Contratación', key: 'tipo' }, 
-    { header: 'Área', key: 'unidadAdm' }, 
-    { header: 'Estado', key: 'estado', type: 'custom' }, 
-    { header: 'Inicia', key: 'fechaInicio', type: 'date' }, 
-    { header: 'Finaliza', key: 'fechaFin', type: 'date' }, 
-    { header: 'Ofertas', key: 'ofertas', type: 'custom' }, 
+    { header: 'Número', key: 'nroCotizacion', sortable: true },
+    { header: 'Expediente / Objeto', key: 'titulo', sortable: true },
+    { header: 'Tipo Contratación', key: 'tipo' },
+    { header: 'Área', key: 'unidadAdm' },
+    { header: 'Estado', key: 'estado', type: 'custom' },
+    { header: 'Inicia', key: 'fechaInicio', type: 'date' },
+    { header: 'Finaliza', key: 'fechaFin', type: 'date' },
+    { header: 'Ofertas', key: 'ofertas', type: 'custom' },
     { header: 'Acciones', key: 'acciones', type: 'custom' }
   ];
-  
-  actions: TableAction[] = []; 
 
-  reservaColumns: TableColumn[] = [
-    { header: 'Nota', key: 'nroReserva', sortable: true },
-    { header: 'Área', key: 'nombreUnidadAdm' },
-    { header: 'Bien / Servicio', key: 'nItem' },
-    { header: 'Cant.', key: 'cantidad' },
-    { header: 'Mon.', key: 'simboloMoneda' },
-    { header: 'Importe', key: 'importe' },
-  ];
-  selColumns: TableColumn[] = [
-    { header: 'Nota', key: 'nroReserva', sortable: true },
-    { header: 'Área', key: 'nombreUnidadAdm' },
-    { header: 'Bien / Servicio', key: 'nItem' },
-    { header: 'Cant.', key: 'cantidad' },
-    { header: 'Mon.', key: 'simboloMoneda' },
-    { header: 'Importe', key: 'importe' },
-  ];
-  selActions: TableAction[] = [{ action: 'quitar', icon: 'x', color: 'text-red-400 hover:text-red-300', tooltip: 'Quitar selección' }];
+  actions: TableAction[] = [];
 
-  // GETTERS PARA FASE 1 (SUBASTA DIRECTA NOMENCLATURA)
   get isDirectaProv(): boolean { return this.provItem()?.idTipoContratacion === this.TIPO_DIRECTA; }
   get isDirectaProp(): boolean { return this.propuestasItem()?.idTipoContratacion === this.TIPO_DIRECTA; }
 
@@ -178,18 +165,14 @@ export class SubastaComponent implements OnInit {
     return new Date(fecha).getTime() < this.ahora();
   }
 
-  accionNoImplementada(nombre: string) {
-    this.notify.showInfo(`La funcionalidad '${nombre}' se implementará en la próxima fase.`);
+  ngOnInit() {
+    this.loadVigencias();
+    this.loadAreas();
+    this.loadOficinas();
+    this.timeService.syncWithServer();
+    this.buscar();
   }
 
-  ngOnInit() { 
-    this.loadVigencias(); 
-    this.loadAreas(); 
-    this.loadOficinas(); 
-    this.timeService.syncWithServer(); 
-    this.buscar(); 
-  }
-  
   loadVigencias() {
     this.vigService.getAll().subscribe({
       next: (r: any) => {
@@ -210,7 +193,7 @@ export class SubastaComponent implements OnInit {
   loadOficinas(idUa?: number) { this.subRespService.getAll(idUa).subscribe({ next: (r: any) => { if (r?.success) this.oficinaOptions.set(r.data.map((o: any) => ({ label: o.nombre, value: o.idSubResponsable }))); } }); }
   onModalAreaChange(val: number | null) { this.modalAreaId.set(val); this.modalOficinaId.set(null); this.loadOficinas(val ?? undefined); this.buscarReservas(); }
   onModalOficinaChange(val: number | null) { this.modalOficinaId.set(val); this.buscarReservas(); }
-  
+
   buscar() {
     this.loading.set(true);
     this.cotService.buscar({
@@ -225,10 +208,6 @@ export class SubastaComponent implements OnInit {
     });
   }
 
-  onReservaSelectionChange(ids: number[]) { 
-    this.selectedIds.set(ids); 
-  }
-  
   quitarItem(row: any) { this.selectedIds.update(arr => arr.filter(id => id !== row.id)); }
 
   openCrear() {
@@ -244,7 +223,7 @@ export class SubastaComponent implements OnInit {
     this.fechaLimiteConsultas.set(''); this.margenMejora.set(5);
     this.permiteProrroga.set(false); this.crearProrrogaMinutos.set(null);
   }
-  
+
   closeCrear() { this.showCrear.set(false); }
 
   elegirModo(renglon: boolean) {
@@ -332,14 +311,14 @@ export class SubastaComponent implements OnInit {
           this.reservas.set(items);
         }
       },
-      error: () => { 
-        this.loadingReservas.set(false); 
-        this.notify.showError("Error al cargar las provisiones autorizadas."); 
+      error: () => {
+        this.loadingReservas.set(false);
+        this.notify.showError("Error al cargar las provisiones autorizadas.");
       }
     });
   }
 
- getSelectedDetalles() {
+  getSelectedDetalles() {
     return this.selectedItems().map(r => {
       let idRenglon: number | undefined;
       if (this.useRenglones()) {
@@ -350,7 +329,6 @@ export class SubastaComponent implements OnInit {
       return {
         idReservaDetalle: r.idReservaDetalle || r.id,
         idItem: r.idItem || 0,
-        // Usamos los valores editados si existen, sino los originales
         cantidad: r._cantidadEditada !== undefined ? r._cantidadEditada : (r.cantidadRestante || r.cantidad || 1),
         importeBase: r._importeEditado !== undefined ? r._importeEditado : (r.importe || 0),
         importeMinimo: r._importeMinimoEditado !== undefined ? r._importeMinimoEditado : null,
@@ -362,7 +340,7 @@ export class SubastaComponent implements OnInit {
   grabar() {
     const detalles = this.getSelectedDetalles();
     if (detalles.length === 0) return;
-    
+
     if (this.useRenglones()) {
       const sinRenglon = this.itemsSinRenglon().length;
       if (sinRenglon > 0) {
@@ -370,7 +348,7 @@ export class SubastaComponent implements OnInit {
         return;
       }
     }
-    
+
     const primerItemSeleccionado = this.selectedItems()[0];
     const idUnidadAdmReal = primerItemSeleccionado?.idUnidadAdm;
 
@@ -378,7 +356,7 @@ export class SubastaComponent implements OnInit {
       this.notify.showError('No se pudo determinar el Área de la subasta a partir del ítem seleccionado.');
       return;
     }
-    
+
     this.saving.set(true);
 
     const body: any = {
@@ -407,15 +385,15 @@ export class SubastaComponent implements OnInit {
     this.http.post(`${this.api}/Cotizacion`, body).subscribe({
       next: (r: any) => {
         this.saving.set(false);
-        if (r?.success) { 
-          this.closeCrear(); 
-          this.notify.showSuccess('Subasta ' + (r.data?.nroCotizacion || '') + ' creada con éxito.'); 
-          this.buscar(); 
+        if (r?.success) {
+          this.closeCrear();
+          this.notify.showSuccess('Subasta ' + (r.data?.nroCotizacion || '') + ' creada con éxito.');
+          this.buscar();
         }
       },
-      error: (e) => { 
-        this.saving.set(false); 
-        this.notify.showError('Error al crear la subasta'); 
+      error: () => {
+        this.saving.set(false);
+        this.notify.showError('Error al crear la subasta');
       }
     });
   }
@@ -424,7 +402,7 @@ export class SubastaComponent implements OnInit {
   detalleData = signal<any>({}); detalleItems = signal<any[]>([]);
   detalleRenglones = signal<any[]>([]); detalleProveedores = signal<any[]>([]);
   loadingDetalle = signal(false); detalleError = signal(false);
-  
+
   openDetalle(item: any) {
     this.detalleItem.set(item); this.showDetalle.set(true);
     this.detalleData.set({}); this.detalleItems.set([]);
@@ -441,16 +419,13 @@ export class SubastaComponent implements OnInit {
           const proveedores = d.proveedores || [];
           this.detalleItems.set(detalles);
           this.detalleProveedores.set(proveedores.map((p: any) => ({ ...p, _nombre: null })));
-          let pendingResolutions = proveedores.length;
           for (const p of proveedores) {
             this.http.get<any>(`${this.api}/Provider/${p.idProveedor}`).subscribe({
               next: (pr: any) => {
                 const nombreResuelto = pr?.data?.razonSocial || pr?.data?.nombre || '';
                 this.detalleProveedores.update(current => current.map(item => item.idProveedor === p.idProveedor ? { ...item, _nombre: nombreResuelto || `Proveedor #${p.idProveedor}` } : item));
-                pendingResolutions--;
               },
               error: () => {
-                pendingResolutions--;
                 this.detalleProveedores.update(current => current.map(item => item.idProveedor === p.idProveedor ? { ...item, _nombre: `Proveedor #${p.idProveedor}` } : item));
               }
             });
@@ -531,7 +506,7 @@ export class SubastaComponent implements OnInit {
   showProveedores = signal(false); provItem = signal<any>(null); provList = signal<any[]>([]);
   provSearchTerm = signal(''); provSearchResults = signal<any[]>([]);
   loadingProv = signal(false); savingProv = signal(false);
-  
+
   provSearchFiltered = computed(() => {
     const idsAsignados = new Set(this.provList().map((p: any) => p.idProveedor));
     return this.provSearchResults().filter((p: any) => {
@@ -539,15 +514,15 @@ export class SubastaComponent implements OnInit {
       return !idsAsignados.has(id);
     });
   });
-  
+
   openProveedores(item: any) { this.provItem.set(item); this.showProveedores.set(true); this.provSearchTerm.set(''); this.provSearchResults.set([]); this.cargarProveedoresAsignados(); this.buscarProveedores(); }
   closeProveedores() { this.showProveedores.set(false); }
-  
+
   cargarProveedoresAsignados() {
     this.loadingProv.set(true);
     this.http.get<any>(`${this.api}/Cotizacion/${this.provItem().idCotizacion}/Proveedor`).subscribe({
-      next: (r: any) => { 
-        this.loadingProv.set(false); 
+      next: (r: any) => {
+        this.loadingProv.set(false);
         if (r?.success) {
           const proveedores = (r.data || []).map((p: any) => ({ ...p, _nombre: null }));
           this.provList.set(proveedores);
@@ -560,7 +535,7 @@ export class SubastaComponent implements OnInit {
               },
               error: () => {
                 const fallback = this.isDirectaProv ? `Oferente #${p.idProveedor}` : `Proveedor #${p.idProveedor}`;
-                this.provList.update(list => list.map(i => i.idProveedor === p.idProveedor ? { ...i, _nombre: fallback } : i))
+                this.provList.update(list => list.map(i => i.idProveedor === p.idProveedor ? { ...i, _nombre: fallback } : i));
               }
             });
           }
@@ -569,7 +544,7 @@ export class SubastaComponent implements OnInit {
       error: () => this.loadingProv.set(false)
     });
   }
-  
+
   buscarProveedores() {
     const q = this.provSearchTerm().trim();
     this.loadingProv.set(true);
@@ -578,18 +553,17 @@ export class SubastaComponent implements OnInit {
       error: () => this.loadingProv.set(false)
     });
   }
-  
+
   agregarProveedor(p: any) {
     const idProv = p.idProveedor || p.id;
     this.savingProv.set(true);
     const entityName = this.isDirectaProv ? 'Oferente' : 'Proveedor';
-
     this.http.post(`${this.api}/Cotizacion/${this.provItem().idCotizacion}/Proveedor`, { idProveedor: idProv }).subscribe({
       next: () => { this.savingProv.set(false); this.cargarProveedoresAsignados(); this.notify.showSuccess(`${entityName} agregado.`); },
       error: (e: any) => { this.savingProv.set(false); this.notify.showWarning(e.error?.message || 'Error'); }
     });
   }
-  
+
   quitarProveedor(p: any) {
     const entityName = this.isDirectaProv ? 'Oferente' : 'Proveedor';
     this.http.delete(`${this.api}/Cotizacion/${this.provItem().idCotizacion}/Proveedor/${p.idCotizacionProveedor}`).subscribe({
@@ -629,10 +603,12 @@ export class SubastaComponent implements OnInit {
       if (token) await this.signalR.connect(token);
     }
   }
+
   closePreguntas() {
     this.showPreguntas.set(false);
     this.signalR.leaveChat(this.chatCotizacionId());
   }
+
   cargarMensajes() {
     this.loadingMensajes.set(true);
     this.http.get<any>(`${this.api}/Cotizacion/${this.chatCotizacionId()}/Mensaje`).subscribe({
@@ -640,6 +616,7 @@ export class SubastaComponent implements OnInit {
       error: () => this.loadingMensajes.set(false)
     });
   }
+
   enviarMensaje() {
     const c = this.mensajeNuevo().trim(); if (!c) return;
     this.http.post(`${this.api}/Cotizacion/${this.chatCotizacionId()}/Mensaje`, { contenido: c }).subscribe({
@@ -647,6 +624,7 @@ export class SubastaComponent implements OnInit {
       error: () => this.notify.showError('Error al enviar.')
     });
   }
+
   onTyping() { this.signalR.typingChat(this.chatCotizacionId()); }
 
   chatMessages = computed(() => {
@@ -656,6 +634,7 @@ export class SubastaComponent implements OnInit {
     const newLive = live.filter(m => !ids.has(m.idMensaje));
     return [...loaded, ...newLive];
   });
+
   get authUsername(): string { return this.auth.currentUser()?.nombreUsuario || ''; }
 
   showProrroga = signal(false); prorrogaItem = signal<any>(null);
@@ -693,7 +672,6 @@ export class SubastaComponent implements OnInit {
   openPliegos(item: any) { this.pliegoItem.set(item); this.showPliegos.set(true); }
   closePliegos() { this.showPliegos.set(false); }
 
-
   openObservaciones(item: any, type: 'TECNICA' | 'ECONOMICA') {
     this.obsItem.set(item);
     this.obsType.set(type);
@@ -703,9 +681,7 @@ export class SubastaComponent implements OnInit {
     this.loadObservaciones();
   }
 
-  closeObservaciones() {
-    this.showObsModal.set(false);
-  }
+  closeObservaciones() { this.showObsModal.set(false); }
 
   loadObservaciones() {
     this.loadingObs.set(true);
@@ -713,7 +689,7 @@ export class SubastaComponent implements OnInit {
     this.http.get<any>(`${this.api}/Licitacion/TraerObservacionesLic?IdCotizacion=${idCotizacion}`).subscribe({
       next: (r: any) => {
         this.loadingObs.set(false);
-        const data = r?.success ? r.data : r; 
+        const data = r?.success ? r.data : r;
         if (data) { this.obsData.set(data); }
       },
       error: () => {
@@ -728,12 +704,12 @@ export class SubastaComponent implements OnInit {
     this.savingObs.set(true);
     const idCotizacion = this.obsItem().idCotizacion;
     const obsCodificada = encodeURIComponent(this.obsText());
-    const url = this.obsType() === 'TECNICA' 
+    const url = this.obsType() === 'TECNICA'
       ? `${this.api}/Licitacion/PublicarObservacion?IdCotizacion=${idCotizacion}&observacion=${obsCodificada}`
       : `${this.api}/Licitacion/PublicarObservacionEco?IdCotizacion=${idCotizacion}&observacion=${obsCodificada}`;
 
     this.http.post(url, {}).subscribe({
-      next: (r: any) => {
+      next: () => {
         this.savingObs.set(false);
         this.notify.showSuccess('Observación publicada correctamente.');
         this.obsText.set('');
@@ -753,24 +729,94 @@ export class SubastaComponent implements OnInit {
   openDictamen(item: any) {
     this.dictamenItem.set(item);
     this.dictamenForm = { tipo: '', archivo: null };
-    this.dictamenList.set([]); 
+    this.dictamenList.set([]);
     this.showDictamen.set(true);
+    this.cargarDocumentos(item.idCotizacion);
   }
+
+  cargarDocumentos(idCotizacion: number) {
+    this.cotService.getDocumentos(idCotizacion).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          const docs = res.data.map((d: any) => ({
+            ...d,
+            tipoLabel: this.getTipoDocumentoLabel(d.tipoDocumento)
+          }));
+          this.dictamenList.set(docs);
+        } else {
+          this.dictamenList.set([]);
+        }
+      }
+    });
+  }
+
+  getTipoDocumentoLabel(tipo: string): string {
+    const tipos: Record<string, string> = {
+      'S/D': 'Pliego', 'DIC': 'Dictamen', 'ANX': 'Informe',
+      'ANT': 'Informe Técnico / Acta de Evaluación Técnica',
+      'INS': 'Notas Aclaratorias', 'ACT': 'Acta de Adjudicación',
+      'ACP': 'Acta de Preadjudicación', 'ASE': 'Asesoramiento',
+      'RES': 'Resolución', 'REF': 'Resolución Final'
+    };
+    return tipos[tipo] || tipo;
+  }
+
   closeDictamen() { this.showDictamen.set(false); }
-  
+
   onFileDictamenSelected(event: any) {
     const file = event.target.files[0];
-    if (file) this.dictamenForm.archivo = file;
-  } 
+    if (file) {
+      if (file.size > 20 * 1024 * 1024) {
+        this.notify.showError('El archivo supera los 20MB permitidos.');
+        return;
+      }
+      this.dictamenForm.archivo = file;
+    }
+  }
 
   guardarDictamen() {
-    this.notify.showInfo('Módulo Documentos en desarrollo (Endpoint pendiente)');
+    if (!this.dictamenForm.tipo || !this.dictamenForm.archivo) return;
+    this.savingDictamen.set(true);
+    const formData = new FormData();
+    formData.append('TipoDocumento', this.dictamenForm.tipo);
+    formData.append('Archivo', this.dictamenForm.archivo);
+
+    this.cotService.subirDocumento(this.dictamenItem().idCotizacion, formData).subscribe({
+      next: (res: any) => {
+        this.savingDictamen.set(false);
+        if (res.success) {
+          this.notify.showSuccess('Documento subido correctamente a Cloudflare R2.');
+          this.dictamenForm = { tipo: '', archivo: null };
+          this.cargarDocumentos(this.dictamenItem().idCotizacion);
+        } else {
+          this.notify.showError(res.message || 'Error al subir el documento.');
+        }
+      },
+      error: (err) => {
+        this.savingDictamen.set(false);
+        this.notify.showError(err.error?.message || 'Error de comunicación con el servidor.');
+      }
+    });
+  }
+
+  eliminarDictamen(idDocumento: number) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este documento? Esta acción no se puede deshacer.')) return;
+    this.cotService.eliminarDocumento(this.dictamenItem().idCotizacion, idDocumento).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.notify.showSuccess('Documento eliminado.');
+          this.cargarDocumentos(this.dictamenItem().idCotizacion);
+        } else {
+          this.notify.showError(res.message || 'Error al eliminar.');
+        }
+      }
+    });
   }
 
   showPropuestas = signal(false); propuestasItem = signal<any>(null);
-  openPropuestas(item: any) { 
-    this.propuestasItem.set(item); 
-    this.showPropuestas.set(true); 
+  openPropuestas(item: any) {
+    this.propuestasItem.set(item);
+    this.showPropuestas.set(true);
     this.provItem.set(item);
     this.cargarProveedoresAsignados();
   }
@@ -782,10 +828,9 @@ export class SubastaComponent implements OnInit {
 
   cambiarEstadoTecnico(proveedor: any, event: any) {
     const nuevoEstado = event.target.value;
-    this.provList.update(list => list.map(p => 
+    this.provList.update(list => list.map(p =>
       p.idCotizacionProveedor === proveedor.idCotizacionProveedor ? { ...p, ganadora: nuevoEstado } : p
     ));
-    
     if (nuevoEstado === 'E') {
       this.notify.showSuccess(`Propuesta técnica aprobada. Se habilitó la apertura del sobre económico.`);
     } else if (nuevoEstado === 'D') {
@@ -795,24 +840,16 @@ export class SubastaComponent implements OnInit {
 
   isDesistible(item: any): boolean {
     if (!this.auth.isSuperAdmin()) return false;
-    // Solo en estado 39 (Publicada/Enviada Pendiente) o 40 (Finalizada)
     if (item.idEstado !== 39 && item.idEstado !== 40) return false;
-    
-    // Validar ventanas de tiempo estrictas (Nunca en vivo)
     const inicioStr = item.fechaInicio || item.especificacion?.fechaInicioSubasta;
     const finStr = item.fechaFin || item.especificacion?.fechaFinalizacionSubasta;
-    
     if (!inicioStr || !finStr) return false;
-
     const ahora = this.ahora();
     const inicio = new Date(inicioStr).getTime();
     const fin = new Date(finStr).getTime();
-
-    // Verdadero si la subasta TODAVÍA NO EMPEZÓ o si YA TERMINÓ
     return ahora < inicio || ahora > fin;
   }
 
-  // --- 1. SUBIR IMAGEN (Exclusivo Subasta Directa) ---
   showImagenModal = signal(false);
   imagenItem = signal<any>(null);
   imagenFile = signal<File | null>(null);
@@ -854,18 +891,15 @@ export class SubastaComponent implements OnInit {
   subirImagen() {
     const file = this.imagenFile();
     if (!file) return;
-
     this.isUploadingImagen.set(true);
     const formData = new FormData();
     formData.append('IdCotizacion', this.imagenItem().idCotizacion.toString());
     formData.append('Imagen', file);
-
     // TODO: Conectar al endpoint real de subida de imágenes para Subasta Directa
     setTimeout(() => {
       this.isUploadingImagen.set(false);
       this.notify.showInfo('Módulo de imágenes en desarrollo. Interfaz lista.');
       this.imagenFile.set(null);
-      // Simular que se subió:
       this.imagenesSubidas.update(arr => [...arr, { id: Date.now(), nombre: file.name, url: '#' }]);
     }, 1000);
   }
@@ -876,66 +910,148 @@ export class SubastaComponent implements OnInit {
     this.notify.showSuccess('Imagen eliminada.');
   }
 
-
-  // --- 2. GRÁFICOS DE AHORRO (Exclusivo Subasta Inversa Finalizada) ---
   showGraficosModal = signal(false);
   graficosItem = signal<any>(null);
   loadingGraficos = signal(false);
+  metricasAhorro = signal<any>(null);
+
+public chartOptionsAhorro: Partial<DonutChartOptions> = {
+    series: [],
+    chart: { type: 'donut', height: 350, background: 'transparent', animations: { enabled: true, speed: 800 } },
+    labels: ['Monto Adjudicado', 'Ahorro Generado (No gastado)'],
+    colors: ['#02b8cc', '#10b981'], // Cyan para el gasto, Emerald para el ahorro
+    stroke: { show: true, colors: ['#0d1117'], width: 2 },
+    dataLabels: { enabled: true, formatter: (val: number) => val.toFixed(1) + '%' },
+    tooltip: { theme: 'dark', y: { formatter: (val: number) => '$ ' + val.toLocaleString('es-AR', { minimumFractionDigits: 2 }) } },
+    legend: { position: 'bottom', labels: { colors: '#f7f8f8' } },
+    plotOptions: { pie: { donut: { size: '65%' } } }
+  };
 
   openGraficos(item: any) {
     this.graficosItem.set(item);
     this.showGraficosModal.set(true);
     this.loadingGraficos.set(true);
+    this.metricasAhorro.set(null);
 
-    // TODO: Llamar al endpoint que trae las métricas de ahorro de la subasta
-    setTimeout(() => {
-      this.loadingGraficos.set(false);
-    }, 800);
+    this.cotService.getMetricasAhorro(item.idCotizacion).subscribe({
+      next: (res: any) => {
+        this.loadingGraficos.set(false);
+        if (res.success && res.data) {
+          this.metricasAhorro.set(res.data);
+          // Calculamos los valores para el gráfico (Gasto vs Ahorro)
+          const ahorroAbsoluto = res.data.presupuestoBase - res.data.mejorOfertaFinal;
+          this.chartOptionsAhorro['series'] = [res.data.mejorOfertaFinal, ahorroAbsoluto > 0 ? ahorroAbsoluto : 0];
+        } else {
+          this.notify.showError(res.message || 'Error al obtener métricas');
+        }
+      },
+      error: () => {
+        this.loadingGraficos.set(false);
+        this.notify.showError('Error de comunicación con el servidor.');
+      }
+    });
   }
 
   closeGraficos() {
     this.showGraficosModal.set(false);
     this.graficosItem.set(null);
   }
-
-
-  // --- 3. DOCUMENTACIÓN DEL PROVEEDOR GANADOR (Exclusivo Subasta Inversa Finalizada) ---
   showDocProvModal = signal(false);
   docProvItem = signal<any>(null);
   docProvList = signal<any[]>([]);
   loadingDocProv = signal(false);
 
+  docProvGarantias = signal<any[]>([]);
+  docProvItems = signal<any[]>([]);
+
+  docProvTab = signal<'GARANTIAS' | 'ITEMS'>('GARANTIAS');
+
   openVerDocProveedor(item: any) {
     this.docProvItem.set(item);
     this.showDocProvModal.set(true);
     this.loadingDocProv.set(true);
+    this.docProvTab.set('GARANTIAS');
+    
+    this.docProvGarantias.set([]);
+    this.docProvItems.set([]);
 
-    // TODO: Llamar al endpoint que trae los adjuntos del proveedor ganador (Constancia AFIP, poderes, etc.)
-    setTimeout(() => {
-      this.docProvList.set([
-        // Data simulada para dejar la UI lista
-        { id: 1, proveedor: 'Proveedor Ganador S.A.', tipo: 'Constancia de Inscripción AFIP', fecha: new Date().toISOString() },
-        { id: 2, proveedor: 'Proveedor Ganador S.A.', tipo: 'Poder Firmante', fecha: new Date().toISOString() }
-      ]);
-      this.loadingDocProv.set(false);
-    }, 800);
+    // Ejecutamos las 3 peticiones en paralelo: Detalles de Subasta (para nombres de ítems), Garantías y Docs.
+    forkJoin({
+      subasta: this.cotService.getById(item.idCotizacion),
+      garantias: this.cotService.getGarantias(item.idCotizacion),
+      docs: this.cotService.getDocumentosItem(item.idCotizacion)
+    }).subscribe({
+      next: (res) => {
+        // 1. Mapear Garantías
+        if (res.garantias.success && res.garantias.data) {
+          const garantiasMap = res.garantias.data.map(g => ({ ...g, _nombreProveedor: `Cargando... (ID: ${g.idProveedor})` }));
+          this.docProvGarantias.set(garantiasMap);
+          this.resolverNombresProveedores(garantiasMap, this.docProvGarantias);
+        }
+
+        // 2. Mapear Documentos por Ítem/Renglón
+        if (res.docs.success && res.docs.data && res.subasta.success && res.subasta.data) {
+          const isRenglon = res.subasta.data.especificacion?.criterioAdjudicacion === 1;
+          const elementosSubasta = isRenglon ? res.subasta.data.renglones : res.subasta.data.detalles;
+
+          const docsMap = res.docs.data.map((d: any) => {
+            // Buscar el nombre del ítem o renglón
+            const targetId = isRenglon ? d.idRenglon : d.idCotizacionDetalle;
+            const elementoObj = elementosSubasta?.find((el: any) => 
+               isRenglon ? el.idRenglon === targetId : el.idCotizacionDetalle === targetId
+            );
+            
+            return {
+              ...d,
+              _nombreProveedor: `Cargando... (ID: ${d.idProveedor})`,
+              _nombreElemento: elementoObj ? (isRenglon ? elementoObj.descripcion : elementoObj.nItem) : 'Elemento Desconocido'
+            };
+          });
+
+          this.docProvItems.set(docsMap);
+          this.resolverNombresProveedores(docsMap, this.docProvItems);
+        }
+
+        this.loadingDocProv.set(false);
+      },
+      error: () => {
+        this.loadingDocProv.set(false);
+        this.notify.showError('Error al recuperar la documentación de los proveedores.');
+      }
+    });
   }
 
-  closeVerDocProveedor() {
+  private resolverNombresProveedores(lista: any[], signalToUpdate: any) {
+    const idsUnicos = [...new Set(lista.map(item => item.idProveedor))];
+    
+    idsUnicos.forEach(id => {
+      this.http.get<any>(`${this.api}/Provider/${id}`).subscribe({
+        next: (pr: any) => {
+          const nombre = pr?.data?.razonSocial || pr?.data?.nombre || `Proveedor #${id}`;
+          signalToUpdate.update((currentList: any[]) => 
+            currentList.map(item => item.idProveedor === id ? { ...item, _nombreProveedor: nombre } : item)
+          );
+        },
+        error: () => {
+          signalToUpdate.update((currentList: any[]) => 
+            currentList.map(item => item.idProveedor === id ? { ...item, _nombreProveedor: `Proveedor #${id}` } : item)
+          );
+        }
+      });
+    });
+  }
+
+ closeVerDocProveedor() {
     this.showDocProvModal.set(false);
     this.docProvItem.set(null);
   }
 
-
   desautorizarItem(item: any) {
     if (!confirm(`¿Estás seguro de que deseas rechazar y quitar el ítem "${item.nItem}" de esta Nota de Pedido?`)) return;
-    
-    // El ID viene como item.id (mapeado desde idReservaDet en buscarReservas)
     this.http.post<any>(`${this.api}/ReservaDetalle/${item.id}/desautorizar`, {}).subscribe({
       next: (r) => {
         if (r.success) {
           this.notify.showSuccess('Ítem rechazado y quitado de la lista.');
-          // Lo quitamos de la lista local para no recargar todo
           this.reservas.update(arr => arr.filter(x => x.id !== item.id));
           this.selectedIds.update(arr => arr.filter(id => id !== item.id));
         } else {
@@ -948,7 +1064,6 @@ export class SubastaComponent implements OnInit {
 
   actualizarValorItem(item: any, campo: '_cantidadEditada' | '_importeEditado' | '_importeMinimoEditado', valor: number) {
     if (campo === '_cantidadEditada') {
-      // Validar que no supere el stock restante
       const maximo = item.cantidadRestante || item.cantidad;
       if (valor > maximo) {
         this.notify.showWarning(`La cantidad no puede superar el stock disponible (${maximo}).`);
@@ -956,9 +1071,7 @@ export class SubastaComponent implements OnInit {
       }
       if (valor <= 0) valor = 1;
     }
-    
-    // Actualizamos el array local
-    this.reservas.update(arr => arr.map(x => 
+    this.reservas.update(arr => arr.map(x =>
       x.id === item.id ? { ...x, [campo]: valor } : x
     ));
   }
