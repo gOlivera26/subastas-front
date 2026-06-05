@@ -296,9 +296,106 @@
   }
 
   @if (pasoCrear() === 3) {
-    }
-</app-modal>
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <div class="space-y-6">
+          <h3 class="text-[13px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+            <lucide-icon name="file-text" [size]="16" class="inline mr-2"></lucide-icon>Datos de la Subasta
+          </h3>
+          
+          <div>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Tipo de Contratación</label>
+            <select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none" [(ngModel)]="tipoContratacion">
+              <option [value]="7">Subasta Electrónica Inversa</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Número de Expediente</label>
+            <input type="text" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none" [(ngModel)]="crearNroExpediente" />
+          </div>
+          
+          <div>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Objeto de la Contratación</label>
+            <textarea class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none" rows="3" [(ngModel)]="observacion"></textarea>
+          </div>
+        </div>
 
+      <div class="space-y-6">
+          <h3 class="text-[13px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+            <lucide-icon name="calendar" [size]="16" class="inline mr-2"></lucide-icon>Fechas y Parámetros
+          </h3>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <app-calendar 
+              label="Inicio Subasta" 
+              placeholder="dd/MM/yyyy HH:mm" 
+              [showTime]="true" 
+              [ngModel]="fechaInicio()" 
+              (ngModelChange)="fechaInicio.set($event)">
+            </app-calendar>
+            
+            <app-calendar 
+              label="Fin Subasta" 
+              placeholder="dd/MM/yyyy HH:mm" 
+              [showTime]="true" 
+              [ngModel]="fechaFin()" 
+              (ngModelChange)="fechaFin.set($event)">
+            </app-calendar>
+          </div>
+          
+          <app-calendar 
+            label="Límite de Consultas" 
+            placeholder="dd/MM/yyyy HH:mm" 
+            [showTime]="true" 
+            [ngModel]="fechaLimiteConsultas()" 
+            (ngModelChange)="fechaLimiteConsultas.set($event)">
+          </app-calendar>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Margen Mejora (%)</label>
+              <input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none" [(ngModel)]="margenMejora" />
+            </div>
+            <div>
+              <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Prórroga (Minutos)</label>
+              <input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none" [(ngModel)]="crearProrrogaMinutos" [disabled]="!permiteProrroga()" [class.opacity-50]="!permiteProrroga()" />
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap gap-4 items-center">
+            <label class="flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] cursor-pointer">
+              <input type="checkbox" [(ngModel)]="permiteProrroga" class="rounded border-[var(--color-charcoal-grey)] text-[var(--color-cyan-spark)] focus:ring-0" /> Prorrogable
+            </label>
+          </div>
+          
+          <div class="flex flex-col gap-2">
+            <label class="block text-[11px] uppercase text-[var(--color-storm-cloud)]">Visibilidad</label>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] cursor-pointer">
+                <input type="radio" name="vis" value="1" [(ngModel)]="crearRedeterminacion" class="text-[var(--color-cyan-spark)] focus:ring-0" /> Pública
+              </label>
+              <label class="flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] cursor-pointer">
+                <input type="radio" name="vis" value="0" [(ngModel)]="crearRedeterminacion" class="text-[var(--color-cyan-spark)] focus:ring-0" /> Privada
+              </label>
+              <label class="flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] cursor-pointer">
+                <input type="radio" name="vis" value="2" [(ngModel)]="crearRedeterminacion" class="text-[var(--color-cyan-spark)] focus:ring-0" /> Cerrada
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-6 border-t border-[var(--color-charcoal-grey)] flex justify-end gap-3">
+        <button (click)="volver()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] text-[var(--color-storm-cloud)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-all">Volver</button>
+        <button (click)="grabar()" [disabled]="saving()" class="rounded-xl bg-[var(--color-neon-lime)] px-6 py-2.5 text-[14px] font-[590] text-black disabled:opacity-50 hover:brightness-110 transition-all">
+          @if (saving()) { <lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2 inline-block"></lucide-icon> }
+          Grabar Subasta
+        </button>
+      </div>
+    </div>
+  }
 <app-modal [isOpen]="showDictamen()" title="Dictamen / Pliegos e Informes" [subtitle]="'Administración de archivos de la Subasta #' + (dictamenItem()?.nroCotizacion || '')" maxWidthClass="max-w-4xl" (close)="closeDictamen()">
   <div class="space-y-6">
     <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-5">

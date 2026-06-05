@@ -81,12 +81,20 @@ export class AppCalendar implements ControlValueAccessor {
   }
   
   updateHour(h: number) {
-    this.selectedHour.set(h);
+    let hour = Number(h);
+    if (isNaN(hour) || hour < 0) hour = 0;
+    if (hour > 23) hour = 23;
+    
+    this.selectedHour.set(hour);
     this.emitTimeChange();
   }
   
-  updateMinute(m: number) {
-    this.selectedMinute.set(m);
+ updateMinute(m: number) {
+    let minute = Number(m);
+    if (isNaN(minute) || minute < 0) minute = 0;
+    if (minute > 59) minute = 59;
+    
+    this.selectedMinute.set(minute);
     this.emitTimeChange();
   }
   
