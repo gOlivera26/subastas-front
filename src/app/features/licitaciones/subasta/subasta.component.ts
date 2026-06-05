@@ -20,11 +20,13 @@ import { environment } from '../../../../environments/environment';
 import { TimeService } from '../../../core/services/time.service';
 import { forkJoin } from 'rxjs';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { ConfirmationModal } from '../../../shared/ui/confirmation-modal/confirmation-modal';
+
 
 interface RenglonItem { id: number; nombre: string; itemIds: number[]; }
 
 export interface DonutChartOptions {
-  series: any;
+  series: any;  
   chart: any;
   labels: any;
   colors: any;
@@ -38,7 +40,7 @@ export interface DonutChartOptions {
 @Component({
   selector: 'app-subasta',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, CustomSelect, AppCalendar, SmartTableComponent, LoadingSpinnerComponent, NgApexchartsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, CustomSelect, AppCalendar, SmartTableComponent, LoadingSpinnerComponent, NgApexchartsModule, ConfirmationModal],
   templateUrl: './subasta.component.html',
 })
 export class SubastaComponent implements OnInit {
@@ -60,6 +62,10 @@ export class SubastaComponent implements OnInit {
   TIPO_INVERSA_FIJA = 13;
   TIPO_CONT_DIRECTA = 14;
   TIPO_SEEC = 15;
+
+  itemToPublish = signal<any>(null);
+  itemToAnular = signal<any>(null);
+  itemToDesistir = signal<any>(null);
 
   items = signal<SubastaDashboard[]>([]); loading = signal(true);
   filterVigencia = signal<number | null>(null); filterEstado = signal<number | null>(null);
@@ -573,13 +579,23 @@ export class SubastaComponent implements OnInit {
   }
 
   enviarInvitaciones(item: any) {
-    if (!confirm(`¿Publicar la subasta #${item.nroCotizacion}? Esto la hará visible para los participantes asignados.`)) return;
+    this.itemToPublish.set(item);
+  }
+
+  confirmPublish() {
+    const item = this.itemToPublish();
+    if (!item) return;
+
     this.http.post(`${this.api}/Cotizacion/${item.idCotizacion}/notificar`, {}).subscribe({
       next: (r: any) => {
         if (r?.success) { this.notify.showSuccess('Subasta publicada exitosamente.'); this.buscar(); }
         else this.notify.showWarning(r?.message || 'Error al publicar');
+        this.itemToPublish.set(null);
       },
-      error: () => this.notify.showError('Error al publicar.')
+      error: () => { 
+        this.notify.showError('Error al publicar.'); 
+        this.itemToPublish.set(null); 
+      }
     });
   }
 
@@ -649,22 +665,45 @@ export class SubastaComponent implements OnInit {
     });
   }
 
-  desistirSubasta(item: any) {
-    if (!confirm(`¿Declarar desierta/fracasada la subasta #${item.nroCotizacion}?`)) return;
-    this.http.post(`${this.api}/Cotizacion/${item.idCotizacion}/desistir`, {}).subscribe({
-      next: (r: any) => { if (r?.success) { this.notify.showSuccess('Subasta desistida.'); this.buscar(); } else this.notify.showWarning(r?.message || 'Error'); },
-      error: () => this.notify.showError('Error al desistir.')
-    });
+ desistirSubasta(item: any) {
+    this.itemToDesistir.set(item);
   }
 
   anularSubasta(item: any) {
-    if (!confirm(`¿Anular definitivamente la subasta #${item.nroCotizacion}?`)) return;
+    this.itemToAnular.set(item);
+  }
+  
+  confirmDesistir() {
+    const item = this.itemToDesistir();
+    if (!item) return;
+
+    this.http.post(`${this.api}/Cotizacion/${item.idCotizacion}/desistir`, {}).subscribe({
+      next: (r: any) => { 
+        if (r?.success) { this.notify.showSuccess('Subasta desistida.'); this.buscar(); } 
+        else this.notify.showWarning(r?.message || 'Error'); 
+        this.itemToDesistir.set(null);
+      },
+      error: () => { 
+        this.notify.showError('Error al desistir.'); 
+        this.itemToDesistir.set(null);
+      }
+    });
+  }
+
+  confirmAnular() {
+    const item = this.itemToAnular();
+    if (!item) return;
+
     this.http.delete(`${this.api}/Cotizacion/${item.idCotizacion}`).subscribe({
       next: (r: any) => {
         if (r?.success) { this.notify.showSuccess('Subasta anulada.'); this.buscar(); }
         else this.notify.showError(r?.message || 'Error');
+        this.itemToAnular.set(null);
       },
-      error: () => this.notify.showError('Error al anular.')
+      error: () => { 
+        this.notify.showError('Error al anular.'); 
+        this.itemToAnular.set(null); 
+      }
     });
   }
 
