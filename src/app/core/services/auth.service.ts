@@ -93,4 +93,28 @@ updateProfile(nombre: string, apellido: string, telefono: string): Observable<Op
   getToken(): string | null {
     return localStorage.getItem('token');
   }
+
+  switchContext(tipoEntidad: string, idEntidad: number): Observable<OperationResponse<LoginResponse>> {
+    return this.http.post<OperationResponse<LoginResponse>>(`${this.apiUrl}/switch-context`, { tipoEntidad, idEntidad })
+      .pipe(
+        tap(res => {
+          if (res.success && res.data) {
+            const current = this.currentUser();
+            const updatedUser = {
+              ...current,
+              ...res.data,
+              modulos: current?.modulos || [],
+              paginas: current?.paginas || [],
+              entidades: current?.entidades || []
+            } as LoginResponse;
+            
+            localStorage.setItem('token', res.data.token);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            this.currentUser.set(updatedUser);
+            
+            window.location.href = '/modulos'; 
+          }
+        })
+      );
+  }
 }

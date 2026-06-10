@@ -61,6 +61,26 @@
                 </span>
               </div>
 
+              @if (user()?.entidades && user()!.entidades.length > 0) {
+                <div class="px-4 py-3 border-b border-[var(--color-charcoal-grey)]/60 mb-2 bg-[var(--color-pitch-black)]/30 rounded-lg mx-2">
+                  <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-2">Operando como:</p>
+                  <div class="space-y-1">
+                    @for (ent of user()!.entidades; track ent.id + ent.tipo) {
+                      <button (click)="switchContext(ent.tipo, ent.id)"
+                              class="w-full text-left rounded-lg px-2.5 py-2 text-[12px] font-[510] transition-all"
+                              [ngClass]="isCurrentContext(ent.tipo, ent.id) ? 'bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] border border-[var(--color-cyan-spark)]/30 cursor-default' : 'text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] border border-transparent'">
+                        <div class="flex items-center justify-between">
+                          <span class="truncate">{{ ent.nombre }}</span>
+                          @if (isCurrentContext(ent.tipo, ent.id)) {
+                            <lucide-icon name="check-circle" [size]="14"></lucide-icon>
+                          }
+                        </div>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+
               <div class="flex flex-col gap-1">
                 <button (click)="openProfile()" class="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
                   <lucide-icon name="user-circle" [size]="16"></lucide-icon>

@@ -200,4 +200,24 @@ export class HeaderComponent implements OnInit {
   onWindowScroll() {
     this.isScrolled.set(window.scrollY > 20);
   }
+
+ isCurrentContext(tipo: string, id: number): boolean {
+    const token = this.authService.getToken();
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      
+      // Comparamos usando el nuevo campo TipoContexto
+      if (payload.TipoContexto === tipo) {
+        if (tipo === 'GESTOR' && payload.IdOrganizacion == id) return true;
+        if (tipo === 'PROVEEDOR' && payload.IdProveedor == id) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  switchContext(tipo: string, id: number) {
+    if (this.isCurrentContext(tipo, id)) return;
+    this.authService.switchContext(tipo, id).subscribe();
+  }
 }

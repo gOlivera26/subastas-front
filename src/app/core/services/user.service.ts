@@ -14,6 +14,12 @@ export interface PendingUser {
   fechaRegistro: string;
 }
 
+export interface UserEntidad {
+  idEntidad: number;
+  tipo: string;
+  nombre: string;
+}
+
 export interface ActiveUser {
   idUsuario: string;
   nombreCompleto: string;
@@ -23,6 +29,7 @@ export interface ActiveUser {
   tipoUsuario: string;
   entidadRepresentada: string;
   estado: string;
+  entidades: UserEntidad[]; // NUEVO
 }
 
 export interface UserAudit {
@@ -72,8 +79,8 @@ export class UserService {
     return this.http.post<OperationResponse<string>>(`${this.apiUrl}/${userId}/reset-password`, {});
   }
 
-  unlinkUser(userId: string): Observable<OperationResponse<boolean>> {
-    return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/${userId}/unlink`, {});
+ unlinkUser(userId: string, payload: { tipoEntidad: string, idEntidad: number }): Observable<OperationResponse<boolean>> {
+    return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/${userId}/unlink`, payload);
   }
 
   linkUser(userId: string, payload: { tipoEntidad: string, idEntidad: number }): Observable<OperationResponse<boolean>> {
