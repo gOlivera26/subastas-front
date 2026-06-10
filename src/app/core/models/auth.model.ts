@@ -9,6 +9,12 @@ export interface AppPagina {
   rutaFrontend: string;
 }
 
+export interface EntidadDto {
+  id: number;
+  tipo: string;
+  nombre: string;
+}
+
 export interface LoginResponse {
   token: string;
   nombreUsuario: string;
@@ -16,6 +22,7 @@ export interface LoginResponse {
   rol: string;
   modulos: AppModulo[];
   paginas: AppPagina[];
+  entidades: EntidadDto[];
 }
 
 export interface ProfileResponse {

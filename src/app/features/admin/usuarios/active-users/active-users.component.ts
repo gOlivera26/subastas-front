@@ -313,17 +313,22 @@ export class ActiveUsersComponent implements OnInit {
     this.isUnlinkModalOpen.set(true);
   }
 
-  confirmUnlink() {
+  confirmUnlink(entidad: { tipo: string, idEntidad: number }) {
     const user = this.selectedUser();
     if (!user) return;
 
     this.isUnlinking.set(true);
-    this.userService.unlinkUser(user.idUsuario).subscribe({
+    this.userService.unlinkUser(user.idUsuario, { tipoEntidad: entidad.tipo, idEntidad: entidad.idEntidad }).subscribe({
       next: (res) => {
         this.isUnlinking.set(false);
         if (res.success) {
-          this.closeUnlinkModal();
-          this.loadUsers();
+          // No cerramos el modal por si quiere seguir borrando otras
+          this.loadUsers(); 
+          // Actualizamos la vista del modal en vivo
+          this.selectedUser.update(u => {
+            if(!u) return u;
+            return {...u, entidades: u.entidades.filter(e => !(e.tipo === entidad.tipo && e.idEntidad === entidad.idEntidad))}
+          });
         }
       },
       error: () => this.isUnlinking.set(false)

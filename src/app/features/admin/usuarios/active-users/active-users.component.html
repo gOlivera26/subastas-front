@@ -140,26 +140,40 @@
 @if (isUnlinkModalOpen() && selectedUser()) {
   <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
     <div class="relative w-full max-w-md rounded-[2rem] border border-red-500/20 bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
+      <button (click)="closeUnlinkModal()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+        <lucide-icon name="x" [size]="24"></lucide-icon>
+      </button>
       <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-red-500/10 text-red-400">
         <lucide-icon name="user-minus" [size]="28"></lucide-icon>
       </div>
-      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-2 text-center">¿Desvincular Usuario?</h2>
-      <p class="text-[14px] text-[var(--color-storm-cloud)] mb-6 text-center leading-relaxed">
-        Estás a punto de desvincular a <strong class="text-[var(--color-porcelain)]">{{ selectedUser()?.nombreCompleto }}</strong> 
-        de <strong class="text-red-400">{{ selectedUser()?.entidadRepresentada }}</strong>. El usuario perderá acceso a las subastas de esta entidad.
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Desvincular Entidad</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center leading-relaxed">
+        Gestiona los accesos de <strong class="text-[var(--color-porcelain)]">{{ selectedUser()?.nombreCompleto }}</strong>. Si eliminas una entidad, el usuario perderá acceso a sus subastas.
       </p>
-      <div class="flex gap-3">
-        <button (click)="closeUnlinkModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
-          Cancelar
-        </button>
-        <button (click)="confirmUnlink()" [disabled]="isUnlinking()" class="flex w-1/2 items-center justify-center gap-2 rounded-xl bg-red-500 py-3 text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:bg-red-400 disabled:opacity-70">
-          @if (isUnlinking()) {
-            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
-          } @else {
-            Desvincular
-          }
-        </button>
+
+      <div class="mb-6 space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
+        @for (ent of selectedUser()?.entidades; track ent.idEntidad + ent.tipo) {
+          <div class="flex items-center justify-between p-3 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/40 hover:border-red-500/30 transition-colors">
+            <div class="overflow-hidden">
+              <p class="text-[13px] font-[510] text-[var(--color-porcelain)] truncate">{{ ent.nombre }}</p>
+              <p class="text-[10px] font-mono text-[var(--color-storm-cloud)] mt-0.5">{{ ent.tipo }}</p>
+            </div>
+            <button (click)="confirmUnlink(ent)" [disabled]="isUnlinking()" class="p-2 shrink-0 rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50" title="Desvincular">
+              @if (isUnlinking()) {
+                <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
+              } @else {
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+              }
+            </button>
+          </div>
+        } @empty {
+          <p class="text-[12px] text-center text-[var(--color-storm-cloud)] italic py-4">Este usuario no tiene entidades vinculadas.</p>
+        }
       </div>
+
+      <button (click)="closeUnlinkModal()" class="w-full rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+        Cerrar
+      </button>
     </div>
   </div>
 }
@@ -224,10 +238,15 @@
         <lucide-icon name="handshake" [size]="28"></lucide-icon>
       </div>
 
-      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Vincular Entidad</h2>
-      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-6 text-center">
-        Asociar al usuario <strong class="text-[var(--color-porcelain)]">{{ selectedUser()?.nombreCompleto }}</strong> a una Organización o Proveedor.
+      <h2 class="text-[22px] font-[590] text-[var(--color-porcelain)] mb-1 text-center">Agregar Vinculación</h2>
+      <p class="text-[13px] text-[var(--color-storm-cloud)] mb-4 text-center">
+        Añadir una Organización o Proveedor al perfil de <strong class="text-[var(--color-porcelain)]">{{ selectedUser()?.nombreCompleto }}</strong>.
       </p>
+      
+      <div class="mb-6 p-3 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/40 text-center">
+        <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-1">Entidades Actuales</p>
+        <p class="text-[13px] font-[510] text-[var(--color-porcelain)]">{{ selectedUser()?.entidadRepresentada || 'Ninguna' }}</p>
+      </div>
 
       @if (linkErrorMessage()) {
         <div class="mb-5 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3 animate-fade-in">
