@@ -39,7 +39,7 @@ export class RegisterComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       nroDocumento: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      idRol: [2], // Rol base por defecto
+      idRol: [3], // Rol base por defecto
       idTipoPersona: [1],
       idTipoDocumento: [1],
       
@@ -63,8 +63,13 @@ export class RegisterComponent implements OnInit {
     this.registrationType.set(type);
     this.errorMessage.set(null);
     this.verifiedProvider.set(null);
-    // Limpiamos los campos condicionales al cambiar de pestaña
-    this.registerForm.patchValue({ idOrganizacion: '', cuitSearch: '', idProveedor: '' });
+
+    this.registerForm.patchValue({ 
+      idOrganizacion: '', 
+      cuitSearch: '', 
+      idProveedor: '',
+      idRol: type === 'GESTOR' ? 2 : 3 
+    });
   }
 
   verifyCuit() {
