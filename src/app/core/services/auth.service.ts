@@ -62,8 +62,16 @@ export class AuthService {
   }
 
   register(userData: any): Observable<OperationResponse<LoginResponse>> {
-  return this.http.post<OperationResponse<LoginResponse>>(`${this.apiUrl}/register`, userData);
-}
+    return this.http.post<OperationResponse<LoginResponse>>(`${this.apiUrl}/register`, userData);
+  }
+
+  confirmarEmail(email: string, codigo: string): Observable<OperationResponse<boolean>> {
+    return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/confirmar-email`, { email, codigo });
+  }
+
+  reenviarCodigo(email: string): Observable<OperationResponse<boolean>> {
+    return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/reenviar-codigo`, { email });
+  }
 
 updateProfile(nombre: string, apellido: string, telefono: string): Observable<OperationResponse<ProfileResponse>> {
     return this.http.put<OperationResponse<ProfileResponse>>(`${this.apiUrl}/profile`, {
