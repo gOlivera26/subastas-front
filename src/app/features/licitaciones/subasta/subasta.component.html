@@ -39,6 +39,9 @@
     <div class="flex items-center gap-1.5 justify-end">
       
       <button (click)="openDetalle(row)" title="Ver Detalle" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="eye" [size]="16"></lucide-icon></button>
+      <button (click)="abrirDetalleSubasta(row)" title="Reporte detalle de subasta" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
+      <button (click)="abrirProveedoresInvitados(row)" title="Listado de proveedores invitados" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="users" [size]="16"></lucide-icon></button>
+      <button (click)="abrirAuditoriaSubasta(row)" title="Reporte de auditor?a de subasta" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="clipboard-list" [size]="16"></lucide-icon></button>
 
       @if (row.idEstado === 4 || row.idEstado === 39 || row.idEstado === 40) {
         <button (click)="openDictamen(row)" title="Pliegos" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
@@ -46,6 +49,7 @@
 
       @if ((row.idEstado === 4 || row.idEstado === 39 || row.idEstado === 40) && auth.isSuperAdmin()) {
         <button (click)="openPreguntas(row)" title="Mensajes y Aclaraciones" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="help-circle" [size]="16"></lucide-icon></button>
+        <button (click)="abrirPreguntasRespuestas(row)" title="Reporte preguntas y respuestas" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="message-square" [size]="16"></lucide-icon></button>
       }
 
       @if (row.idEstado === 4 && auth.isSuperAdmin()) {
@@ -78,13 +82,19 @@
         </button>
       }
 
+      @if (row.idEstado === 47) {
+        <button (click)="abrirDesistimiento(row)" title="Constancia de desistimiento" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="file-x" [size]="16"></lucide-icon></button>
+      }
+
       @if (row.idEstado === 40 && row.idTipoContratacion !== TIPO_DIRECTA) {
+        <button (click)="abrirActaPrelacion(row)" title="Informe final de subasta" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-emerald-400 hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-badge" [size]="16"></lucide-icon></button>
         <button (click)="openGraficos(row)" title="Ver Gráficos" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="pie-chart" [size]="16"></lucide-icon></button>
         <button (click)="openVerDocProveedor(row)" title="Ver Documentación de Proveedores" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="folder-open" [size]="16"></lucide-icon></button>
       }
 
       @if ((row.idTipoContratacion === TIPO_LICITACION || row.idTipoContratacion === TIPO_COMPULSA) && auth.isSuperAdmin()) {
         <button (click)="openObservaciones(row, 'TECNICA')" title="Observación Técnica" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="message-circle" [size]="16"></lucide-icon></button>
+        <button (click)="abrirObservacionesProveedores(row)" title="Reporte observaciones de proveedores" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
         
         @if (row.tipoSobre === 'D') {
           <button (click)="openObservaciones(row, 'ECONOMICA')" title="Observación Económica" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="message-square" [size]="16"></lucide-icon></button>

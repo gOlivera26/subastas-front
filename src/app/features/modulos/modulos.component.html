@@ -19,7 +19,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8">
       
       @for (modulo of modulosPermitidos(); track modulo.keyName || $index) {
-        <a [routerLink]="modulo.ruta" 
+        <a [routerLink]="moduloRoute(modulo)" 
            class="group relative flex flex-col justify-between rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-8 sm:p-10 shadow-xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-[var(--color-cyan-spark)]/50 hover:bg-[var(--color-deep-slate)] hover:shadow-[0_15px_40px_rgba(2,184,204,0.12)] overflow-hidden min-h-[240px]">
           
           <div class="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-[var(--color-cyan-spark)] opacity-0 blur-[80px] transition-opacity duration-700 group-hover:opacity-20 pointer-events-none"></div>

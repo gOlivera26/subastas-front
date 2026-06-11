@@ -8,6 +8,7 @@ import { VigenciaService } from '../../../core/services/vigencia.service';
 import { UnidadAdministrativaService } from '../../../core/services/unidad-administrativa.service';
 import { SubResponsableService } from '../../../core/services/sub-responsable.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ReporteService } from '../../../core/services/reporte.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 import { Modal } from '../../../shared/ui/modal/modal';
@@ -50,6 +51,7 @@ export class SubastaComponent implements OnInit {
   private subRespService = inject(SubResponsableService);
   private http = inject(HttpClient);
   private notify = inject(NotificationService);
+  private reporteService = inject(ReporteService);
   public auth = inject(AuthService);
   private timeService = inject(TimeService);
   signalR = inject(SignalRService);
@@ -177,6 +179,56 @@ export class SubastaComponent implements OnInit {
     this.loadOficinas();
     this.timeService.syncWithServer();
     this.buscar();
+  }
+
+
+  abrirActaPrelacion(item: any) {
+    this.reporteService.descargarActaPrelacion(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el informe final de subasta.')
+    });
+  }
+
+  abrirDetalleSubasta(item: any) {
+    this.reporteService.descargarDetalleSubasta(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el detalle de subasta.')
+    });
+  }
+
+  abrirProveedoresInvitados(item: any) {
+    this.reporteService.descargarProveedoresInvitados(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el listado de proveedores invitados.')
+    });
+  }
+
+  abrirPreguntasRespuestas(item: any) {
+    this.reporteService.descargarPreguntasRespuestas(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el reporte de preguntas y respuestas.')
+    });
+  }
+
+  abrirDesistimiento(item: any) {
+    this.reporteService.descargarDesistimiento(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar la constancia de desistimiento.')
+    });
+  }
+
+  abrirObservacionesProveedores(item: any) {
+    this.reporteService.descargarObservacionesProveedores(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el reporte de observaciones de proveedores.')
+    });
+  }
+
+  abrirAuditoriaSubasta(item: any) {
+    this.reporteService.descargarAuditoriaSubasta(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el reporte de auditor?a de subasta.')
+    });
   }
 
   loadVigencias() {

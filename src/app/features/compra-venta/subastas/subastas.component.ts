@@ -11,6 +11,7 @@ import { TimeService } from '../../../core/services/time.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 import { ConsultaService } from '../../../core/services/consulta.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ReporteService } from '../../../core/services/reporte.service';
 import { Modal } from '../../../shared/ui/modal/modal';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmationModal } from '../../../shared/ui/confirmation-modal/confirmation-modal';
@@ -32,6 +33,7 @@ export class SubastasComponent implements OnInit {
   private signalR = inject(SignalRService);
   private consultaService = inject(ConsultaService);
   private notify = inject(NotificationService);
+  private reporteService = inject(ReporteService);
 
   vigencias = signal<Vigencia[]>([]);
   filtros = {
@@ -192,6 +194,12 @@ export class SubastasComponent implements OnInit {
   // ==========================================
   // LOGICA DEL FORO DE CONSULTAS Y ACLARACIONES
   // ==========================================
+  abrirActaPrelacion(item: SubastaDashboard) {
+    this.reporteService.descargarActaPrelacion(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el informe final de subasta.')
+    });
+  }
   async abrirModalConsultas(idCotizacion: number) {
     this.activeCotizacionId.set(idCotizacion);
     this.isConsultasModalOpen.set(true);
