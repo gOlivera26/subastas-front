@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -6,13 +6,16 @@ import { AuthService } from '../../../core/services/auth.service';
 import { OrganizationService, Organization } from '../../../core/services/organization.service';
 import { ProviderService, ProviderResponse } from '../../../core/services/provider.service';
 
+
+type RegisterStep = 'form' | 'code' | 'success';
+
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [ReactiveFormsModule, LucideAngularModule, RouterLink],
   templateUrl: './register.component.html',
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private orgService = inject(OrganizationService);
@@ -21,16 +24,25 @@ export class RegisterComponent implements OnInit {
 
   registerForm: FormGroup;
   organizations = signal<Organization[]>([]);
-  
+
   // Estados de la UI
+  step = signal<RegisterStep>('form');
   isLoading = signal(false);
   isSuccess = signal(false);
   errorMessage = signal<string | null>(null);
-  
+
   // Lógica de Caminos (Gestor vs Proveedor)
   registrationType = signal<'GESTOR' | 'PROVEEDOR'>('GESTOR');
   isVerifyingCuit = signal(false);
   verifiedProvider = signal<ProviderResponse | null>(null);
+
+  // Paso de código
+  registeredEmail = signal('');
+  codigo = signal('');
+  isConfirming = signal(false);
+  isResending = signal(false);
+  resendCooldown = signal(0);
+  private cooldownInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.registerForm = this.fb.group({
@@ -39,10 +51,10 @@ export class RegisterComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       nroDocumento: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      idRol: [2], // Rol base por defecto
+      idRol: [3],
       idTipoPersona: [1],
       idTipoDocumento: [1],
-      
+
       // Campos condicionales
       idOrganizacion: [''],
       cuitSearch: [''],
@@ -59,12 +71,42 @@ export class RegisterComponent implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    this.clearCooldown();
+  }
+
+  private clearCooldown() {
+    if (this.cooldownInterval) {
+      clearInterval(this.cooldownInterval);
+      this.cooldownInterval = null;
+    }
+  }
+
+  private startResendCooldown() {
+    this.resendCooldown.set(60);
+    this.clearCooldown();
+    this.cooldownInterval = setInterval(() => {
+      this.resendCooldown.update(v => {
+        if (v <= 1) {
+          this.clearCooldown();
+          return 0;
+        }
+        return v - 1;
+      });
+    }, 1000);
+  }
+
   setRegistrationType(type: 'GESTOR' | 'PROVEEDOR') {
     this.registrationType.set(type);
     this.errorMessage.set(null);
     this.verifiedProvider.set(null);
-    // Limpiamos los campos condicionales al cambiar de pestaña
-    this.registerForm.patchValue({ idOrganizacion: '', cuitSearch: '', idProveedor: '' });
+
+    this.registerForm.patchValue({
+      idOrganizacion: '',
+      cuitSearch: '',
+      idProveedor: '',
+      idRol: type === 'GESTOR' ? 2 : 3
+    });
   }
 
   verifyCuit() {
@@ -92,7 +134,6 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
-    // Validaciones personalizadas según el tipo de registro elegido
     if (this.registrationType() === 'GESTOR' && !this.registerForm.get('idOrganizacion')?.value) {
       this.errorMessage.set('Debe seleccionar una Organización para registrarse.');
       return;
@@ -111,13 +152,9 @@ export class RegisterComponent implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    // Armamos el payload
     const payload = { ...this.registerForm.value };
-    
-    // Eliminamos lo que el backend no necesita
     delete payload.cuitSearch;
 
-    // 👇 LA SOLUCIÓN: Convertimos strings vacíos a null y forzamos que sean números
     payload.idOrganizacion = payload.idOrganizacion ? Number(payload.idOrganizacion) : null;
     payload.idProveedor = payload.idProveedor ? Number(payload.idProveedor) : null;
 
@@ -125,12 +162,71 @@ export class RegisterComponent implements OnInit {
       next: (res) => {
         this.isLoading.set(false);
         if (res.success) {
-          this.isSuccess.set(true);
+          this.registeredEmail.set(payload.email);
+          this.step.set('code');
+          this.startResendCooldown();
         }
       },
       error: (err) => {
         this.isLoading.set(false);
         this.errorMessage.set(err.error?.message || 'Error al procesar el registro.');
+      }
+    });
+  }
+
+  onCodigoInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    // Solo dígitos, máximo 6
+    const soloDigitos = input.value.replace(/\D/g, '').slice(0, 6);
+    this.codigo.set(soloDigitos);
+    input.value = soloDigitos;
+
+    // Auto-enviar cuando llega a 6 dígitos
+    if (soloDigitos.length === 6) {
+      this.confirmarCodigo(soloDigitos);
+    }
+  }
+
+  confirmarCodigo(codigo?: string) {
+    const code = codigo || this.codigo();
+    if (code.length !== 6) return;
+
+    this.isConfirming.set(true);
+    this.errorMessage.set(null);
+
+    this.authService.confirmarEmail(this.registeredEmail(), code).subscribe({
+      next: (res) => {
+        this.isConfirming.set(false);
+        if (res.success) {
+          this.step.set('success');
+        }
+      },
+      error: (err) => {
+        this.isConfirming.set(false);
+        this.errorMessage.set(err.error?.message || 'El código es incorrecto o expiró.');
+        this.codigo.set('');
+      }
+    });
+  }
+
+  reenviarCodigo() {
+    if (this.resendCooldown() > 0) return;
+
+    this.isResending.set(true);
+    this.errorMessage.set(null);
+
+    this.authService.reenviarCodigo(this.registeredEmail()).subscribe({
+      next: (res) => {
+        this.isResending.set(false);
+        if (res.success) {
+          this.errorMessage.set(null);
+          this.startResendCooldown();
+          this.codigo.set('');
+        }
+      },
+      error: (err) => {
+        this.isResending.set(false);
+        this.errorMessage.set(err.error?.message || 'Error al reenviar el código.');
       }
     });
   }

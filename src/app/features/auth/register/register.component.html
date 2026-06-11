@@ -5,21 +5,22 @@
 
   <div class="relative z-10 w-full max-w-[600px] animate-fade-in-up">
     <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
-      
-      @if (!isSuccess()) {
+
+      <!-- ═══════════════ PASO 1: FORMULARIO DE REGISTRO ═══════════════ -->
+      @if (step() === 'form') {
         <div class="mb-8 text-center">
           <h1 class="mb-2 text-[24px] font-[590] tracking-tight text-[var(--color-porcelain)]">Registro de Usuario</h1>
           <p class="text-[14px] text-[var(--color-storm-cloud)]">Seleccione el motivo por el que quiere registrarse</p>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-3 mb-8 bg-[var(--color-pitch-black)]/50 p-1.5 rounded-xl border border-[var(--color-charcoal-grey)]">
-          <button type="button" 
+          <button type="button"
                   (click)="setRegistrationType('GESTOR')"
                   class="flex-1 py-3 px-4 rounded-lg text-[13px] font-[590] transition-all duration-300"
                   [class]="registrationType() === 'GESTOR' ? 'bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] shadow-md border border-[var(--color-charcoal-grey)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/30'">
             Usuario Subasta Inversa / Licitación
           </button>
-          <button type="button" 
+          <button type="button"
                   (click)="setRegistrationType('PROVEEDOR')"
                   class="flex-1 py-3 px-4 rounded-lg text-[13px] font-[590] transition-all duration-300"
                   [class]="registrationType() === 'PROVEEDOR' ? 'bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] shadow-md border border-[var(--color-charcoal-grey)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/30'">
@@ -35,7 +36,7 @@
         }
 
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
-          
+
           @if (registrationType() === 'GESTOR') {
             <div class="animate-fade-in p-5 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30">
               <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Organización *</label>
@@ -53,7 +54,7 @@
               <p class="text-[13px] text-[var(--color-storm-cloud)] mb-4 text-center">
                 Ingrese el número de CUIT de la empresa/persona humana a la que representa.
               </p>
-              
+
               <div class="flex gap-3">
                 <div class="relative flex-1">
                   <input formControlName="cuitSearch" type="text" placeholder="CUIT (Ej: 30123456789)" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-neon-lime)] outline-none transition-all">
@@ -84,7 +85,7 @@
           <div class="space-y-5 transition-opacity duration-300"
                [class.opacity-50]="registrationType() === 'PROVEEDOR' && !verifiedProvider()"
                [class.pointer-events-none]="registrationType() === 'PROVEEDOR' && !verifiedProvider()">
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Nombre</label>
@@ -122,19 +123,91 @@
             </button>
           </div>
         </form>
+      }
 
-      } @else {
+      <!-- ═══════════════ PASO 2: CÓDIGO DE CONFIRMACIÓN ═══════════════ -->
+      @if (step() === 'code') {
+        <div class="text-center animate-fade-in">
+          <div class="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] ring-8 ring-[var(--color-cyan-spark)]/5">
+            <lucide-icon name="mail" [size]="48"></lucide-icon>
+          </div>
+
+          <h2 class="text-[26px] font-[590] text-[var(--color-porcelain)] mb-2">Revisá tu correo</h2>
+          <p class="text-[var(--color-storm-cloud)] text-[15px] leading-relaxed mb-2">
+            Te enviamos un código de <strong>6 dígitos</strong> a
+          </p>
+          <p class="text-[var(--color-porcelain)] text-[16px] font-[590] mb-1">{{ registeredEmail() }}</p>
+          <p class="text-[var(--color-storm-cloud)] text-[13px] mb-8">Válido por 30 minutos</p>
+
+          @if (errorMessage()) {
+            <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 animate-fade-in">
+              <lucide-icon name="lock" [size]="18" class="text-red-400 shrink-0 mt-0.5"></lucide-icon>
+              <p class="text-[13px] text-red-400 text-left">{{ errorMessage() }}</p>
+            </div>
+          }
+
+          <div class="max-w-[280px] mx-auto">
+            <label class="mb-3 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Código de confirmación</label>
+            <input
+              #codigoInput
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="000000"
+              (input)="onCodigoInput($event)"
+              [disabled]="isConfirming()"
+              class="w-full text-center text-[32px] font-mono font-bold tracking-[12px] rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-4 text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all disabled:opacity-50 placeholder:text-[var(--color-charcoal-grey)]"
+              autofocus
+            >
+            <p class="text-[11px] text-[var(--color-storm-cloud)] mt-2">Escribilo o pegálo acá arriba</p>
+
+            @if (isConfirming()) {
+              <div class="mt-6 flex items-center justify-center gap-2 text-[var(--color-cyan-spark)]">
+                <lucide-icon name="loader-2" [size]="18" class="animate-spin"></lucide-icon>
+                <span class="text-[14px]">Verificando código...</span>
+              </div>
+            }
+          </div>
+
+          <div class="mt-8 flex flex-col items-center gap-2">
+            @if (resendCooldown() > 0) {
+              <p class="text-[13px] text-[var(--color-storm-cloud)]">
+                Reenviar código en <span class="text-[var(--color-porcelain)] font-[590]">{{ resendCooldown() }}s</span>
+              </p>
+            } @else {
+              <button
+                type="button"
+                (click)="reenviarCodigo()"
+                [disabled]="isResending()"
+                class="text-[13px] font-[590] text-[var(--color-cyan-spark)] hover:underline disabled:opacity-50 disabled:no-underline transition-all"
+              >
+                @if (isResending()) {
+                  <span class="flex items-center gap-2">
+                    <lucide-icon name="loader-2" [size]="14" class="animate-spin"></lucide-icon>
+                    Reenviando...
+                  </span>
+                } @else {
+                  Reenviar código
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ═══════════════ PASO 3: ÉXITO (pendiente de aprobación) ═══════════════ -->
+      @if (step() === 'success') {
         <div class="text-center py-6 animate-fade-in">
           <div class="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)] ring-8 ring-[var(--color-neon-lime)]/5">
             <lucide-icon name="shield-check" [size]="48"></lucide-icon>
           </div>
-          <h2 class="text-[26px] font-[590] text-[var(--color-porcelain)] mb-4">¡Registro Exitoso!</h2>
+          <h2 class="text-[26px] font-[590] text-[var(--color-porcelain)] mb-4">¡Email confirmado!</h2>
           <p class="text-[var(--color-storm-cloud)] text-[15px] leading-relaxed mb-10">
-            Hola <span class="text-[var(--color-porcelain)] font-bold">{{ registerForm.get('nombre')?.value }}</span>, tu solicitud ha sido enviada.<br><br>
+            Hola <span class="text-[var(--color-porcelain)] font-bold">{{ registerForm.get('nombre')?.value }}</span>, tu correo fue verificado correctamente.<br><br>
             Como medida de seguridad, un administrador debe <strong>validar tu identidad</strong> antes de habilitar tu acceso al sistema. Te notificaremos por correo electrónico.
           </p>
           <button routerLink="/login" class="w-full py-4 bg-[var(--color-deep-slate)] rounded-xl text-[15px] font-[590] hover:bg-[var(--color-charcoal-grey)] transition-colors border border-[var(--color-charcoal-grey)] text-[var(--color-porcelain)]">
-            Entendido, volver al inicio
+            Entendido, ir al inicio
           </button>
         </div>
       }
@@ -143,7 +216,7 @@
 
     <div class="mt-8 text-center">
       <p class="text-[13px] text-[var(--color-storm-cloud)]">
-        ¿Ya tienes cuenta? 
+        ¿Ya tienes cuenta?
         <a routerLink="/login" class="font-[510] text-[var(--color-neon-lime)] hover:underline">Inicia sesión</a>
       </p>
     </div>
