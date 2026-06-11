@@ -73,6 +73,14 @@ export class AuthService {
     return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/reenviar-codigo`, { email });
   }
 
+  solicitarReset(email: string): Observable<OperationResponse<boolean>> {
+    return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/solicitar-reset`, { email });
+  }
+
+  resetPassword(email: string, codigo: string, nuevaPassword: string): Observable<OperationResponse<boolean>> {
+    return this.http.post<OperationResponse<boolean>>(`${this.apiUrl}/reset-password`, { email, codigo, nuevaPassword });
+  }
+
 updateProfile(nombre: string, apellido: string, telefono: string): Observable<OperationResponse<ProfileResponse>> {
     return this.http.put<OperationResponse<ProfileResponse>>(`${this.apiUrl}/profile`, {
       nombre,
