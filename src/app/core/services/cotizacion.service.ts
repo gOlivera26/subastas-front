@@ -27,6 +27,7 @@ export interface SubastaDashboard {
   fechaLimiteImpugnar?: string;
   fechaAperturaSobreUno?: string;
   fechaAperturaSobreDos?: string;
+  cantOfertas?: number;
 }
 
 export interface CotizacionResponse {
@@ -198,8 +199,15 @@ export interface SubastaPublicaDetalleDto {
   moneda: string;
   items: ItemPublicoDto[];
   cantOfertas: number;
+  historialOfertas: OfertaPublicaDto[];
 }
 
+export interface OfertaPublicaDto {
+  monto: number;
+  fecha: string;
+  idCotizacionDetalle?: number;
+  idRenglon?: number;
+}
 export interface ItemPublicoDto {
   idElemento: number;
   codigo: string;

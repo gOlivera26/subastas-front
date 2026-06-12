@@ -27,7 +27,13 @@
     @else {<span class="px-2.5 py-0.5 rounded-full bg-[var(--color-charcoal-grey)]/30 text-[var(--color-storm-cloud)] text-[11px] font-[590]">{{ row.estado || '-' }}</span>}
   </ng-template>
 
-  <ng-template #ofertasTpl let-row><span class="font-mono text-[13px] text-[var(--color-porcelain)]">-</span></ng-template>
+  <ng-template #ofertasTpl let-row>
+    <span class="font-mono text-[13px] font-[590]" 
+          [class.text-[var(--color-neon-lime)]]="row.cantOfertas > 0" 
+          [class.text-[var(--color-storm-cloud)]]="!row.cantOfertas">
+      {{ row.cantOfertas || 0 }}
+    </span>
+  </ng-template>
 
   <ng-template #accionesTpl let-row>
     <div class="flex items-center gap-1.5 justify-end">
@@ -62,9 +68,9 @@
         <button (click)="anularSubasta(row)" title="Anular Subasta" class="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
       }
 
-      @if (row.idEstado === 39 && auth.isSuperAdmin() && !verActaPrelacion(row.fechaFin)) {
+      <!-- @if (row.idEstado === 39 && auth.isSuperAdmin() && !verActaPrelacion(row.fechaFin)) {
         <button (click)="openProrroga(row)" title="Prórroga" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="clock" [size]="16"></lucide-icon></button>
-      }
+      } -->
 
       @if (isDesistible(row)) {
         <button (click)="desistirSubasta(row)" title="Declarar Fracasada" class="p-1.5 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-colors">
@@ -228,6 +234,11 @@
               <thead class="bg-[var(--color-pitch-black)]/40 border-b border-[var(--color-neon-lime)]/20 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
                 <tr>
                   <th class="px-4 py-3">Bien / Servicio</th>
+                  
+                  @if (useRenglones()) {
+                    <th class="px-4 py-3 w-48 text-center border-l border-r border-[var(--color-charcoal-grey)]">Asignar a Grupo</th>
+                  }
+
                   <th class="px-4 py-3 w-28">Cant. Subastar</th>
                   <th class="px-4 py-3 w-32">Importe Base</th>
                   <th class="px-4 py-3 w-32">Importe Mínimo</th>
@@ -237,17 +248,31 @@
               </thead>
               <tbody class="divide-y divide-[var(--color-neon-lime)]/10">
                 @for (item of selectedItems(); track item.id) {
-                  <tr class="transition-colors">
+                  <tr class="transition-colors hover:bg-[var(--color-pitch-black)]/30">
                     <td class="px-4 py-3">
                       <p class="text-[var(--color-porcelain)] font-[510] truncate max-w-[200px]">{{ item.nItem }}</p>
                       <p class="text-[10px] text-[var(--color-fog-grey)] mt-0.5">{{ item.nroReserva }}</p>
                     </td>
+
+                    @if (useRenglones()) {
+                      <td class="px-4 py-3 border-l border-r border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/20">
+                        <select [ngModel]="getRenglonOfItem(item.id)"
+                                (ngModelChange)="setItemRenglon($event, item.id)"
+                                class="w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 py-1.5 text-[12px] font-[590] text-[var(--color-cyan-spark)] outline-none focus:border-[var(--color-cyan-spark)] transition-colors cursor-pointer">
+                          <option value="" class="text-[var(--color-storm-cloud)]">-- Sin asignar --</option>
+                          @for (ren of renglones(); track ren.id) {
+                            <option [value]="ren.id.toString()" class="text-[var(--color-porcelain)]">{{ ren.nombre }}</option>
+                          }
+                        </select>
+                      </td>
+                    }
+
                     <td class="px-4 py-3">
                       <input type="number" 
                              [ngModel]="item._cantidadEditada !== undefined ? item._cantidadEditada : (item.cantidadRestante ?? item.cantidad)" 
                              (ngModelChange)="actualizarValorItem(item, '_cantidadEditada', $event)"
                              [max]="item.cantidadRestante ?? item.cantidad" min="1"
-                             class="w-full rounded border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-2 py-1 text-[13px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-neon-lime)]" />
+                             class="w-full rounded border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-2 py-1 text-[13px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-neon-lime)] transition-colors" />
                     </td>
                     <td class="px-4 py-3">
                       <div class="relative">
@@ -255,7 +280,7 @@
                         <input type="number" 
                                [ngModel]="item._importeEditado !== undefined ? item._importeEditado : (item.importe || 0)" 
                                (ngModelChange)="actualizarValorItem(item, '_importeEditado', $event)"
-                               class="w-full rounded border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] pl-5 pr-2 py-1 text-[13px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-neon-lime)]" />
+                               class="w-full rounded border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] pl-5 pr-2 py-1 text-[13px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-neon-lime)] transition-colors" />
                       </div>
                     </td>
                     <td class="px-4 py-3">
@@ -264,7 +289,7 @@
                         <input type="number" placeholder="Opcional"
                                [ngModel]="item._importeMinimoEditado" 
                                (ngModelChange)="actualizarValorItem(item, '_importeMinimoEditado', $event)"
-                               class="w-full rounded border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] pl-5 pr-2 py-1 text-[13px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
+                               class="w-full rounded border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] pl-5 pr-2 py-1 text-[13px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)] transition-colors" />
                       </div>
                     </td>
                     <td class="px-4 py-3 text-right font-mono font-[590] text-[var(--color-neon-lime)]">
@@ -287,6 +312,63 @@
         </div>
       }
 
+      @if (useRenglones() && renglones().length > 0 && selectedCount() > 0) {
+        <div class="mt-8 animate-fade-in">
+          <div class="flex items-center justify-between mb-4 border-b border-[var(--color-charcoal-grey)] pb-2">
+            <h4 class="text-[13px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2">
+              <lucide-icon name="layers" [size]="16" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+              Composición de los Lotes (Renglones)
+            </h4>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            @for (ren of renglones(); track ren.id) {
+              <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/40 flex flex-col overflow-hidden shadow-sm hover:border-[var(--color-cyan-spark)]/40 transition-colors">
+                
+                <div class="px-4 py-3 bg-[var(--color-pitch-black)]/60 border-b border-[var(--color-charcoal-grey)] flex justify-between items-center">
+                  <span class="text-[14px] font-[600] text-[var(--color-cyan-spark)] truncate pr-2">{{ ren.nombre }}</span>
+                  <span class="text-[10px] font-[600] bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] px-2 py-1 rounded-md shrink-0 border border-[var(--color-cyan-spark)]/20">
+                    {{ ren.itemIds.length }} ítems
+                  </span>
+                </div>
+
+                <div class="p-4 flex-1 overflow-y-auto max-h-[200px] custom-scrollbar space-y-3">
+                  @if (ren.itemIds.length === 0) {
+                    <div class="flex flex-col items-center justify-center py-6 text-[var(--color-storm-cloud)] opacity-60">
+                      <lucide-icon name="inbox" [size]="24" class="mb-2"></lucide-icon>
+                      <p class="text-[12px] italic">Grupo vacío</p>
+                    </div>
+                  } @else {
+                    @for (itemId of ren.itemIds; track itemId) {
+                      @let item = getItemById(itemId);
+                      @if (item) {
+                        <div class="flex items-start justify-between gap-3 text-[12px]">
+                          <div class="flex items-start gap-2 min-w-0">
+                            <lucide-icon name="check" [size]="14" class="text-[var(--color-storm-cloud)] shrink-0 mt-0.5"></lucide-icon>
+                            <span class="text-[var(--color-porcelain)] truncate" [title]="item.nItem">{{ item.nItem }}</span>
+                          </div>
+                          <span class="text-[var(--color-storm-cloud)] font-mono shrink-0 font-[510]">
+                            x{{ item._cantidadEditada !== undefined ? item._cantidadEditada : (item.cantidadRestante ?? item.cantidad) }}
+                          </span>
+                        </div>
+                      }
+                    }
+                  }
+                </div>
+
+                <div class="px-4 py-3 bg-[var(--color-pitch-black)]/40 border-t border-[var(--color-charcoal-grey)] flex items-center justify-between">
+                  <span class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Subtotal Lote:</span>
+                  <span class="text-[14px] font-mono font-[600] text-[var(--color-neon-lime)]">
+                    ${{ calcularSubtotalRenglon(ren) | number:'1.2-2' }}
+                  </span>
+                </div>
+
+              </div>
+            }
+          </div>
+        </div>
+      }
+      
       <div class="flex justify-end gap-3 mt-6">
         <button (click)="volver()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">← Volver</button>
         <button (click)="closeCrear()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
@@ -308,9 +390,9 @@
             <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Tipo de Contratación</label>
             <select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none" [(ngModel)]="tipoContratacion">
               <option [value]="7">Subasta Electrónica Inversa</option>
-              <option [value]="9">Subasta Electrónica Directa</option>
+              <!-- <option [value]="9">Subasta Electrónica Directa</option>
               <option [value]="13">Subasta Inversa Monto Fijo</option>
-              <option [value]="15">Subasta Inversa SEEC</option>
+              <option [value]="15">Subasta Inversa SEEC</option> -->
             </select>
           </div>
           

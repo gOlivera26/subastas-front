@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-[var(--color-pitch-black)] text-[var(--color-porcelain)] px-4 pt-24 pb-8">
-  <span class="hidden">{{ tick() }}</span>
+  <span class="hidden">{{ ahora() }}</span>
 
   <div class="mx-auto max-w-5xl">
 
@@ -68,7 +68,7 @@
         <div class="mx-auto mt-6 h-2 w-full max-w-md overflow-hidden rounded-full bg-[var(--color-deep-slate)]">
           <div class="h-full rounded-full transition-all duration-1000 ease-linear" [class]="barraColor" [style.width.%]="progreso"></div>
         </div>
-        <div class="mt-1 flex justify-between text-[11px] text-[var(--color-storm-cloud)]">
+        <div class="mt-1 flex justify-between text-[11px] text-[var(--color-storm-cloud)] max-w-md mx-auto">
           <span>Inicio</span>
           <span>Fin</span>
         </div>
@@ -90,6 +90,42 @@
         <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-5">
           <p class="text-[11px] font-[600] uppercase tracking-wider text-[var(--color-storm-cloud)]">Total Ofertas</p>
           <p class="mt-1 text-[22px] font-[700]">{{ s.cantOfertas }}</p>
+        </div>
+      </div>
+
+      <div class="mb-6 rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-lg">
+        <div class="mb-4 flex items-center justify-between border-b border-[var(--color-charcoal-grey)] pb-4">
+          <h2 class="text-[14px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)]">
+            Tendencia de Ofertas
+          </h2>
+          <span class="rounded bg-[var(--color-deep-slate)] px-2 py-0.5 text-[10px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+            Actualización cada 10s
+          </span>
+        </div>
+        <div class="relative h-[300px] w-full">
+          @if (s.historialOfertas?.length === 0) {
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-[var(--color-storm-cloud)]">
+              <svg class="mb-4 size-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002-2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+              <p class="text-[14px] font-[510]">Esperando actividad de mercado...</p>
+            </div>
+          } @else {
+            <apx-chart
+              [series]="chartOptions.series!"
+              [chart]="chartOptions.chart!"
+              [xaxis]="chartOptions.xaxis!"
+              [yaxis]="chartOptions.yaxis!"
+              [stroke]="chartOptions.stroke!"
+              [colors]="chartOptions.colors!"
+              [fill]="chartOptions.fill!"
+              [dataLabels]="chartOptions.dataLabels!"
+              [theme]="chartOptions.theme!"
+              [tooltip]="chartOptions.tooltip!"
+              [markers]="chartOptions.markers!"
+              class="block h-full w-full">
+            </apx-chart>
+          }
         </div>
       </div>
 

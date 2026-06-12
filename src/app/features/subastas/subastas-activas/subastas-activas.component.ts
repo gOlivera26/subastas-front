@@ -61,7 +61,8 @@ export class SubastasActivasComponent implements OnInit, OnDestroy {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   }
 
-  formatMoneda(valor: number): string {
+ formatMoneda(valor: number): string {
+    if (valor === undefined || valor === null) return '—';
     return '$ ' + valor.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 }

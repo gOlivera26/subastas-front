@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { AlertTriangle, ArrowLeft, Check, ChevronLeft, FileText, Handshake, KeyRound, LayoutTemplate, LogOut, LUCIDE_ICONS, LucideIconProvider, MousePointerClick, Pencil, Search, Settings, Shield, Unlock, User, UserCircle, UserMinus } from 'lucide-angular';
+import { AlertTriangle, ArrowLeft, Check, ChevronLeft, FileText, Handshake, KeyRound, Layers, LayoutTemplate, LogOut, LUCIDE_ICONS, LucideIconProvider, MousePointerClick, Pencil, Search, Settings, Shield, Unlock, User, UserCircle, UserMinus } from 'lucide-angular';
 import { 
   Gavel, UserPlus, Zap, Trophy, Eye, Github, Twitter, Linkedin, 
   ArrowRight, Sparkles, Menu, X, ChevronRight, ShieldCheck, EyeOff, Activity,
@@ -35,7 +35,7 @@ export const appConfig: ApplicationConfig = {
         Sun, Moon, PanelLeft, PanelLeftClose, List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
         Banknote, Network, Upload, LayoutDashboard, Clock, Construction, BarChart, RotateCcw, Copy, Send, HelpCircle, SearchX, Inbox,
         FileBadge, History, TrendingDown, MessageSquareDashed, ShieldAlert, MailOpen, MessageSquare, FolderOpen,
-        Image, PieChart, Download, FileX
+        Image, PieChart, Download, FileX, Layers
       }),
       multi: true,
     },

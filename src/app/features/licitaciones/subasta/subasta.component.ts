@@ -276,21 +276,45 @@ export class SubastaComponent implements OnInit {
     }
   }
 
-  toggleItemInRenglon(renglonId: number, itemId: number) {
+getRenglonOfItem(itemId: number): string {
+    const ren = this.renglones().find(r => r.itemIds.includes(itemId));
+    return ren ? ren.id.toString() : '';
+  }
+
+  // Se ejecuta cuando el usuario cambia el select en la tabla
+  setItemRenglon(renglonIdStr: string, itemId: number) {
+    const newRenglonId = renglonIdStr ? Number(renglonIdStr) : null;
+
     this.renglones.update(list => {
-      const yaAsignado = this.isItemInRenglon(renglonId, itemId);
       return list.map(r => {
-        if (r.id === renglonId) {
-          const ids = yaAsignado ? r.itemIds.filter(i => i !== itemId) : [...r.itemIds, itemId];
-          return { ...r, itemIds: ids };
+        // 1. Lo removemos de todos los renglones para evitar duplicados
+        let newItemIds = r.itemIds.filter(id => id !== itemId);
+        
+        // 2. Lo agregamos al nuevo renglón seleccionado
+        if (r.id === newRenglonId) {
+          newItemIds.push(itemId);
         }
-        return { ...r, itemIds: r.itemIds.filter(i => i !== itemId) };
+        
+        return { ...r, itemIds: newItemIds };
       });
     });
   }
 
-  isItemInRenglon(renglonId: number, itemId: number): boolean {
-    return this.renglones().find(r => r.id === renglonId)?.itemIds.includes(itemId) ?? false;
+  getItemById(id: number) {
+    return this.selectedItems().find(i => i.id === id);
+  }
+
+  calcularSubtotalRenglon(renglon: any): number {
+    let total = 0;
+    for (const itemId of renglon.itemIds) {
+      const item = this.getItemById(itemId);
+      if (item) {
+        const cant = item._cantidadEditada !== undefined ? item._cantidadEditada : (item.cantidadRestante || item.cantidad || 1);
+        const imp = item._importeEditado !== undefined ? item._importeEditado : (item.importe || 0);
+        total += cant * imp;
+      }
+    }
+    return total;
   }
 
   buscarReservas() {
