@@ -67,8 +67,16 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
   desistiendo = signal(false);
   
   proveedorId = computed(() => {
-    const user = this.auth.currentUser();
-    return (user as any)?.idProveedor || (user as any)?.idEntidad || 1; 
+    const user: any = this.auth.currentUser();
+    if (user && user.token) {
+      try {
+        const payload = JSON.parse(atob(user.token.split('.')[1]));
+        return payload.IdProveedor ? Number(payload.IdProveedor) : 2;
+      } catch (e) {
+        return 2;
+      }
+    }
+    return 2;
   });
 
   ofertasForm = signal<Record<number, any>>({});
@@ -141,6 +149,12 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     archivo: null as File | null
   };
 
+  // Helper para desencapsular los valores numéricos extraños de la API
+  getVal(campo: any): number {
+    if (campo && campo.parsedValue !== undefined) return campo.parsedValue;
+    return Number(campo) || 0;
+  }
+
   constructor() {
     this.chartOptions = {
       series: [{ name: "Total Subasta", data: [] }],
@@ -198,7 +212,6 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
       }
     };
 
-    // EFECTO 1: Reactividad para la Prórroga (Punto 1 solucionado)
     effect(() => {
       const prorroga = this.signalR.prorrogaEvent();
       if (prorroga && prorroga.idCotizacion === this.idCotizacion()) {
@@ -217,18 +230,22 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
       }
     }, { allowSignalWrites: true });
 
-    // EFECTO 2: Procesar ofertas, inyectar puntos y actualizar inputs (Punto 2 solucionado)
     effect(() => {
       const pujas = this.ofertas();
       const elementos = this.elementosOfertables();
       if (elementos.length === 0) return;
 
       const margen = this.subasta()?.especificacion?.margenMejora || 5;
-      let totalActual = elementos.reduce((sum: number, el: any) => sum + ((el.importeBase || 0) * (el.cantidad || 1)), 0);
+      
+      let totalActual = elementos.reduce((sum: number, el: any) => {
+        const base = this.isPorRenglon ? (el._importeBaseConsolidado || 0) : (this.getVal(el.importeBase) * this.getVal(el.cantidad));
+        return sum + base;
+      }, 0);
       
       const bestPerItem: Record<number, number> = {};
       elementos.forEach((el: any) => {
-        bestPerItem[this.isPorRenglon ? el.idRenglon : el.idCotizacionDetalle] = el.importeBase || 0;
+        const base = this.isPorRenglon ? (el._importeBaseConsolidado || 0) : (this.getVal(el.importeBase) * this.getVal(el.cantidad));
+        bestPerItem[this.isPorRenglon ? el.idRenglon : el.idCotizacionDetalle] = base;
       });
 
       const dataPoints: [number, number][] = [];
@@ -244,7 +261,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
         const idItem = this.isPorRenglon ? puja.idRenglon : puja.idCotizacionDetalle;
         if (idItem && bestPerItem[idItem] !== undefined) {
           const precioAnterior = bestPerItem[idItem];
-          const cantidad = elementos.find((e: any) => (this.isPorRenglon ? e.idRenglon : e.idCotizacionDetalle) === idItem)?.cantidad || 1;
+          const cantidad = this.isPorRenglon ? 1 : this.getVal(elementos.find((e: any) => e.idCotizacionDetalle === idItem)?.cantidad);
 
           if ((!this.isDirecta && puja.monto < precioAnterior) || (this.isDirecta && puja.monto > precioAnterior)) {
             const diff = precioAnterior - puja.monto;
@@ -259,22 +276,18 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
         dataPoints.push([this.timeService.now(), totalActual]);
       }
 
-      // Actualización inteligente de inputs (Teniendo en cuenta la Primera Oferta)
       this.ofertasForm.update(state => {
         const newState = { ...state };
         elementos.forEach((el: any) => {
           const idItem = this.isPorRenglon ? el.idRenglon : el.idCotizacionDetalle;
           const mejorOferta = bestPerItem[idItem];
           
-          // Verificar si ya existen pujas para este ítem específico
           const hasBids = pujas.some(o => this.isPorRenglon ? o.idRenglon === idItem : o.idCotizacionDetalle === idItem);
 
           if (mejorOferta > 0 && newState[idItem]) {
             if (!hasBids) {
-               // Primera oferta: el sugerido es exactamente el precio base
                newState[idItem].miImporte = mejorOferta;
             } else {
-               // Subastas con historial: aplicamos el margen de mejora
                if (this.isDirecta) {
                  newState[idItem].miImporte = Math.floor((mejorOferta + (mejorOferta * margen / 100)) * 100) / 100;
                } else {
@@ -321,7 +334,6 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
       await this.signalR.connect(token);
       await this.signalR.joinSubasta(id);
 
-      // EFECTO 3: Cierre reactivo sin reload de pantalla (Punto 3 solucionado)
       this.signalR['connection']?.on('SubastaCerradaPorTope', (cerradaId: number) => {
         if (cerradaId === this.idCotizacion()) {
           this.notify.showWarning('La subasta ha finalizado porque se alcanzó el importe mínimo permitido.');
@@ -376,12 +388,33 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     
     array.forEach((item: any) => {
       const id = isRenglon ? item.idRenglon : item.idCotizacionDetalle;
+      
+      let cantidadFila = 1;
+      let importeBaseFila = 0;
+      let descripcionLote = '';
+
+      if (isRenglon) {
+        const detallesDelRenglon = (data.detalles || []).filter((d: any) => d.idRenglon === id);
+        cantidadFila = 1; 
+        
+        detallesDelRenglon.forEach((d: any) => {
+          importeBaseFila += this.getVal(d.importeBase) * this.getVal(d.cantidad);
+        });
+
+        descripcionLote = detallesDelRenglon.map((d: any) => d.nItem).join(' + ');
+        item._descripcionResumen = descripcionLote; 
+        item._importeBaseConsolidado = importeBaseFila;
+      } else {
+        cantidadFila = this.getVal(item.cantidad);
+        importeBaseFila = this.getVal(item.importeBase);
+      }
+
       formState[id] = {
         miImporte: null,
         idMoneda: item.idMoneda || 1,
         ofertar: false,
-        cantidad: isRenglon ? 1 : item.cantidad,
-        importeBase: item.importeBase || 0,
+        cantidad: cantidadFila,
+        importeBase: importeBaseFila,
         textoError: null 
       };
     });

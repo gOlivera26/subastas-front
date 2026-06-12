@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { PublicLayoutComponent } from './features/public/public-layout/public-layout.component';
 import { HomeComponent } from './features/public/home/home.component';
 import { SubastasActivasComponent } from './features/subastas/subastas-activas/subastas-activas.component';
+import { SubastaPublicaDetalleComponent } from './features/subastas/subasta-publica-detalle/subasta-publica-detalle.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { authGuard } from './core/guards/auth.guard';
 import { ModulosComponent } from './features/modulos/modulos.component';
@@ -48,7 +49,8 @@ export const routes: Routes = [
     component: PublicLayoutComponent,
     children: [
       { path: '', component: HomeComponent, data: { state: 'home' } },
-      { path: 'subastas-activas', component: SubastasActivasComponent, data: { state: 'subastas' } },
+      { path: 'subastas-activas', component: SubastasActivasComponent, data: { state: 'subastas', title: 'Subastas Activas' } },
+      { path: 'subastas-activas/:id', component: SubastaPublicaDetalleComponent, data: { state: 'subasta-publica-detalle', title: 'Subasta Pública' } },
       { path: 'login', component: LoginComponent, data: { state: 'login' } },
       { path: 'register', component: RegisterComponent, data: { state: 'register' } },
       { path: 'modulos', component: ModulosComponent, canActivate: [authGuard], data: { state: 'modulos' } }

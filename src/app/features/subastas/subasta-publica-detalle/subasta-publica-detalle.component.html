@@ -1,0 +1,188 @@
+<div class="min-h-screen bg-[var(--color-pitch-black)] text-[var(--color-porcelain)] px-4 pt-24 pb-8">
+  <span class="hidden">{{ ahora() }}</span>
+
+  <div class="mx-auto max-w-5xl">
+
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-32">
+        <div class="size-10 animate-spin rounded-full border-2 border-[var(--color-neon-lime)] border-t-transparent"></div>
+        <p class="mt-4 text-[14px] text-[var(--color-storm-cloud)]">Cargando detalle de la subasta...</p>
+      </div>
+    }
+
+    @if (error() && !loading()) {
+      <div class="mx-auto max-w-lg rounded-2xl border border-red-500/20 bg-red-500/10 p-8 text-center">
+        <p class="text-[16px] font-[590] text-red-400">Error</p>
+        <p class="mt-2 text-[14px] text-red-300/80">{{ error() }}</p>
+        <button (click)="loadData()"
+                class="mt-6 rounded-xl bg-[var(--color-deep-slate)] px-6 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
+          Reintentar
+        </button>
+      </div>
+    }
+
+    @if (subasta(); as s) {
+      <a routerLink="/subastas-activas"
+         class="mb-6 inline-flex items-center gap-2 text-[13px] text-[var(--color-storm-cloud)] transition-colors hover:text-[var(--color-porcelain)]">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Volver al listado
+      </a>
+
+      <div class="mb-8">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div class="min-w-0 flex-1">
+            <h1 class="text-[26px] font-[700] leading-tight tracking-tight">{{ s.titulo }}</h1>
+            <div class="mt-2 flex flex-wrap items-center gap-3 text-[13px] text-[var(--color-storm-cloud)]">
+              <span class="rounded-full border border-[var(--color-neon-lime)]/30 bg-[var(--color-neon-lime)]/10 px-3 py-0.5 text-[11px] font-[600] uppercase tracking-wider text-[var(--color-neon-lime)]">
+                {{ s.tipo }}
+              </span>
+              <span>{{ s.estado }}</span>
+              <span>{{ s.moneda }}</span>
+              <span>{{ s.cantOfertas }} oferta{{ s.cantOfertas !== 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+
+          @if (estaFinalizada) {
+            <span class="shrink-0 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] px-4 py-2 text-[13px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+              Finalizada
+            </span>
+          } @else {
+            <span class="flex shrink-0 items-center gap-2 rounded-xl border border-[var(--color-neon-lime)]/30 bg-[var(--color-neon-lime)]/10 px-4 py-2 text-[13px] font-[600] uppercase tracking-widest text-[var(--color-neon-lime)] shadow-[0_0_15px_rgba(228,242,34,0.12)]">
+              <span class="size-2 rounded-full bg-[var(--color-neon-lime)] animate-pulse"></span>
+              En vivo
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="mb-6 overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-8 text-center shadow-lg">
+        <p class="mb-2 text-[12px] font-[600] uppercase tracking-[0.2em] text-[var(--color-storm-cloud)]">Tiempo restante</p>
+        <p class="font-mono text-[56px] font-[700] leading-none tracking-tight"
+           [class.text-[var(--color-neon-lime)]]="!estaFinalizada"
+           [class.text-[var(--color-warning-red)]]="estaFinalizada">
+          {{ timeLeft }}
+        </p>
+
+        <div class="mx-auto mt-6 h-2 w-full max-w-md overflow-hidden rounded-full bg-[var(--color-deep-slate)]">
+          <div class="h-full rounded-full transition-all duration-1000 ease-linear" [class]="barraColor" [style.width.%]="progreso"></div>
+        </div>
+        <div class="mt-1 flex justify-between text-[11px] text-[var(--color-storm-cloud)] max-w-md mx-auto">
+          <span>Inicio</span>
+          <span>Fin</span>
+        </div>
+      </div>
+
+      <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-5">
+          <p class="text-[11px] font-[600] uppercase tracking-wider text-[var(--color-storm-cloud)]">Precio Base</p>
+          <p class="mt-1 text-[22px] font-[700]">{{ formatMoneda(s.precioBase) }}</p>
+        </div>
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-5">
+          <p class="text-[11px] font-[600] uppercase tracking-wider text-[var(--color-storm-cloud)]">Mejor Oferta Actual</p>
+          <p class="mt-1 text-[22px] font-[700]"
+             [class.text-[var(--color-neon-lime)]]="s.mejorOfertaActual != null"
+             [class.text-[var(--color-storm-cloud)]]="s.mejorOfertaActual == null">
+            {{ s.mejorOfertaActual != null ? formatMoneda(s.mejorOfertaActual) : '—' }}
+          </p>
+        </div>
+        <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-5">
+          <p class="text-[11px] font-[600] uppercase tracking-wider text-[var(--color-storm-cloud)]">Total Ofertas</p>
+          <p class="mt-1 text-[22px] font-[700]">{{ s.cantOfertas }}</p>
+        </div>
+      </div>
+
+      <div class="mb-6 rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-lg">
+        <div class="mb-4 flex items-center justify-between border-b border-[var(--color-charcoal-grey)] pb-4">
+          <h2 class="text-[14px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)]">
+            Tendencia de Ofertas
+          </h2>
+          <span class="rounded bg-[var(--color-deep-slate)] px-2 py-0.5 text-[10px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+            Actualización cada 10s
+          </span>
+        </div>
+        <div class="relative h-[300px] w-full">
+          @if (s.historialOfertas?.length === 0) {
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-[var(--color-storm-cloud)]">
+              <svg class="mb-4 size-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002-2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+              <p class="text-[14px] font-[510]">Esperando actividad de mercado...</p>
+            </div>
+          } @else {
+            <apx-chart
+              [series]="chartOptions.series!"
+              [chart]="chartOptions.chart!"
+              [xaxis]="chartOptions.xaxis!"
+              [yaxis]="chartOptions.yaxis!"
+              [stroke]="chartOptions.stroke!"
+              [colors]="chartOptions.colors!"
+              [fill]="chartOptions.fill!"
+              [dataLabels]="chartOptions.dataLabels!"
+              [theme]="chartOptions.theme!"
+              [tooltip]="chartOptions.tooltip!"
+              [markers]="chartOptions.markers!"
+              class="block h-full w-full">
+            </apx-chart>
+          }
+        </div>
+      </div>
+
+      <div class="overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-lg">
+        <div class="border-b border-[var(--color-charcoal-grey)] px-6 py-4">
+          <h2 class="text-[14px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)]">
+            Ítems {{ s.items.length > 0 ? (s.items[0].esRenglon ? '/ Renglones' : '/ Detalles') : '' }}
+          </h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-[13px]">
+            <thead class="bg-[var(--color-deep-slate)]/80 text-[10px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+              <tr>
+                <th class="px-6 py-4">Código</th>
+                <th class="px-6 py-4">Descripción</th>
+                <th class="px-6 py-4 text-center">Unidad</th>
+                <th class="px-6 py-4 text-right">Cantidad</th>
+                <th class="px-6 py-4 text-right">Precio Base</th>
+                <th class="px-6 py-4 text-right text-[var(--color-neon-lime)]">Mejor Oferta</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
+              @for (item of s.items; track item.idElemento) {
+                <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/30">
+                  <td class="px-6 py-4 font-mono text-[12px] text-[var(--color-storm-cloud)]">{{ item.codigo }}</td>
+                  <td class="px-6 py-4 max-w-xs">
+                    <p class="truncate text-[var(--color-porcelain)]" [title]="item.descripcion">{{ item.descripcion }}</p>
+                  </td>
+                  <td class="px-6 py-4 text-center text-[var(--color-storm-cloud)]">{{ item.unidad }}</td>
+                  <td class="px-6 py-4 text-right font-mono">{{ item.cantidad }}</td>
+                  <td class="px-6 py-4 text-right font-mono">{{ formatMoneda(item.precioBase) }}</td>
+                  <td class="px-6 py-4 text-right font-mono"
+                      [class.text-[var(--color-neon-lime)]]="item.mejorOfertaActual != null"
+                      [class.text-[var(--color-storm-cloud)]]="item.mejorOfertaActual == null">
+                    {{ item.mejorOfertaActual != null ? formatMoneda(item.mejorOfertaActual) : '—' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (s.items.length === 0) {
+          <div class="px-6 py-10 text-center text-[14px] text-[var(--color-storm-cloud)]">
+            No hay ítems disponibles para esta subasta.
+          </div>
+        }
+      </div>
+
+      <div class="mt-8 text-center">
+        <a routerLink="/subastas-activas"
+           class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-6 py-3 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)]">
+          <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Volver al listado de subastas activas
+        </a>
+      </div>
+    }
+  </div>
+</div>

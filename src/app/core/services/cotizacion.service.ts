@@ -27,6 +27,7 @@ export interface SubastaDashboard {
   fechaLimiteImpugnar?: string;
   fechaAperturaSobreUno?: string;
   fechaAperturaSobreDos?: string;
+  cantOfertas?: number;
 }
 
 export interface CotizacionResponse {
@@ -158,4 +159,62 @@ export class CotizacionService {
   getMetricasAhorro(idCotizacion: number): Observable<OperationResponse<any>> {
     return this.http.get<OperationResponse<any>>(`${this.apiUrl}/${idCotizacion}/metricas-ahorro`);
   }
+
+  // ========== ENDPOINTS PÚBLICOS (VIDRIERA) ==========
+
+  getPublicasActivas(): Observable<OperationResponse<SubastaPublicaListDto[]>> {
+    return this.http.get<OperationResponse<SubastaPublicaListDto[]>>(`${environment.apiUrl}/CotizacionPublica/activas`);
+  }
+
+  getDetallePublico(id: number): Observable<OperationResponse<SubastaPublicaDetalleDto>> {
+    return this.http.get<OperationResponse<SubastaPublicaDetalleDto>>(`${environment.apiUrl}/CotizacionPublica/${id}`);
+  }
+}
+
+// ========== DTOs PÚBLICOS ==========
+
+export interface SubastaPublicaListDto {
+  idCotizacion: number;
+  titulo: string;
+  tipo: string;
+  estado: string;
+  precioBase: number;
+  mejorOfertaActual?: number;
+  fechaInicio: string;
+  fechaFin: string;
+  moneda: string;
+  cantItems: number;
+  cantOfertas: number;
+}
+
+export interface SubastaPublicaDetalleDto {
+  idCotizacion: number;
+  titulo: string;
+  tipo: string;
+  estado: string;
+  precioBase: number;
+  mejorOfertaActual?: number;
+  fechaInicio: string;
+  fechaFin: string;
+  moneda: string;
+  items: ItemPublicoDto[];
+  cantOfertas: number;
+  historialOfertas: OfertaPublicaDto[];
+}
+
+export interface OfertaPublicaDto {
+  monto: number;
+  fecha: string;
+  idCotizacionDetalle?: number;
+  idRenglon?: number;
+}
+export interface ItemPublicoDto {
+  idElemento: number;
+  codigo: string;
+  descripcion: string;
+  unidad: string;
+  cantidad: number;
+  precioBase: number;
+  mejorOfertaActual?: number;
+  esRenglon: boolean;
 }

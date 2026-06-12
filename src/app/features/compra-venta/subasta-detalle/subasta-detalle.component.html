@@ -101,19 +101,26 @@
                     @let rowState = ofertasForm()[rowId];
                     @let mejorActual = getMejorOferta(rowId);
 
-                    <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors" [class.bg-[var(--color-neon-lime)]/5]="rowState.ofertar" [class.bg-red-500/5]="rowState.textoError">
+                    <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors" [class.bg-[var(--color-neon-lime)]/5]="rowState?.ofertar" [class.bg-red-500/5]="rowState?.textoError">
                       <td class="px-4 py-4 text-center">
                         <button title="Ver historial de este ítem" class="p-1.5 rounded-lg text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors">
                           <lucide-icon name="history" [size]="16"></lucide-icon>
                         </button>
                       </td>
+                      
                       <td class="px-4 py-4">
-                        <p class="font-[600] text-[var(--color-porcelain)] text-[14px] uppercase">{{ item.nItem || item.descripcion || 'Sin nombre' }}</p>
-                        @if (isPorRenglon) {<p class="text-[11px] text-[var(--color-storm-cloud)] mt-1 font-mono">LOTE #{{ item.numeroRenglon }}</p>}
+                        <p class="font-[600] text-[var(--color-porcelain)] text-[14px] uppercase truncate max-w-[250px]" [title]="item.nItem || item.descripcion || 'Sin nombre'">
+                          {{ item.nItem || item.descripcion || 'Sin nombre' }}
+                        </p>
+                        @if (isPorRenglon) {
+                          <p class="text-[11px] text-[var(--color-storm-cloud)] mt-1 font-mono truncate max-w-[250px]" [title]="item._descripcionResumen">LOTE #{{ item.numeroRenglon }}: {{ item._descripcionResumen }}</p>
+                        }
                       </td>
-                      <td class="px-4 py-4 text-center font-mono text-[var(--color-storm-cloud)]">{{ isPorRenglon ? '-' : item.cantidad }}</td>
+                      <td class="px-4 py-4 text-center font-mono text-[var(--color-storm-cloud)]">
+                        {{ isPorRenglon ? '1 (Lote)' : (item.cantidad?.parsedValue ?? item.cantidad) }}
+                      </td>
                       <td class="px-4 py-4 text-right font-mono text-[var(--color-fog-grey)] border-r border-[var(--color-charcoal-grey)]">
-                        {{ (isPorRenglon ? 0 : item.importeBase) | currency }}
+                        {{ (isPorRenglon ? item._importeBaseConsolidado : (item.importeBase?.parsedValue ?? item.importeBase)) | currency }}
                       </td>
                       
                       <td class="px-4 py-4 text-right font-mono text-[16px] font-bold bg-[var(--color-neon-lime)]/5 border-r border-[var(--color-charcoal-grey)] transition-all" [class.text-[var(--color-neon-lime)]]="mejorActual !== null" [class.text-[var(--color-storm-cloud)]]="mejorActual === null">
@@ -151,7 +158,7 @@
                       </td>
                     </tr>
 
-                    @if (rowState.textoError) {
+                    @if (rowState?.textoError) {
                       <tr class="animate-fade-in">
                         <td colspan="9" class="px-4 py-3 bg-red-500/10 border-b border-[var(--color-charcoal-grey)]">
                           <div class="flex items-center justify-end gap-2 text-red-400 text-[12px] font-[510]">
@@ -198,6 +205,7 @@
                 [dataLabels]="chartOptions.dataLabels!"
                 [theme]="chartOptions.theme!"
                 [tooltip]="chartOptions.tooltip!"
+                [markers]="chartOptions.markers!"
                 class="h-full w-full block">
               </apx-chart>
             }
