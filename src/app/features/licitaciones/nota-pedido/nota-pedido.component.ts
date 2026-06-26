@@ -1,12 +1,13 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
-import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
 import { ConfirmationModal } from '../../../shared/ui/confirmation-modal/confirmation-modal';
 import { SearchableSelectComponent, SelectOption } from '../../../shared/components/searchable-select/searchable-select.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { CustomSelect, SelectOption as CustomSelectOption } from '../../../shared/ui/custom-select/custom-select';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
 import { ReservaService } from '../../../core/services/reserva.service';
 import {
   Reserva, ReservaRequest, ReservaDetalle, ReservaDetalleRequest, BienFormState,
@@ -26,7 +27,7 @@ interface CatProgNode {
 @Component({
   selector: 'app-nota-pedido',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective, ConfirmationModal, SearchableSelectComponent, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, SmartTableComponent, ConfirmationModal, SearchableSelectComponent, LoadingSpinnerComponent, CustomSelect],
   templateUrl: './nota-pedido.component.html',
 })
 export class NotaPedidoComponent implements OnInit {
@@ -71,7 +72,7 @@ export class NotaPedidoComponent implements OnInit {
   autorizarMotivo = signal<string>(''); 
 
   // Modal Listado de Ítems (Intermedio)
-  isItemsListOpen = signal(false);
+isItemsListOpen = signal(false);
 
   // Modal Formulario de Bienes
   isBienModalOpen = signal(false);
@@ -159,20 +160,63 @@ export class NotaPedidoComponent implements OnInit {
     return this.monedas().map(m => ({ value: m.idMoneda, label: m.nombre }));
   });
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach(d => { map[d.cellKey] = d.templateRef; });
-    return map;
+  filterUnidadAdmOptions = computed<CustomSelectOption[]>(() => [
+    { label: '-- Consultar por área --', value: undefined },
+    ...this.unidadesAdm().map(ua => ({ label: ua.nombreUnidadAdm, value: ua.idUnidadAdm }))
+  ]);
+
+  filterVigenciaOptions = computed<CustomSelectOption[]>(() => [
+    { label: '-- Todos --', value: undefined },
+    ...this.vigencias().map(vig => ({ label: String(vig.ejercicio), value: vig.idVigencia }))
+  ]);
+
+  modalUnidadAdmOptions = computed<CustomSelectOption[]>(() => [
+    { label: '-- Seleccione --', value: 0 },
+    ...this.unidadesAdm().map(ua => ({ label: ua.nombreUnidadAdm, value: ua.idUnidadAdm }))
+  ]);
+
+  oficinaOptions = computed<CustomSelectOption[]>(() => [
+    { label: '-- Seleccione --', value: 0 },
+    ...this.oficinas().map(of => ({ label: of.nombre, value: (of as any).idSubResponsable || (of as any).idSubResponsables }))
+  ]);
+
+  descripcionEstadoTpl = viewChild<TemplateRef<any>>('descripcionEstadoTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const descripcionEstado = this.descripcionEstadoTpl();
+    const acciones = this.accionesTpl();
+
+    if (descripcionEstado) templates['descripcionEstado'] = descripcionEstado;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
   });
 
   columns: TableColumn[] = [
-    { key: 'nroReserva', label: 'Número', sortable: true, width: '120px' },
-    { key: 'nombreUnidadAdm', label: 'Área', sortable: true },
-    { key: 'nombreSubResponsable', label: 'Oficina Solicitante', sortable: true }, 
-    { key: 'descripcionEstado', label: 'Estado', sortable: true, width: '120px' },
-    { key: 'acciones', label: 'Acciones', align: 'right', width: '140px' },
+    { key: 'nroReserva', header: 'Número', sortable: true },
+    { key: 'nombreUnidadAdm', header: 'Área', sortable: true },
+    { key: 'nombreSubResponsable', header: 'Oficina Solicitante', sortable: true },
+    { key: 'descripcionEstado', header: 'Estado', type: 'custom', sortable: true },
+    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
+
+  esGenerado(row: Reserva): boolean {
+    return row.idEstado === 1 || this.normalizarEstado(row.descripcionEstado) === 'GENERADO';
+  }
+
+  esAutorizado(row: Reserva): boolean {
+    return row.idEstado === 3 || this.normalizarEstado(row.descripcionEstado) === 'AUTORIZADO';
+  }
+
+  private normalizarEstado(estado?: string): string {
+    return (estado || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toUpperCase();
+  }
 
   ngOnInit() {
     this.loadReservas();
@@ -222,6 +266,10 @@ export class NotaPedidoComponent implements OnInit {
 
   onFilterUnidadAdmChange(idUA: number) {
     this.filtros.update(f => ({ ...f, idUnidadAdm: idUA || undefined }));
+  }
+
+  onFilterVigenciaChange(idVigencia: number | undefined) {
+    this.filtros.update(f => ({ ...f, idVigencia: idVigencia || undefined }));
   }
 
   onModalUnidadAdmChange(idUA: number) {
@@ -292,7 +340,7 @@ export class NotaPedidoComponent implements OnInit {
         this.isSaving.set(false);
         if (res.success) {
           this.closeModal();
-          this.showSuccess(this.isEditing() ? 'Nota de pedido actualizada.' : 'Nota de pedido creada.');
+          this.showSuccess(this.isEditing() ? 'Nota de pedido actualizada.' : 'Nota de pedidocreada.');
           this.loadReservas();
         } else {
           this.errorMessage.set(res.message || 'Error al guardar.');
@@ -318,13 +366,13 @@ export class NotaPedidoComponent implements OnInit {
   }
 
   // --- LISTADO DE ÍTEMS INTERMEDIO ---
-  openItemsList(reserva: Reserva) {
+openItemsList(reserva: Reserva) {
     this.selectedReserva.set(reserva);
     this.isItemsListOpen.set(true);
     this.loadDetalles(reserva.idReserva);
   }
 
-  closeItemsList() {
+ closeItemsList() {
     this.isItemsListOpen.set(false);
     this.selectedReserva.set(null);
     this.detalles.set([]);
@@ -470,7 +518,7 @@ export class NotaPedidoComponent implements OnInit {
         if (res.success) {
           this.closeBienModal();
           this.loadDetalles(reserva.idReserva);
-          this.showSuccess(this.isEditingBien() ? 'Ítem actualizado correctamente.' : 'Ítem creado correctamente.');
+          this.showSuccess(this.isEditingBien() ? 'Ítem actualizado correctamente.' : 'Ítemcreado correctamente.');
         } else {
           this.bienErrorMessage.set(res.message || 'Error al guardar el ítem.');
         }
@@ -499,10 +547,10 @@ export class NotaPedidoComponent implements OnInit {
           this.loadDetalles(reserva.idReserva);
           this.showSuccess('Ítem eliminado correctamente.');
         } else {
-          this.errorMessage.set(res.message || 'Error al eliminar el ítem.');
+          this.errorMessage.set(res.message || 'Error al Eliminar ítem.');
         }
       },
-      error: () => { this.errorMessage.set('Error al eliminar el ítem.'); }
+      error: () => { this.errorMessage.set('Error al Eliminar ítem.'); }
     });
   }
 
@@ -526,7 +574,7 @@ export class NotaPedidoComponent implements OnInit {
         this.isCloning.set(false);
         if (res.success) {
           this.closeCloneModal();
-          this.showSuccess('Operación realizada con éxito.');
+          this.showSuccess('OperacióÁrealizada con éxito.');
           this.loadReservas();
         } else {
           this.errorMessage.set(res.message || 'Error al clonar.');
@@ -541,7 +589,7 @@ export class NotaPedidoComponent implements OnInit {
     });
   }
 
-  // --- CONFIRMAR AUTORIZACIÓN ---
+  // --- CONFIRMAR autorización ---
   openAuthorizeModal(reserva: Reserva) {
     this.reservaToAuthorize.set(reserva);
     this.autorizarMotivo.set(''); // Reseteamos el motivo
@@ -565,7 +613,7 @@ export class NotaPedidoComponent implements OnInit {
         this.isAuthorizing.set(false);
         if (res.success) {
           this.closeAuthorizeModal();
-          this.showSuccess('Operación realizada con éxito.');
+          this.showSuccess('OperacióÁrealizada con éxito.');
           this.loadReservas();
         } else {
           this.errorMessage.set(res.message || 'Error al autorizar. Verificá que tenga al menos un ítem.');

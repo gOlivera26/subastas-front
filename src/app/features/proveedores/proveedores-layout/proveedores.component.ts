@@ -1,24 +1,16 @@
-import { Component, OnInit, signal, inject, computed, TemplateRef, viewChildren, Directive, Input } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProviderService, ProviderListDto, CreateProviderDto, UpdateProviderDto, RubroTreeDto, DomicilioDto, CreateDomicilioDto, UpdateDomicilioDto, TipoDomicilioDto, ProvinciaDto, AfipPersonDataDto } from '../../../core/services/provider.service';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-
-@Directive({
-  selector: 'ng-template[cellKey]',
-  standalone: true,
-})
-export class CellTemplateDirective {
-  @Input({ required: true }) cellKey!: string;
-  constructor(public templateRef: TemplateRef<any>) {}
-}
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-proveedores',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, SmartTableComponent, LoadingSpinnerComponent],
   templateUrl: './proveedores.component.html',
 })
 export class ProveedoresComponent implements OnInit {
@@ -91,22 +83,42 @@ export class ProveedoresComponent implements OnInit {
   afipCuit = signal('');
 
   columns: TableColumn[] = [
-    { key: 'razonSocial', label: 'Razón Social', sortable: true },
-    { key: 'cuit', label: 'CUIT', sortable: true, width: '130px' },
-    { key: 'cup', label: 'CUP', width: '80px' },
-    { key: 'tipoPersona', label: 'Tipo', align: 'center', width: '80px' },
-    { key: 'rubrosCount', label: 'Rubros', align: 'center', width: '70px' },
-    { key: 'hasConstanciaAfip', label: 'Constancia AFIP', align: 'center', width: '130px' },
-    { key: 'acciones', label: 'Acciones', align: 'right', width: '140px' },
+    { key: 'razonSocial', header: 'Razón Social', type: 'custom', sortable: true },
+    { key: 'cuit', header: 'CUIT', type: 'custom', sortable: true },
+    { key: 'cup', header: 'CUP', type: 'custom' },
+    { key: 'tipoPersona', header: 'Tipo', type: 'custom' },
+    { key: 'rubrosCount', header: 'Rubros', type: 'custom' },
+    { key: 'hasConstanciaAfip', header: 'Constancia AFIP', type: 'custom' },
+    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach(d => {
-      map[d.cellKey] = d.templateRef;
-    });
-    return map;
+  razonSocialTpl = viewChild<TemplateRef<any>>('razonSocialTpl');
+  cuitTpl = viewChild<TemplateRef<any>>('cuitTpl');
+  cupTpl = viewChild<TemplateRef<any>>('cupTpl');
+  tipoPersonaTpl = viewChild<TemplateRef<any>>('tipoPersonaTpl');
+  rubrosCountTpl = viewChild<TemplateRef<any>>('rubrosCountTpl');
+  hasConstanciaAfipTpl = viewChild<TemplateRef<any>>('hasConstanciaAfipTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const razonSocial = this.razonSocialTpl();
+    const cuit = this.cuitTpl();
+    const cup = this.cupTpl();
+    const tipoPersona = this.tipoPersonaTpl();
+    const rubrosCount = this.rubrosCountTpl();
+    const hasConstanciaAfip = this.hasConstanciaAfipTpl();
+    const acciones = this.accionesTpl();
+
+    if (razonSocial) templates['razonSocial'] = razonSocial;
+    if (cuit) templates['cuit'] = cuit;
+    if (cup) templates['cup'] = cup;
+    if (tipoPersona) templates['tipoPersona'] = tipoPersona;
+    if (rubrosCount) templates['rubrosCount'] = rubrosCount;
+    if (hasConstanciaAfip) templates['hasConstanciaAfip'] = hasConstanciaAfip;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
   });
 
   sortKey = signal<string>('razonSocial');
@@ -160,9 +172,8 @@ export class ProveedoresComponent implements OnInit {
     this.loadProviders();
   }
 
-  onPageChange(event: { page: number; pageSize: number }) {
-    this.currentPage.set(event.page);
-    this.pageSize.set(event.pageSize);
+  onPageChange(page: number) {
+    this.currentPage.set(page);
     this.loadProviders();
   }
 
@@ -191,7 +202,8 @@ export class ProveedoresComponent implements OnInit {
       });
   }
 
-  search() {
+  onSearch(term: string) {
+    this.searchTerm.set(term);
     this.currentPage.set(1);
     this.loadProviders();
   }

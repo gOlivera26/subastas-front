@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,11 +7,14 @@ import { VigenciaService } from '../../../core/services/vigencia.service';
 import { CotizacionService, SubastaDashboard } from '../../../core/services/cotizacion.service';
 import { Vigencia } from '../../../core/models/vigencia.model';
 import { TimeService } from '../../../core/services/time.service';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-dashboard-compra-venta',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule],
+  imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule, CustomSelect, SmartTableComponent],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardCompraVentaComponent implements OnInit, OnDestroy {
@@ -31,6 +34,34 @@ export class DashboardCompraVentaComponent implements OnInit, OnDestroy {
   proximas = signal<SubastaDashboard[]>([]);
   delMes = signal<SubastaDashboard[]>([]);
   loading = signal(false);
+
+  vigenciaOptions = computed<SelectOption[]>(() => this.vigencias().map(v => ({
+    label: `Ejercicio ${v.ejercicio}${v.activoEjecucion ? ' (Activo)' : ''}`,
+    value: v.idVigencia
+  })));
+
+  estadoTpl = viewChild<TemplateRef<any>>('estadoTpl');
+  accionTpl = viewChild<TemplateRef<any>>('accionTpl');
+
+  calendarioTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const estado = this.estadoTpl();
+    const accion = this.accionTpl();
+
+    if (estado) templates['estado'] = estado;
+    if (accion) templates['accion'] = accion;
+
+    return templates;
+  });
+
+  calendarioColumns: TableColumn[] = [
+    { key: 'nroCotizacion', header: 'Nro', sortable: true },
+    { key: 'titulo', header: 'Subasta', sortable: true },
+    { key: 'tipo', header: 'Tipo', sortable: true },
+    { key: 'fechaInicio', header: 'Fecha', type: 'date', sortable: true },
+    { key: 'estado', header: 'Estado', type: 'custom' },
+    { key: 'accion', header: 'Acción', type: 'custom' },
+  ];
 
   ngOnInit() {
     this.timeService.syncWithServer();

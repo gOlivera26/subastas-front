@@ -1,0 +1,161 @@
+<div class="tablero-shell">
+  <section class="tablero-hero">
+    <div class="hero-copy">
+      <div class="hero-kicker">
+        <span class="status-dot"></span>
+        APB Analytics
+      </div>
+
+      <h1>Tablero</h1>
+
+      <p>
+        Resumen ejecutivo de cotizaciones finalizadas, comparativo de importes y ahorro generado
+        por vigencia.
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <app-custom-select
+        [options]="criterioOptions"
+        [value]="criterio()"
+        placeholder="Criterio"
+        (valueChange)="onCriterioChange($event)"
+      />
+
+      <app-custom-select
+        [options]="vigenciaOptions()"
+        [value]="selectedVigenciaId()"
+        placeholder="Vigencia"
+        (valueChange)="onVigenciaChange($event)"
+      />
+    </div>
+  </section>
+
+  @if (loading()) {
+    <section class="state-card">
+      <div class="loader"></div>
+      <span>Cargando datos del tablero&hellip;</span>
+    </section>
+  } @else if (error()) {
+    <section class="error-card">
+      <strong>No se pudo cargar el tablero</strong>
+      <span>{{ error() }}</span>
+    </section>
+  } @else if (data(); as d) {
+    <section class="summary-grid">
+      <article class="summary-card">
+        <div class="summary-label">
+          <span class="summary-dot dot-muted"></span>
+          Presupuestado
+        </div>
+
+        <strong>{{ d.totalPresupuestado | number:'1.2-2' }}</strong>
+
+        <small>Monto base estimado</small>
+      </article>
+
+      <article class="summary-card summary-card-accent">
+        <div class="summary-label">
+          <span class="summary-dot dot-cyan"></span>
+          Subastado
+        </div>
+
+        <strong>{{ d.totalSubastado | number:'1.2-2' }}</strong>
+
+        <small>Resultado adjudicado</small>
+      </article>
+
+      <article
+        class="summary-card"
+        [class.summary-card-positive]="d.totalAhorrado > 0"
+        [class.summary-card-neutral]="d.totalAhorrado === 0"
+      >
+        <div class="summary-label">
+          <span class="summary-dot dot-lime"></span>
+          Ahorrado
+        </div>
+
+        <strong>{{ d.totalAhorrado | number:'1.2-2' }}</strong>
+
+        <small>Diferencia obtenida</small>
+      </article>
+
+      <article
+        class="summary-card"
+        [class.summary-card-positive]="d.porcentajeAhorro > 0"
+        [class.summary-card-neutral]="d.porcentajeAhorro === 0"
+      >
+        <div class="summary-label">
+          <span class="summary-dot dot-lime"></span>
+          % Ahorro
+        </div>
+
+        <strong>{{ d.porcentajeAhorro | number:'1.2-2' }}%</strong>
+
+        <small>Sobre presupuestado</small>
+      </article>
+    </section>
+
+    <section class="insight-card">
+      <header class="section-head">
+        <div>
+          <h2>Comparativo por cotizaci&oacute;n</h2>
+
+          <p>
+            Vista comparativa de importes presupuestados, subastados y ahorro calculado.
+          </p>
+        </div>
+
+        <div class="section-meta">
+          <span>Top {{ chartItemsCount() }}</span>
+        </div>
+      </header>
+
+      @if (chartReady()) {
+        <div class="chart-wrap">
+          <apx-chart
+            [series]="chartOptions.series"
+            [chart]="chartOptions.chart"
+            [xaxis]="chartOptions.xaxis"
+            [yaxis]="chartOptions.yaxis"
+            [dataLabels]="chartOptions.dataLabels"
+            [fill]="chartOptions.fill"
+            [tooltip]="chartOptions.tooltip"
+            [theme]="chartOptions.theme"
+            [plotOptions]="chartOptions.plotOptions"
+            [legend]="chartOptions.legend"
+            [grid]="chartOptions.grid"
+            [colors]="chartOptions.colors"
+          />
+        </div>
+      } @else {
+        <div class="empty-chart">
+          No hay suficientes datos para graficar.
+        </div>
+      }
+    </section>
+
+    <section class="context-strip">
+      <div class="context-item">
+        <span class="context-value">{{ d.cantidadCotizaciones }}</span>
+        <span class="context-label">cotizaciones</span>
+      </div>
+
+      <div class="context-separator"></div>
+
+      <div class="context-item">
+        <span class="context-value">{{ d.cantidadFilas }}</span>
+        <span class="context-label">{{ criterio() === 0 ? '&iacute;tems' : 'renglones' }}</span>
+      </div>
+
+      <div class="context-separator"></div>
+
+      <div class="context-item context-grow">
+        <span class="context-label">criterio</span>
+        <span class="context-chip">{{ d.criterio }}</span>
+      </div>
+    </section>
+
+    <app-pivot-table [data]="pivotData" />
+  }
+</div>

@@ -1,19 +1,20 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
-import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
 import { UnidadAdministrativaService, UnidadAdministrativaRequest } from '../../../core/services/unidad-administrativa.service';
 import { UnidadAdministrativa } from '../../../core/models/unidad-administrativa.model';
 import { VigenciaService } from '../../../core/services/vigencia.service';
 import { Vigencia } from '../../../core/models/vigencia.model';
 import { OrganizationService, Organization } from '../../../core/services/organization.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 
 @Component({
   selector: 'app-unidades-administrativas',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective],
+  imports: [FormsModule, LucideAngularModule, SmartTableComponent, CustomSelect],
   templateUrl: './unidades-administrativas.component.html',
 })
 export class UnidadesAdministrativasComponent implements OnInit {
@@ -36,20 +37,43 @@ export class UnidadesAdministrativasComponent implements OnInit {
   editingId = signal<number | null>(null);
   form: UnidadAdministrativaRequest = this.getEmptyForm();
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach(d => { map[d.cellKey] = d.templateRef; });
-    return map;
+  numeroUnidadAdmTpl = viewChild<TemplateRef<any>>('numeroUnidadAdmTpl');
+  organizacionNombreTpl = viewChild<TemplateRef<any>>('organizacionNombreTpl');
+  mailTpl = viewChild<TemplateRef<any>>('mailTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const numeroUnidadAdm = this.numeroUnidadAdmTpl();
+    const organizacionNombre = this.organizacionNombreTpl();
+    const mail = this.mailTpl();
+    const acciones = this.accionesTpl();
+
+    if (numeroUnidadAdm) templates['numeroUnidadAdm'] = numeroUnidadAdm;
+    if (organizacionNombre) templates['organizacionNombre'] = organizacionNombre;
+    if (mail) templates['mail'] = mail;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
   });
 
   columns: TableColumn[] = [
-    { key: 'numeroUnidadAdm', label: 'Nro', width: '100px' },
-    { key: 'nombreUnidadAdm', label: 'Nombre / Descripción' },
-    { key: 'organizacionNombre', label: 'Organización' },
-    { key: 'mail', label: 'Email' },
-    { key: 'acciones', label: 'Acciones', align: 'right', width: '120px' },
+    { key: 'numeroUnidadAdm', header: 'Nro', type: 'custom', sortable: true },
+    { key: 'nombreUnidadAdm', header: 'Nombre / Descripción', sortable: true },
+    { key: 'organizacionNombre', header: 'Organización', type: 'custom', sortable: true },
+    { key: 'mail', header: 'Email', type: 'custom' },
+    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
+
+  vigenciaOptions = computed<SelectOption[]>(() => this.vigencias().map(v => ({
+    label: `Ejercicio ${v.ejercicio}${v.activoEjecucion ? ' (Activo)' : ''}`,
+    value: v.idVigencia
+  })));
+
+  organizacionOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguna / Global', value: undefined },
+    ...this.organizaciones().map(org => ({ label: org.nombre, value: org.idOrganizacion }))
+  ]);
 
   ngOnInit() { this.loadVigencias(); this.loadOrganizaciones(); }
 
@@ -75,7 +99,7 @@ export class UnidadesAdministrativasComponent implements OnInit {
     });
   }
 
-  onVigenciaChange(event: any) { this.selectedVigenciaId.set(Number(event.target.value)); this.loadUnidades(); }
+  onVigenciaChange(value: any) { this.selectedVigenciaId.set(Number(value)); this.loadUnidades(); }
 
   loadUnidades() {
     const vigenciaId = this.selectedVigenciaId(); if (!vigenciaId) return;

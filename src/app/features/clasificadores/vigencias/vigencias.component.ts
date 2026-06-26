@@ -1,16 +1,16 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
-import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
 import { VigenciaService, VigenciaRequest } from '../../../core/services/vigencia.service';
 import { Vigencia } from '../../../core/models/vigencia.model';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-vigencias',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective],
+  imports: [DatePipe, FormsModule, LucideAngularModule, SmartTableComponent],
   templateUrl: './vigencias.component.html',
 })
 export class VigenciasComponent implements OnInit {
@@ -28,23 +28,33 @@ export class VigenciasComponent implements OnInit {
 
   form: VigenciaRequest = { ejercicio: new Date().getFullYear(), activoEjecucion: false };
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach(d => { map[d.cellKey] = d.templateRef; });
-    return map;
+  activoEjecucionTpl = viewChild<TemplateRef<any>>('activoEjecucionTpl');
+  fecIngTpl = viewChild<TemplateRef<any>>('fecIngTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const activoEjecucion = this.activoEjecucionTpl();
+    const fecIng = this.fecIngTpl();
+    const acciones = this.accionesTpl();
+
+    if (activoEjecucion) templates['activoEjecucion'] = activoEjecucion;
+    if (fecIng) templates['fecIng'] = fecIng;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
   });
 
   columns: TableColumn[] = [
-    { key: 'ejercicio', label: 'Ejercicio' },
-    { key: 'activoEjecucion', label: 'Activo' },
-    { key: 'fecIng', label: 'Creado' },
-    { key: 'acciones', label: 'Acciones', align: 'right', width: '120px' },
+    { key: 'ejercicio', header: 'Ejercicio', sortable: true },
+    { key: 'activoEjecucion', header: 'Activo', type: 'custom' },
+    { key: 'fecIng', header: 'Creado', type: 'custom', sortable: true },
+    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
 
   ngOnInit() { this.loadVigencias(); }
 
-  vigenciaOrdenada = computed(() => this.vigencias().sort((a, b) => b.ejercicio - a.ejercicio));
+  vigenciaOrdenada = computed(() => [...this.vigencias()].sort((a, b) => b.ejercicio - a.ejercicio));
 
   loadVigencias() {
     this.isLoading.set(true);

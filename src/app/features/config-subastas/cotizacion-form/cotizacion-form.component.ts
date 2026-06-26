@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -9,11 +9,12 @@ import { OrganizationService, Organization } from '../../../core/services/organi
 import { AuthService } from '../../../core/services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 
 @Component({
   selector: 'app-cotizacion-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, CustomSelect],
   templateUrl: './cotizacion-form.component.html',
 })
 export class CotizacionFormComponent implements OnInit {
@@ -42,10 +43,26 @@ export class CotizacionFormComponent implements OnInit {
       fechaLimiteConsultas: '',
       margenMejora: 5,
       criterioAdjudicacion: 0,
-      permiteProrroga: false
+      permiteProrroga: false,
+      gestionDocumentacion: false
     },
     detalles: [] as any[]
   };
+
+  vigenciaOptions = computed<SelectOption[]>(() => this.vigencias().map(v => ({
+    label: `Ejercicio ${v.ejercicio}${v.activoEjecucion ? ' (Activo)' : ''}`,
+    value: v.idVigencia
+  })));
+
+  tipoOptions: SelectOption[] = [
+    { label: 'Subasta Inversa', value: 7 },
+    { label: 'Subasta Directa', value: 9 },
+  ];
+
+  organizacionOptions = computed<SelectOption[]>(() => [
+    { label: 'Global', value: undefined },
+    ...this.organizaciones().map(o => ({ label: o.nombre, value: o.idOrganizacion }))
+  ]);
 
   ngOnInit() {
     this.vigService.getAll().subscribe({ next: (r: any) => { if (r?.success) { const s = r.data.sort((a: any, b: any) => b.ejercicio - a.ejercicio); this.vigencias.set(s); const a = s.find((v: any) => v.activoEjecucion); if (a) { this.form.idVigencia = a.idVigencia; this.loadReservas(); } } } });
@@ -53,6 +70,13 @@ export class CotizacionFormComponent implements OnInit {
   }
 
   onVigenciaChange(v: any) { this.form.idVigencia = +v; this.loadReservas(); }
+
+  onTipoContratacionChange(value: any) {
+    this.form.idTipoContratacion = Number(value);
+    if (this.form.idTipoContratacion === 8) {
+      this.form.especificacion.gestionDocumentacion = true;
+    }
+  }
 
   loadReservas() {
     if (!this.form.idVigencia) return;

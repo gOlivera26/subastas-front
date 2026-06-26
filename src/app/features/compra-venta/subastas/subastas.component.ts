@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -11,14 +11,18 @@ import { TimeService } from '../../../core/services/time.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 import { ConsultaService } from '../../../core/services/consulta.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ReporteService } from '../../../core/services/reporte.service';
 import { Modal } from '../../../shared/ui/modal/modal';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmationModal } from '../../../shared/ui/confirmation-modal/confirmation-modal';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 
 @Component({
   selector: 'app-subastas',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, Modal, LoadingSpinnerComponent, ConfirmationModal],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, Modal, LoadingSpinnerComponent, ConfirmationModal, SmartTableComponent, CustomSelect],
   templateUrl: './subastas.component.html',
 })
 export class SubastasComponent implements OnInit {
@@ -32,6 +36,7 @@ export class SubastasComponent implements OnInit {
   private signalR = inject(SignalRService);
   private consultaService = inject(ConsultaService);
   private notify = inject(NotificationService);
+  private reporteService = inject(ReporteService);
 
   vigencias = signal<Vigencia[]>([]);
   filtros = {
@@ -44,6 +49,49 @@ export class SubastasComponent implements OnInit {
 
   listado = signal<SubastaDashboard[]>([]);
   loading = signal(false);
+
+  objetoTpl = viewChild<TemplateRef<any>>('objetoTpl');
+  criterioTpl = viewChild<TemplateRef<any>>('criterioTpl');
+  fechasTpl = viewChild<TemplateRef<any>>('fechasTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const objeto = this.objetoTpl();
+    const criterio = this.criterioTpl();
+    const fechas = this.fechasTpl();
+    const acciones = this.accionesTpl();
+
+    if (objeto) templates['objeto'] = objeto;
+    if (criterio) templates['criterioAdjudicacion'] = criterio;
+    if (fechas) templates['fechas'] = fechas;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
+  });
+
+  columns: TableColumn[] = [
+    { header: 'Número', key: 'nroCotizacion', sortable: true },
+    { header: 'Área', key: 'unidadAdm', sortable: true },
+    { header: 'Objeto Contratación', key: 'objeto', type: 'custom', searchFields: ['objetoContratacion', 'titulo'] },
+    { header: 'Tipo', key: 'tipoContratacion', sortable: true },
+    { header: 'Adjudicación', key: 'criterioAdjudicacion', type: 'custom' },
+    { header: 'Fechas', key: 'fechas', type: 'custom' },
+    { header: 'Acciones', key: 'acciones', type: 'custom' }
+  ];
+
+  vigenciaOptions = computed<SelectOption[]>(() => [
+    { label: 'Todos', value: null },
+    ...this.vigencias().map(v => ({ label: String(v.ejercicio), value: v.idVigencia }))
+  ]);
+
+  dictamenTipoOptions: SelectOption[] = [
+    { label: '-- Seleccionar Tipo --', value: '' },
+    { label: 'Pliego', value: 'S/D' },
+    { label: 'Dictamen', value: 'DIC' },
+    { label: 'Informe', value: 'ANX' },
+    { label: 'Otro', value: 'OTR' },
+  ];
 
   TIPO_INVERSA = 7;
   TIPO_LICITACION = 8;
@@ -192,6 +240,12 @@ export class SubastasComponent implements OnInit {
   // ==========================================
   // LOGICA DEL FORO DE CONSULTAS Y ACLARACIONES
   // ==========================================
+  abrirActaPrelacion(item: SubastaDashboard) {
+    this.reporteService.descargarActaPrelacion(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el informe final de subasta.')
+    });
+  }
   async abrirModalConsultas(idCotizacion: number) {
     this.activeCotizacionId.set(idCotizacion);
     this.isConsultasModalOpen.set(true);

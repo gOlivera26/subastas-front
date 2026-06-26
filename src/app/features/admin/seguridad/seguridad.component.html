@@ -14,7 +14,7 @@
   <!-- TABS -->
   <div class="flex gap-1 mb-6 rounded-xl bg-[var(--color-graphite)]/50 p-1 w-fit">
     <button (click)="activeTab.set('roles')" class="px-5 py-2 rounded-lg text-[13px] font-[590] transition-all"
-            [ngClass]="activeTab() === 'roles' ? 'bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'">Roles y Módulos</button>
+            [ngClass]="activeTab() === 'roles' ? 'bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'">Roles y módulos</button>
     <button (click)="activeTab.set('usuarios')" class="px-5 py-2 rounded-lg text-[13px] font-[590] transition-all"
             [ngClass]="activeTab() === 'usuarios' ? 'bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'">Usuarios x Organización</button>
   </div>
@@ -31,14 +31,22 @@
         @if (isLoading()) {
           <div class="flex items-center justify-center py-20 text-[13px] text-[var(--color-storm-cloud)]"><lucide-icon name="loader-2" [size]="20" class="animate-spin mr-3"></lucide-icon>Cargando...</div>
         } @else {
-      <ng-template cellKey="acciones" let-row>
+      <ng-template #accionesTpl let-row>
         <div class="flex justify-end gap-1">
           <button (click)="openPagesModal(row)" title="Gestionar Páginas" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
           <button (click)="openEditRole(row)" title="Editar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
           <button (click)="deleteRole(row)" title="Eliminar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-red-400"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
         </div>
       </ng-template>
-      <app-data-table [columns]="columns" [data]="roles()" [totalRows]="roles().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" emptyMessage="No hay roles registrados" emptySubMessage="Creá el primero para comenzar."></app-data-table>
+      <app-smart-table
+          [columns]="columns"
+          [data]="roles()"
+          [customTemplates]="customTemplates()"
+          [loading]="isLoading()"
+          [pageSize]="999"
+          emptyMessage="No hay roles registrados"
+          emptySubMessage="Creá el primero para comenzar.">
+        </app-smart-table>
         }
       </div>
     </div>
@@ -89,7 +97,7 @@
         <button (click)="isPagesModalOpen.set(false)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button>
       </div>
       <div class="overflow-y-auto p-6 space-y-6 flex-1">
-        <p class="text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)] mb-3">Módulos y Páginas</p>
+        <p class="text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)] mb-3">módulos y Páginas</p>
         @for (mcp of modulosConPaginas(); track mcp.idModulo) {
           <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/20 p-4">
             <div class="flex items-center justify-between mb-2">
@@ -136,21 +144,11 @@
       <div class="space-y-4 px-6 py-6">
         <div>
           <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Usuario</label>
-          <select [(ngModel)]="linkForm.idUsuario" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]">
-            <option value="">Seleccionar usuario...</option>
-            @for (u of activeUsers(); track u.idUsuario) {
-              <option [value]="u.idUsuario">{{ u.nombreCompleto }} — {{ u.email }}</option>
-            }
-          </select>
+          <app-custom-select placeholder="Seleccionar usuario..." [options]="linkUserOptions()" [(value)]="linkForm.idUsuario"></app-custom-select>
         </div>
         <div>
           <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Organización</label>
-          <select [(ngModel)]="linkForm.idOrganizacion" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]">
-            <option [value]="0">Seleccionar organización...</option>
-            @for (org of organizations(); track org.idOrganizacion) {
-              <option [value]="org.idOrganizacion">{{ org.nombre }}</option>
-            }
-          </select>
+          <app-custom-select placeholder="Seleccionar organización..." [options]="linkOrganizationOptions()" [(value)]="linkForm.idOrganizacion"></app-custom-select>
         </div>
       </div>
       <div class="flex justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4">

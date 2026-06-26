@@ -40,24 +40,16 @@
       </span>
     </div>
 
-    <app-data-table
-      [columns]="columns"
-      [data]="pendingUsers()"
-      [loading]="isLoading()"
-      [cellTemplates]="cellTemplatesMap()"
-      emptyMessage="Todo al día"
-      emptySubMessage="No hay usuarios pendientes de aprobación en este momento.">
-
-      <ng-template cellKey="nombreCompleto" let-row>
+    <ng-template #nombreCompletoTpl let-row>
         <p class="font-[590] text-[var(--color-porcelain)]">{{ row.nombreCompleto }}</p>
         <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5">{{ row.email }}</p>
       </ng-template>
 
-      <ng-template cellKey="documento" let-row>
+      <ng-template #documentoTpl let-row>
         <span class="text-[var(--color-fog-grey)] font-mono text-[13px]">{{ row.documento }}</span>
       </ng-template>
 
-      <ng-template cellKey="tipoUsuario" let-row>
+      <ng-template #tipoUsuarioTpl let-row>
         <div class="flex items-center gap-2 mb-1">
           <span [class]="row.tipoUsuario === 'Proveedor Directo' ? 'text-[var(--color-neon-lime)] bg-[var(--color-neon-lime)]/10' : 'text-[var(--color-cyan-spark)] bg-[var(--color-cyan-spark)]/10'" 
                 class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
@@ -69,11 +61,11 @@
         </p>
       </ng-template>
 
-      <ng-template cellKey="fechaRegistro" let-row>
+      <ng-template #fechaRegistroTpl let-row>
         <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span>
       </ng-template>
 
-      <ng-template cellKey="acciones" let-row>
+      <ng-template #accionesTpl let-row>
         <button 
           (click)="openApproveModal(row.idUsuario, row.nombreCompleto)"
           [disabled]="processingId() === row.idUsuario"
@@ -86,7 +78,16 @@
           }
         </button>
       </ng-template>
-    </app-data-table>
+
+    <app-smart-table
+      [columns]="columns"
+      [data]="pendingUsers()"
+      [customTemplates]="customTemplates()"
+      [loading]="isLoading()"
+      [pageSize]="999"
+      emptyMessage="Todo al día"
+      emptySubMessage="No hay usuarios pendientes de aprobación en este momento.">
+    </app-smart-table>
 
   </div>
 </div>

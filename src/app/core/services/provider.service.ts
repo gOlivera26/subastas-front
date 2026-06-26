@@ -91,6 +91,15 @@ export interface RubroSearchResultDto {
   level: number;
 }
 
+export interface RubroBulkUploadResultDto {
+  procesados: number;
+  creados: number;
+  actualizados: number;
+  omitidos: number;
+  relacionesActualizadas: number;
+  errores: string[];
+}
+
 export interface ProviderRubroDto {
   idRubro: number;
   codigo: string;
@@ -259,6 +268,12 @@ export class ProviderService {
 
   deleteRubro(id: number): Observable<OperationResponse<boolean>> {
     return this.http.delete<OperationResponse<boolean>>(`${this.rubroUrl}/${id}`);
+  }
+
+  bulkUploadRubros(file: File): Observable<OperationResponse<RubroBulkUploadResultDto>> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.http.post<OperationResponse<RubroBulkUploadResultDto>>(`${this.rubroUrl}/bulk-upload`, formData);
   }
 
   getRubroTree(): Observable<OperationResponse<RubroTreeDto[]>> {

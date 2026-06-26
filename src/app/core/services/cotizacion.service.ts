@@ -23,6 +23,7 @@ export interface SubastaDashboard {
   fechaFinSubasta?: string;
   verInformeFinal?: boolean;
   mostrarBotonMejora?: boolean;
+  gestionDocumentacion?: boolean;
   tipoSobre?: string;
   fechaLimiteImpugnar?: string;
   fechaAperturaSobreUno?: string;
@@ -47,6 +48,7 @@ export interface CotizacionResponse {
     permiteProrroga?: boolean;
     prorrogaMinutos?: number;
     redeterminacion?: string;
+    gestionDocumentacion?: boolean;
   };
   detalles: any[];
   renglones: any[];

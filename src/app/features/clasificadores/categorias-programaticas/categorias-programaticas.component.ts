@@ -11,10 +11,11 @@ import { UnidadAdministrativaService } from '../../../core/services/unidad-admin
 import { UnidadAdministrativa } from '../../../core/models/unidad-administrativa.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 
 @Component({
   selector: 'app-categorias-programaticas', standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, LoadingSpinnerComponent, CustomSelect],
   templateUrl: './categorias-programaticas.component.html',
 })
 export class CategoriasProgramaticasComponent implements OnInit {
@@ -53,6 +54,36 @@ export class CategoriasProgramaticasComponent implements OnInit {
     if (!term) return this.treeNodes();
     return this.filterNodes(this.treeNodes(), term);
   });
+
+  vigenciaOptions = computed<SelectOption[]>(() => this.vigencias().map(v => ({
+    label: `Ejercicio ${v.ejercicio}${v.activoEjecucion ? ' (Activo)' : ''}`,
+    value: v.idVigencia
+  })));
+
+  parentOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguno (raíz)', value: undefined },
+    ...this.parentList().map(p => ({ label: `${p.codigo} - ${p.nombre}`, value: p.idCatProg }))
+  ]);
+
+  organizacionOptions = computed<SelectOption[]>(() => [
+    { label: 'Global', value: undefined },
+    ...this.organizaciones().map(o => ({ label: o.nombre, value: o.idOrganizacion }))
+  ]);
+
+  unidadAdmOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguna', value: undefined },
+    ...this.unidadesAdm().map(ua => ({ label: ua.nombreUnidadAdm, value: ua.idUnidadAdm }))
+  ]);
+
+  naturalezaOptions: SelectOption[] = [
+    { label: 'Ninguna', value: '' },
+    { label: 'AC', value: 'AC' },
+    { label: 'CO', value: 'CO' },
+    { label: 'PR', value: 'PR' },
+    { label: 'SP', value: 'SP' },
+    { label: 'OB', value: 'OB' },
+    { label: 'IN', value: 'IN' },
+  ];
 
   ngOnInit() { this.loadVigencias(); this.loadOrganizaciones(); }
   getEmptyForm(): CategoriaProgramaticaRequest { return { idVigencia: this.selectedVigenciaId() || 0, codigo: 0, nombre: '', idCatProgRel: undefined, idOrganizacion: undefined, idUnidadAdm: undefined, naturaleza: '' }; }
@@ -104,8 +135,8 @@ export class CategoriasProgramaticasComponent implements OnInit {
   loadOrganizaciones() { this.orgService.getActiveOrganizations().subscribe({ next: (res: any) => { if (res.success && res.data) this.organizaciones.set(res.data); } }); }
   loadUnidades() { const id = this.selectedVigenciaId(); if (!id) return; this.uaService.getByVigencia(id).subscribe({ next: (res: any) => { if (res.success && res.data) this.unidadesAdm.set(res.data); } }); }
 
-  onVigenciaChange(e: any) {
-    this.selectedVigenciaId.set(Number(e.target.value));
+  onVigenciaChange(value: any) {
+    this.selectedVigenciaId.set(Number(value));
     this.expandedNodes.set(new Set());
     this.searchTerm.set('');
     this.loadItems();

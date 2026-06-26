@@ -8,6 +8,7 @@ import { VigenciaService } from '../../../core/services/vigencia.service';
 import { UnidadAdministrativaService } from '../../../core/services/unidad-administrativa.service';
 import { SubResponsableService } from '../../../core/services/sub-responsable.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ReporteService } from '../../../core/services/reporte.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 import { Modal } from '../../../shared/ui/modal/modal';
@@ -50,6 +51,7 @@ export class SubastaComponent implements OnInit {
   private subRespService = inject(SubResponsableService);
   private http = inject(HttpClient);
   private notify = inject(NotificationService);
+  private reporteService = inject(ReporteService);
   public auth = inject(AuthService);
   private timeService = inject(TimeService);
   signalR = inject(SignalRService);
@@ -90,6 +92,17 @@ export class SubastaComponent implements OnInit {
     { label: 'Finalizada', value: 40 },
     { label: 'Anulada', value: 20 },
     { label: 'Desistida', value: 47 }
+  ];
+  tipoContratacionOptions: SelectOption[] = [
+    { label: 'Subasta Electronica Inversa', value: 7 },
+  ];
+
+  dictamenTipoOptions: SelectOption[] = [
+    { label: '-- Seleccionar Tipo --', value: '' },
+    { label: 'Pliego', value: 'S/D' },
+    { label: 'Dictamen', value: 'DIC' },
+    { label: 'Informe', value: 'ANX' },
+    { label: 'Otro', value: 'OTR' },
   ];
 
   showCrear = signal(false); pasoCrear = signal(1);
@@ -177,6 +190,56 @@ export class SubastaComponent implements OnInit {
     this.loadOficinas();
     this.timeService.syncWithServer();
     this.buscar();
+  }
+
+
+  abrirActaPrelacion(item: any) {
+    this.reporteService.descargarActaPrelacion(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el informe final de subasta.')
+    });
+  }
+
+  abrirDetalleSubasta(item: any) {
+    this.reporteService.descargarDetalleSubasta(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el detalle de subasta.')
+    });
+  }
+
+  abrirProveedoresInvitados(item: any) {
+    this.reporteService.descargarProveedoresInvitados(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el listado de proveedores invitados.')
+    });
+  }
+
+  abrirPreguntasRespuestas(item: any) {
+    this.reporteService.descargarPreguntasRespuestas(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el reporte de preguntas y respuestas.')
+    });
+  }
+
+  abrirDesistimiento(item: any) {
+    this.reporteService.descargarDesistimiento(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar la constancia de desistimiento.')
+    });
+  }
+
+  abrirObservacionesProveedores(item: any) {
+    this.reporteService.descargarObservacionesProveedores(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el reporte de observaciones de proveedores.')
+    });
+  }
+
+  abrirAuditoriaSubasta(item: any) {
+    this.reporteService.descargarAuditoriaSubasta(item.idCotizacion).subscribe({
+      next: (blob) => this.reporteService.abrirPdf(blob),
+      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el reporte de auditoría de subasta.')
+    });
   }
 
   loadVigencias() {
@@ -535,7 +598,8 @@ getRenglonOfItem(itemId: number): string {
 
   showProveedores = signal(false); provItem = signal<any>(null); provList = signal<any[]>([]);
   provSearchTerm = signal(''); provSearchResults = signal<any[]>([]);
-  loadingProv = signal(false); savingProv = signal(false);
+  provRubrosTree = signal<any[]>([]); provRubroId = signal<number | null>(null); provRubroResults = signal<any[]>([]);
+  loadingProv = signal(false); loadingProvRubro = signal(false); savingProv = signal(false); savingProvRubro = signal(false);
 
   provSearchFiltered = computed(() => {
     const idsAsignados = new Set(this.provList().map((p: any) => p.idProveedor));
@@ -545,7 +609,27 @@ getRenglonOfItem(itemId: number): string {
     });
   });
 
-  openProveedores(item: any) { this.provItem.set(item); this.showProveedores.set(true); this.provSearchTerm.set(''); this.provSearchResults.set([]); this.cargarProveedoresAsignados(); this.buscarProveedores(); }
+  provRubroFiltered = computed(() => {
+    const idsAsignados = new Set(this.provList().map((p: any) => p.idProveedor));
+    return this.provRubroResults().filter((p: any) => !idsAsignados.has(p.idProveedor || p.id));
+  });
+
+  provRubroOptions = computed<SelectOption[]>(() => [
+    { label: 'Seleccionar rubro...', value: null },
+    ...this.flattenRubros(this.provRubrosTree()).map((r: any) => ({ label: r.label, value: r.id }))
+  ]);
+
+  openProveedores(item: any) {
+    this.provItem.set(item);
+    this.showProveedores.set(true);
+    this.provSearchTerm.set('');
+    this.provSearchResults.set([]);
+    this.provRubroId.set(null);
+    this.provRubroResults.set([]);
+    this.cargarProveedoresAsignados();
+    this.buscarProveedores();
+    this.cargarRubrosParaInvitar();
+  }
   closeProveedores() { this.showProveedores.set(false); }
 
   cargarProveedoresAsignados() {
@@ -582,6 +666,66 @@ getRenglonOfItem(itemId: number): string {
       next: (r: any) => { this.loadingProv.set(false); const items = r?.data?.data || r?.data || []; this.provSearchResults.set(Array.isArray(items) ? items : []); },
       error: () => this.loadingProv.set(false)
     });
+  }
+
+  cargarRubrosParaInvitar() {
+    if (this.provRubrosTree().length > 0) return;
+    this.http.get<any>(`${this.api}/Rubro/tree`).subscribe({
+      next: (r: any) => { if (r?.success && Array.isArray(r.data)) this.provRubrosTree.set(r.data); },
+      error: () => this.provRubrosTree.set([])
+    });
+  }
+
+  buscarProveedoresPorRubro() {
+    const rubroId = this.provRubroId();
+    this.provRubroResults.set([]);
+    if (!rubroId) return;
+
+    this.loadingProvRubro.set(true);
+    this.http.get<any>(`${this.api}/Provider/by-rubro/${rubroId}?includeChildren=true`).subscribe({
+      next: (r: any) => {
+        this.loadingProvRubro.set(false);
+        const items = r?.data || [];
+        this.provRubroResults.set(Array.isArray(items) ? items : []);
+      },
+      error: () => {
+        this.loadingProvRubro.set(false);
+        this.provRubroResults.set([]);
+      }
+    });
+  }
+
+  agregarProveedoresPorRubro() {
+    const candidatos = this.provRubroFiltered();
+    if (candidatos.length === 0) return;
+
+    this.savingProvRubro.set(true);
+    const requests = candidatos.map((p: any) =>
+      this.http.post(`${this.api}/Cotizacion/${this.provItem().idCotizacion}/Proveedor`, { idProveedor: p.idProveedor || p.id })
+    );
+
+    forkJoin(requests).subscribe({
+      next: () => {
+        this.savingProvRubro.set(false);
+        this.provRubroResults.set([]);
+        this.cargarProveedoresAsignados();
+        this.notify.showSuccess(candidatos.length + ' proveedor' + (candidatos.length === 1 ? '' : 'es') + ' agregado' + (candidatos.length === 1 ? '' : 's') + ' por rubro.');
+      },
+      error: (e: any) => {
+        this.savingProvRubro.set(false);
+        this.cargarProveedoresAsignados();
+        this.notify.showWarning(e.error?.message || 'No se pudieron agregar todos los proveedores del rubro.');
+      }
+    });
+  }
+
+  flattenRubros(nodes: any[], level = 0): any[] {
+    const result: any[] = [];
+    for (const node of nodes || []) {
+      result.push({ id: node.id, codigo: node.codigo, descripcion: node.descripcion, label: '  '.repeat(level) + node.codigo + ' - ' + node.descripcion });
+      result.push(...this.flattenRubros(node.children || [], level + 1));
+    }
+    return result;
   }
 
   agregarProveedor(p: any) {
@@ -1156,3 +1300,5 @@ public chartOptionsAhorro: Partial<DonutChartOptions> = {
     }
   }
 }
+
+

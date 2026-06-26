@@ -39,6 +39,11 @@
     <div class="flex items-center gap-1.5 justify-end">
       
       <button (click)="openDetalle(row)" title="Ver Detalle" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="eye" [size]="16"></lucide-icon></button>
+      @if (row.idEstado === 40) {
+        <button (click)="abrirDetalleSubasta(row)" title="Reporte detalle de subasta" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
+        <button (click)="abrirProveedoresInvitados(row)" title="Listado de proveedores invitados" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="users" [size]="16"></lucide-icon></button>
+        <button (click)="abrirAuditoriaSubasta(row)" title="Reporte de auditoría de subasta" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="clipboard-list" [size]="16"></lucide-icon></button>
+      }
 
       @if (row.idEstado === 4 || row.idEstado === 39 || row.idEstado === 40) {
         <button (click)="openDictamen(row)" title="Pliegos" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
@@ -46,6 +51,9 @@
 
       @if ((row.idEstado === 4 || row.idEstado === 39 || row.idEstado === 40) && auth.isSuperAdmin()) {
         <button (click)="openPreguntas(row)" title="Mensajes y Aclaraciones" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="help-circle" [size]="16"></lucide-icon></button>
+        @if (row.idEstado === 40) {
+          <button (click)="abrirPreguntasRespuestas(row)" title="Reporte preguntas y respuestas" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="message-square" [size]="16"></lucide-icon></button>
+        }
       }
 
       @if (row.idEstado === 4 && auth.isSuperAdmin()) {
@@ -78,13 +86,23 @@
         </button>
       }
 
+      @if (row.idEstado === 47) {
+        <button (click)="abrirDesistimiento(row)" title="Constancia de desistimiento" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="file-x" [size]="16"></lucide-icon></button>
+      }
+
       @if (row.idEstado === 40 && row.idTipoContratacion !== TIPO_DIRECTA) {
+        <button (click)="abrirActaPrelacion(row)" title="Informe final de subasta" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-emerald-400 hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-badge" [size]="16"></lucide-icon></button>
         <button (click)="openGraficos(row)" title="Ver Gráficos" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="pie-chart" [size]="16"></lucide-icon></button>
+        @if (row.idTipoContratacion === TIPO_LICITACION || row.gestionDocumentacion) {
         <button (click)="openVerDocProveedor(row)" title="Ver Documentación de Proveedores" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="folder-open" [size]="16"></lucide-icon></button>
+        }
       }
 
       @if ((row.idTipoContratacion === TIPO_LICITACION || row.idTipoContratacion === TIPO_COMPULSA) && auth.isSuperAdmin()) {
         <button (click)="openObservaciones(row, 'TECNICA')" title="Observación Técnica" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="message-circle" [size]="16"></lucide-icon></button>
+        @if (row.idEstado === 40) {
+          <button (click)="abrirObservacionesProveedores(row)" title="Reporte observaciones de proveedores" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
+        }
         
         @if (row.tipoSobre === 'D') {
           <button (click)="openObservaciones(row, 'ECONOMICA')" title="Observación Económica" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="message-square" [size]="16"></lucide-icon></button>
@@ -388,12 +406,7 @@
           
           <div>
             <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Tipo de Contratación</label>
-            <select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none" [(ngModel)]="tipoContratacion">
-              <option [value]="7">Subasta Electrónica Inversa</option>
-              <!-- <option [value]="9">Subasta Electrónica Directa</option>
-              <option [value]="13">Subasta Inversa Monto Fijo</option>
-              <option [value]="15">Subasta Inversa SEEC</option> -->
-            </select>
+            <app-custom-select placeholder="Tipo de contratación" [options]="tipoContratacionOptions" [value]="tipoContratacion()" (valueChange)="tipoContratacion.set($event)"></app-custom-select>
           </div>
           
           <div>
@@ -585,6 +598,27 @@
       <p class="text-[13px] text-[var(--color-storm-cloud)] text-center py-2">{{ provSearchTerm() ? 'Sin resultados.' : (isDirectaProv ? 'No hay oferentes disponibles.' : 'No hay proveedores disponibles.') }}</p>
     }
     @if (loadingProv() && provSearchFiltered().length === 0) {<app-loading-spinner label="Buscando..."></app-loading-spinner>}
+
+    <div class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/40 p-3">
+      <div class="mb-2 flex items-center gap-2 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
+        <lucide-icon name="tags" [size]="14"></lucide-icon>
+        Invitar por rubro
+      </div>
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <app-custom-select class="min-w-0 flex-1" placeholder="Seleccionar rubro..." [options]="provRubroOptions()" [value]="provRubroId()" (valueChange)="provRubroId.set($event); buscarProveedoresPorRubro()"></app-custom-select>
+        <button (click)="agregarProveedoresPorRubro()" [disabled]="provRubroFiltered().length === 0 || savingProvRubro()" class="rounded-xl bg-[var(--color-cyan-spark)] px-4 py-2.5 text-[12px] font-[590] text-black transition-all hover:brightness-110 disabled:opacity-50">
+          @if (savingProvRubro()) { Agregando... } @else { Agregar {{ provRubroFiltered().length }} }
+        </button>
+      </div>
+      @if (loadingProvRubro()) {
+        <p class="mt-2 text-[12px] text-[var(--color-storm-cloud)]">Buscando proveedores del rubro...</p>
+      } @else if (provRubroId() && provRubroFiltered().length === 0) {
+        <p class="mt-2 text-[12px] text-[var(--color-storm-cloud)]">No hay proveedores disponibles para ese rubro o ya están asignados.</p>
+      } @else if (provRubroFiltered().length > 0) {
+        <p class="mt-2 text-[12px] text-[var(--color-storm-cloud)]">{{ provRubroFiltered().length }} proveedor(es) disponible(s) para agregar.</p>
+      }
+    </div>
+
     <div class="border-t border-[var(--color-charcoal-grey)] pt-3">
       <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)] mb-2">{{ isDirectaProv ? 'Oferentes asignados' : 'Proveedores asignados' }} ({{ provList().length }})</h4>
       @if (provList().length > 0) {
@@ -609,19 +643,7 @@
       <label class="mb-2 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Subir Nuevo Documento Oficial</label>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
-          <select [(ngModel)]="dictamenForm.tipo" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none">
-            <option value="">-- Seleccionar Tipo --</option>
-            <option value="S/D">Pliego</option>
-            <option value="DIC">Dictamen</option>
-            <option value="ANX">Informe</option>
-            <option value="ANT">Informe Técnico / Acta de Evaluación Técnica</option>
-            <option value="INS">Notas Aclaratorias</option>
-            <option value="ACP">Acta de Preadjudicación</option>
-            <option value="ACT">Acta de Adjudicación</option>
-            <option value="ASE">Asesoramiento</option>
-            <option value="RES">Resolución</option>
-            <option value="REF">Resolución Final</option>
-          </select>
+          <app-custom-select placeholder="-- Seleccionar Tipo --" [options]="dictamenTipoOptions" [(value)]="dictamenForm.tipo"></app-custom-select>
         </div>
         <div>
           <input type="file" id="fileDictamen" class="hidden" (change)="onFileDictamenSelected($event)" accept=".pdf,.doc,.docx,.xls,.xlsx">
@@ -1147,3 +1169,6 @@
   (confirm)="confirmDesistir()"
   (cancel)="itemToDesistir.set(null)">
 </app-confirmation-modal>
+
+
+

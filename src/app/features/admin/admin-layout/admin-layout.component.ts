@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgClass } from '@angular/common';
@@ -17,8 +17,8 @@ export class AdminLayoutComponent {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   protected authService = inject(AuthService);
-
-  isSidebarOpen = signal(localStorage.getItem('sidebar-admin') === 'true');
+  private readonly sidebarStorageKey = 'sidebar-admin';
+  isSidebarOpen = signal(this.getInitialSidebarState(false));
   pageTitle = signal('');
   routeState = signal('initial');
   
@@ -42,19 +42,24 @@ export class AdminLayoutComponent {
   }
 
   toggleSidebar() {
-    this.isSidebarOpen.update(v => {
-      localStorage.setItem('sidebar-admin', String(!v));
-      return !v;
-    });
+    const next = !this.isSidebarOpen();
+    this.isSidebarOpen.set(next);
+
+    if (this.isDesktopViewport()) {
+      localStorage.setItem(this.sidebarStorageKey, String(next));
+    }
   }
 
   closeSidebar() {
     this.isSidebarOpen.set(false);
-    localStorage.setItem('sidebar-admin', 'false');
+
+    if (this.isDesktopViewport()) {
+      localStorage.setItem(this.sidebarStorageKey, 'false');
+    }
   }
 
   closeSidebarOnMobile() {
-    if (window.innerWidth < 1024) this.closeSidebar();
+    if (!this.isDesktopViewport()) this.isSidebarOpen.set(false);
   }
 
   toggleUserMenu() {
@@ -75,4 +80,26 @@ export class AdminLayoutComponent {
   logout() {
     this.authService.logout();
   }
+
+  @HostListener('window:resize')
+  onViewportResize() {
+    if (!this.isDesktopViewport()) {
+      this.isSidebarOpen.set(false);
+      return;
+    }
+
+    this.isSidebarOpen.set(this.getInitialSidebarState(false));
+  }
+
+  private getInitialSidebarState(defaultOpen: boolean): boolean {
+    if (!this.isDesktopViewport()) return false;
+
+    const stored = localStorage.getItem(this.sidebarStorageKey);
+    return stored === null ? defaultOpen : stored === 'true';
+  }
+
+  private isDesktopViewport(): boolean {
+    return window.matchMedia('(min-width: 1024px)').matches;
+  }
+
 }

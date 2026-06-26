@@ -1,38 +1,40 @@
 <div class="mx-auto max-w-[1200px]">
   <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div><h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Unidades Administrativas</h1><p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de áreas y oficinas dependientes de una vigencia.</p></div>
-    <div class="flex items-center gap-3">
-      <div class="relative">
-        <select class="appearance-none rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] pl-4 pr-10 py-2 text-[13px] font-[510] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)]/30" [ngModel]="selectedVigenciaId()" (change)="onVigenciaChange($event)" [disabled]="isLoading() && vigencias().length === 0">
-          @if (vigencias().length === 0) {<option [value]="null">Cargando vigencias...</option>}
-          @else {@for (v of vigencias(); track v.idVigencia) {<option [value]="v.idVigencia">Ejercicio {{ v.ejercicio }} {{ v.activoEjecucion ? '(Activo)' : '' }}</option>}}
-        </select>
-        <lucide-icon name="chevron-down" [size]="14" class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)] pointer-events-none"></lucide-icon>
-      </div>
-      <button (click)="openCreateModal()" [disabled]="!selectedVigenciaId()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[var(--color-cyan-spark)]/50 hover:shadow-[0_0_20px_rgba(2,184,204,0.08)] disabled:opacity-50 disabled:cursor-not-allowed"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva UA</button>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+      <div class="w-full sm:w-56"><app-custom-select placeholder="Ejercicio" [options]="vigenciaOptions()" [value]="selectedVigenciaId()" (valueChange)="onVigenciaChange($event)" [disabled]="isLoading() && vigencias().length === 0"></app-custom-select></div>
+      <button (click)="openCreateModal()" [disabled]="!selectedVigenciaId()" class="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[var(--color-cyan-spark)]/50 hover:shadow-[0_0_20px_rgba(2,184,204,0.08)] disabled:cursor-not-allowed disabled:opacity-50"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva UA</button>
     </div>
   </div>
 
   @if (successMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] font-[510] text-emerald-400 backdrop-blur-sm animate-slide-up"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
   @if (errorMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] font-[510] text-red-400 backdrop-blur-sm animate-slide-up"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
 
-  <ng-template cellKey="numeroUnidadAdm" let-row>
+  <ng-template #numeroUnidadAdmTpl let-row>
     <span class="inline-flex items-center justify-center rounded-lg bg-[var(--color-deep-slate)] px-2 py-1 text-[12px] font-[590] text-[var(--color-storm-cloud)] border border-[var(--color-charcoal-grey)]">#{{ row.numeroUnidadAdm }}</span>
   </ng-template>
-  <ng-template cellKey="organizacionNombre" let-row>
+  <ng-template #organizacionNombreTpl let-row>
     <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.organizacionNombre || 'Global' }}</span>
   </ng-template>
-  <ng-template cellKey="mail" let-row>
+  <ng-template #mailTpl let-row>
     <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.mail || '-' }}</span>
   </ng-template>
-  <ng-template cellKey="acciones" let-row>
+  <ng-template #accionesTpl let-row>
     <div class="flex items-center justify-end gap-1">
       <button (click)="openEditModal(row)" title="Editar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
       <button (click)="confirmDelete(row)" title="Eliminar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-red-400"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
     </div>
   </ng-template>
 
-  <app-data-table [columns]="columns" [data]="unidades()" [totalRows]="unidades().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" emptyMessage="No hay unidades en esta vigencia" emptySubMessage="Creá la primera para comenzar."></app-data-table>
+  <app-smart-table
+    [columns]="columns"
+    [data]="unidades()"
+    [customTemplates]="customTemplates()"
+    [loading]="isLoading()"
+    [pageSize]="999"
+    emptyMessage="No hay unidades en esta vigencia"
+    emptySubMessage="Creá la primera para comenzar.">
+  </app-smart-table>
 </div>
 
 @if (isModalOpen()) {
@@ -51,7 +53,7 @@
               <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Número UA <span class="text-red-400">*</span></label><input type="number" [(ngModel)]="form.numeroUnidadAdm" name="num" required class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)]/30 transition-colors" /></div>
               <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Organización</label>
                 @if (auth.isSuperAdmin()) {
-                  <div class="relative"><select [(ngModel)]="form.idOrganizacion" name="org" class="w-full appearance-none rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] pl-4 pr-10 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors"><option [ngValue]="undefined">Ninguna / Global</option>@for (org of organizaciones(); track org.idOrganizacion) {<option [ngValue]="org.idOrganizacion">{{ org.nombre }}</option>}</select><lucide-icon name="chevron-down" [size]="14" class="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)] pointer-events-none"></lucide-icon></div>
+                  <app-custom-select placeholder="Ninguna / Global" [options]="organizacionOptions()" [(value)]="form.idOrganizacion"></app-custom-select>
                 } @else { <p class="text-[14px] text-[var(--color-storm-cloud)] py-2.5">Automática (según usuario)</p> }
               </div>
               <div class="sm:col-span-2"><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nombre / Descripción <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.nombreUnidadAdm" name="nom" required class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors" /></div>
