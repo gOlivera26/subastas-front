@@ -1,19 +1,20 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
-import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
 import { SubResponsableService, SubResponsableRequest, SubResponsableBulkItem } from '../../../core/services/sub-responsable.service';
 import { UnidadAdministrativaService } from '../../../core/services/unidad-administrativa.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SubResponsable } from '../../../core/models/sub-responsable.model';
 import { UnidadAdministrativa } from '../../../core/models/unidad-administrativa.model';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 
 interface BulkRow { codigo: string; nombre: string; nombreUA: string; }
 
 @Component({
   selector: 'app-areas', standalone: true,
-  imports: [FormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective],
+  imports: [FormsModule, LucideAngularModule, SmartTableComponent, CustomSelect],
   templateUrl: './areas.component.html',
 })
 export class AreasComponent implements OnInit {
@@ -35,14 +36,47 @@ export class AreasComponent implements OnInit {
   uploadRows = signal<BulkRow[]>([]);
   isUploading = signal(false);
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => { const m: Record<string, TemplateRef<any>> = {}; this.cellTemplateDirectives().forEach(d => m[d.cellKey] = d.templateRef); return m; });
-  columns: TableColumn[] = [{ key: 'codigo', label: 'Código', width: '120px' }, { key: 'nombre', label: 'Nombre' }, { key: 'unidadAdmNombre', label: 'UA' }, { key: 'vigente', label: 'Estado', width: '100px' }, { key: 'acciones', label: 'Acciones', align: 'right', width: '100px' }];
+  vigenteTpl = viewChild<TemplateRef<any>>('vigenteTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const vigente = this.vigenteTpl();
+    const acciones = this.accionesTpl();
+
+    if (vigente) templates['vigente'] = vigente;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
+  });
+
+  columns: TableColumn[] = [
+    { key: 'codigo', header: 'Código', sortable: true },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'unidadAdmNombre', header: 'UA', sortable: true },
+    { key: 'vigente', header: 'Estado', type: 'custom' },
+    { key: 'acciones', header: 'Acciones', type: 'custom' },
+  ];
+
+  uaOptions = computed<SelectOption[]>(() => [
+    { label: 'Todas las UA', value: null },
+    ...this.unidadesAdm().map(ua => ({ label: ua.nombreUnidadAdm, value: ua.idUnidadAdm }))
+  ]);
+
+  parentOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguno (raíz)', value: undefined },
+    ...this.parentList().map(p => ({ label: `${p.codigo} - ${p.nombre}`, value: p.idSubResponsable }))
+  ]);
+
+  formUaOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguna', value: undefined },
+    ...this.unidadesAdm().map(ua => ({ label: ua.nombreUnidadAdm, value: ua.idUnidadAdm }))
+  ]);
 
   ngOnInit() { this.loadUAs(); this.loadItems(); }
 
   loadUAs() { this.uaService.getAll().subscribe({ next: (r: any) => { if (r.success && r.data) this.unidadesAdm.set(r.data); } }); }
-  onUaChange(e: any) { const v = e.target.value; this.selectedUaId.set(v && v !== 'null' ? Number(v) : null); this.loadItems(); }
+  onUaChange(value: any) { this.selectedUaId.set(value != null ? Number(value) : null); this.loadItems(); }
   loadItems() { this.isLoading.set(true); this.service.getAll(this.selectedUaId() ?? undefined).subscribe({ next: (r: any) => { this.isLoading.set(false); if (r.success && r.data) { this.items.set(r.data); this.parentList.set(r.data); } else this.items.set([]); }, error: () => { this.isLoading.set(false); this.items.set([]); } }); }
 
   openCreateModal() { this.isEditing.set(false); this.editingId.set(null); this.form = { codigo: '', nombre: '', idSubRespRel: undefined, vigente: true, idUnidadAdm: this.selectedUaId() ?? undefined }; this.isModalOpen.set(true); }

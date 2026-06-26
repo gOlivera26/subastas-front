@@ -226,4 +226,10 @@ export class RubrosTreeComponent implements OnInit {
     this.isDetailModalOpen.set(false);
     this.selectedRubro.set(null);
   }
+
+  closeModal() {
+    this.isEditModalOpen.set(false);
+    this.isDeleteModalOpen.set(false);
+    this.isDetailModalOpen.set(false);
+  }
 }

@@ -1,0 +1,290 @@
+<div class="pivot-shell">
+  <div class="pivot-card">
+    <header class="pivot-header">
+      <div class="pivot-title-block">
+        <h2>Tabla Din&aacute;mica</h2>
+        <p>
+          Arrastr&aacute; los campos disponibles hacia Filas, Columnas y Valores para construir tu reporte.
+        </p>
+      </div>
+
+      <span class="pivot-count">
+        {{ rawData.length }} registros
+      </span>
+    </header>
+
+    @if (rawData.length === 0) {
+      <div class="pivot-empty">
+        <p>No hay datos para armar la tabla din&aacute;mica.</p>
+      </div>
+    } @else {
+      <section class="pivot-builder">
+        <aside class="pivot-fields">
+          <div class="section-label">
+            <span>Campos</span>
+            <small>{{ availableFields.length }} disponibles</small>
+          </div>
+
+          <div class="fields-box">
+            @for (field of availableFields; track field.id) {
+              <button
+                type="button"
+                draggable="true"
+                (dragstart)="onDragStart($event, field)"
+                (dblclick)="quickAdd(field)"
+                class="field-pill"
+              >
+                <span class="field-main">
+                  <span
+                    class="field-dot"
+                    [class.dot-dimension]="field.type === 'dimension'"
+                    [class.dot-value]="field.type === 'value'"
+                  ></span>
+
+                  <span class="field-name">
+                    {{ field.label }}
+                  </span>
+                </span>
+
+                <span class="field-kind">
+                  {{ field.type === 'dimension' ? 'string' : 'number' }}
+                </span>
+              </button>
+            } @empty {
+              <div class="fields-empty">
+                No hay m&aacute;s campos
+              </div>
+            }
+          </div>
+        </aside>
+
+        <section class="pivot-zones">
+          <div class="zones-grid">
+            <div class="zone-block">
+              <h3 class="zone-title">
+                <span class="zone-dot rows-dot"></span>
+                Filas
+              </h3>
+
+              <div
+                class="drop-zone"
+                [class.drop-zone-active]="dragOverZone === 'rows'"
+                (dragover)="onDragOver($event, 'rows')"
+                (dragleave)="onDragLeave()"
+                (drop)="onDrop($event, 'rows')"
+              >
+                @for (field of rowFields; track field.id; let i = $index) {
+                  <div
+                    draggable="true"
+                    (dragstart)="onDragStart($event, field)"
+                    class="selected-pill"
+                  >
+                    <span>{{ field.label }}</span>
+
+                    <button type="button" aria-label="Quitar campo" (click)="removeRow(i)">
+                      ×
+                    </button>
+                  </div>
+                } @empty {
+                  <span class="zone-placeholder">
+                    Soltar filas ac&aacute;
+                  </span>
+                }
+              </div>
+            </div>
+
+            <div class="zone-block">
+              <h3 class="zone-title">
+                <span class="zone-dot cols-dot"></span>
+                Columnas
+              </h3>
+
+              <div
+                class="drop-zone drop-zone-columns"
+                [class.drop-zone-active]="dragOverZone === 'cols'"
+                (dragover)="onDragOver($event, 'cols')"
+                (dragleave)="onDragLeave()"
+                (drop)="onDrop($event, 'cols')"
+              >
+                @for (field of colFields; track field.id; let i = $index) {
+                  <div
+                    draggable="true"
+                    (dragstart)="onDragStart($event, field)"
+                    class="selected-pill"
+                  >
+                    <span>{{ field.label }}</span>
+
+                    <button type="button" aria-label="Quitar campo" (click)="removeCol(i)">
+                      ×
+                    </button>
+                  </div>
+                } @empty {
+                  <span class="zone-placeholder">
+                    Soltar columnas ac&aacute;
+                  </span>
+                }
+              </div>
+            </div>
+
+            <div class="zone-block">
+              <h3 class="zone-title">
+                <span class="zone-dot vals-dot"></span>
+                Valores
+              </h3>
+
+              <div
+                class="drop-zone"
+                [class.drop-zone-active]="dragOverZone === 'vals'"
+                (dragover)="onDragOver($event, 'vals')"
+                (dragleave)="onDragLeave()"
+                (drop)="onDrop($event, 'vals')"
+              >
+                @for (value of valueFields; track value.id; let i = $index) {
+                  <div
+                    draggable="true"
+                    (dragstart)="onDragStart($event, value.field)"
+                    class="selected-pill value-pill"
+                  >
+                    <span>{{ value.field.label }}</span>
+
+                    <select
+                      [ngModel]="value.aggregation"
+                      (ngModelChange)="setValueAggregation(value.id, $event)"
+                    >
+                      <option value="Sum">Sum</option>
+                      <option value="Count">Cnt</option>
+                      <option value="Average">Avg</option>
+                    </select>
+
+                    <button type="button" aria-label="Quitar campo" (click)="removeValue(i)">
+                      ×
+                    </button>
+                  </div>
+                } @empty {
+                  <span class="zone-placeholder">
+                    Soltar valores ac&aacute;
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="builder-footer">
+            @if (dropMessage) {
+              <span class="drop-message">
+                {{ dropMessage }}
+              </span>
+            } @else {
+              <span class="builder-tip">
+                Doble click sobre un campo para agregarlo r&aacute;pido.
+              </span>
+            }
+
+            <button type="button" class="reset-btn" (click)="resetAll()">
+              Reiniciar configuraci&oacute;n
+            </button>
+          </div>
+        </section>
+      </section>
+
+      <section class="smart-section">
+        <div class="smart-header">
+          <h3>Smart Table</h3>
+
+          <div class="smart-meta">
+            <span>{{ displayRows.length }} filas</span>
+            <span>&middot;</span>
+            <span>{{ leafColumns.length }} columnas</span>
+          </div>
+        </div>
+
+        @if (displayRows.length > 0 && leafColumns.length > 0) {
+          <div class="smart-table-wrap">
+            <table class="smart-table">
+              <thead>
+                <tr>
+                  <th rowspan="2" class="dimension-head">
+                    Dimensiones
+                  </th>
+
+                  @for (group of columnGroups; track group.id) {
+                    <th [attr.colspan]="group.colspan" class="group-head">
+                      {{ group.label }}
+                    </th>
+                  }
+                </tr>
+
+                <tr>
+                  @for (col of leafColumns; track col.id) {
+                    <th class="metric-head">
+                      <span>{{ col.valueLabel }}</span>
+                      <small>{{ col.aggregation }}</small>
+                    </th>
+                  }
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (row of displayRows; track row.id; let ri = $index) {
+                  <tr
+                    [class.row-alt]="ri % 2 === 1"
+                    [class.row-group]="row.kind === 'group'"
+                  >
+                    <td class="dimension-cell">
+                      <div class="dimension-content" [style.padding-left.px]="row.depth * 16">
+                        @if (row.hasChildren) {
+                          <button type="button" class="toggle-btn" (click)="toggle(row.id)">
+                            {{ isCollapsed(row.id) ? '›' : '⌄' }}
+                          </button>
+                        } @else {
+                          <span class="toggle-spacer"></span>
+                        }
+
+                        <div class="dimension-text">
+                          <strong>{{ row.label }}</strong>
+                          <small>{{ row.fieldLabel }}</small>
+                        </div>
+                      </div>
+                    </td>
+
+                    @for (cell of row.cells; track cell.id; let ci = $index) {
+                      <td
+                        class="metric-cell"
+                        [style.background]="cellBackground(cell.raw, ci)"
+                      >
+                        {{ cell.display }}
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+
+              @if (totalCells.length > 0) {
+                <tfoot>
+                  <tr>
+                    <td class="total-label">
+                      Total General
+                    </td>
+
+                    @for (cell of totalCells; track cell.id; let ci = $index) {
+                      <td
+                        class="total-cell"
+                        [style.background]="cellBackground(cell.raw, ci)"
+                      >
+                        {{ cell.display }}
+                      </td>
+                    }
+                  </tr>
+                </tfoot>
+              }
+            </table>
+          </div>
+        } @else {
+          <div class="pivot-empty small">
+            <p>Configur&aacute; filas, columnas y valores para ver los resultados.</p>
+          </div>
+        }
+      </section>
+    }
+  </div>
+</div>

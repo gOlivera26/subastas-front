@@ -1,17 +1,18 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
-import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
 import { RoleService, Role, AppPage, ModuloConPaginas, RoleModule } from '../../../core/services/role.service';
 import { UserService, ActiveUser } from '../../../core/services/user.service';
 import { OrganizationService, Organization } from '../../../core/services/organization.service';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 
 @Component({
   selector: 'app-seguridad',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, SmartTableComponent, CustomSelect],
   templateUrl: './seguridad.component.html',
 })
 export class SeguridadComponent implements OnInit {
@@ -42,18 +43,32 @@ export class SeguridadComponent implements OnInit {
   isLinkModalOpen = signal(false);
   linkForm = { idUsuario: '', idOrganizacion: 0, esPrincipal: true };
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach(d => { map[d.cellKey] = d.templateRef; });
-    return map;
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const acciones = this.accionesTpl();
+
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
   });
 
   columns: TableColumn[] = [
-    { key: 'nombre', label: 'Nombre' },
-    { key: 'descripcion', label: 'Descripción' },
-    { key: 'acciones', label: 'Acciones', align: 'right', width: '140px' },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'descripcion', header: 'Descripción', sortable: true },
+    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
+
+  linkUserOptions = computed<SelectOption[]>(() => [
+    { label: 'Seleccionar usuario...', value: '' },
+    ...this.activeUsers().map(u => ({ label: u.nombreCompleto + ' — ' + u.email, value: u.idUsuario }))
+  ]);
+
+  linkOrganizationOptions = computed<SelectOption[]>(() => [
+    { label: 'Seleccionar organización...', value: 0 },
+    ...this.organizations().map(org => ({ label: org.nombre, value: org.idOrganizacion }))
+  ]);
   isLinking = signal(false);
 
   ngOnInit() {

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, HostListener, inject, signal, computed } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgClass } from '@angular/common';
@@ -17,8 +17,8 @@ export class ClasificadoresLayoutComponent {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   protected auth = inject(AuthService);
-
-  isSidebarOpen = signal(localStorage.getItem('sidebar-clasificadores') !== 'false');
+  private readonly sidebarStorageKey = 'sidebar-clasificadores';
+  isSidebarOpen = signal(this.getInitialSidebarState(true));
   pageTitle = signal('');
   routeState = signal('initial');
 
@@ -40,18 +40,45 @@ export class ClasificadoresLayoutComponent {
   }
 
   toggleSidebar() {
-    this.isSidebarOpen.update(v => {
-      localStorage.setItem('sidebar-clasificadores', String(!v));
-      return !v;
-    });
+    const next = !this.isSidebarOpen();
+    this.isSidebarOpen.set(next);
+
+    if (this.isDesktopViewport()) {
+      localStorage.setItem(this.sidebarStorageKey, String(next));
+    }
   }
 
   closeSidebar() {
     this.isSidebarOpen.set(false);
-    localStorage.setItem('sidebar-clasificadores', 'false');
+
+    if (this.isDesktopViewport()) {
+      localStorage.setItem(this.sidebarStorageKey, 'false');
+    }
   }
 
   closeSidebarOnMobile() {
-    if (window.innerWidth < 1024) this.closeSidebar();
+    if (!this.isDesktopViewport()) this.isSidebarOpen.set(false);
   }
+
+  @HostListener('window:resize')
+  onViewportResize() {
+    if (!this.isDesktopViewport()) {
+      this.isSidebarOpen.set(false);
+      return;
+    }
+
+    this.isSidebarOpen.set(this.getInitialSidebarState(true));
+  }
+
+  private getInitialSidebarState(defaultOpen: boolean): boolean {
+    if (!this.isDesktopViewport()) return false;
+
+    const stored = localStorage.getItem(this.sidebarStorageKey);
+    return stored === null ? defaultOpen : stored === 'true';
+  }
+
+  private isDesktopViewport(): boolean {
+    return window.matchMedia('(min-width: 1024px)').matches;
+  }
+
 }

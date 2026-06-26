@@ -11,11 +11,12 @@ import { Vigencia } from '../../../core/models/vigencia.model';
 import { OrganizationService, Organization } from '../../../core/services/organization.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 
 @Component({
   selector: 'app-catalogo-bienes',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, LoadingSpinnerComponent, CustomSelect],
   templateUrl: './catalogo-bienes.component.html',
 })
 export class CatalogoBienesComponent implements OnInit {
@@ -53,6 +54,26 @@ export class CatalogoBienesComponent implements OnInit {
     if (!term) return this.treeNodes();
     return this.filterNodes(this.treeNodes(), term);
   });
+
+  vigenciaOptions = computed<SelectOption[]>(() => this.vigencias().map(v => ({
+    label: `Ejercicio ${v.ejercicio}${v.activoEjecucion ? ' (Activo)' : ''}`,
+    value: v.idVigencia
+  })));
+
+  parentOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguno (raíz)', value: undefined },
+    ...this.parentList().map(p => ({ label: `${p.codigo} - ${p.nItem}`, value: p.idItem }))
+  ]);
+
+  objetoGastoOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguno', value: undefined },
+    ...this.objetosGasto().map(og => ({ label: `${og.numeroObjeto} - ${og.nombreObjeto}`, value: og.idObjetoGasto }))
+  ]);
+
+  organizacionOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguna / Global', value: undefined },
+    ...this.organizaciones().map(org => ({ label: org.nombre, value: org.idOrganizacion }))
+  ]);
 
   ngOnInit() { this.loadVigencias(); this.loadOrganizaciones(); }
 
@@ -102,7 +123,7 @@ export class CatalogoBienesComponent implements OnInit {
 
   loadOrganizaciones() { this.orgService.getActiveOrganizations().subscribe({ next: (res: any) => { if (res.success && res.data) this.organizaciones.set(res.data); } }); }
   loadObjetosGasto() { const id = this.selectedVigenciaId(); if (!id) return; this.objetoGastoService.getAll(id).subscribe({ next: (res: any) => { if (res.success && res.data) this.objetosGasto.set(res.data); } }); }
-  onVigenciaChange(event: any) { this.selectedVigenciaId.set(Number(event.target.value)); this.expandedNodes.set(new Set()); this.searchTerm.set(''); this.loadItems(); this.loadObjetosGasto(); }
+  onVigenciaChange(value: any) { this.selectedVigenciaId.set(Number(value)); this.expandedNodes.set(new Set()); this.searchTerm.set(''); this.loadItems(); this.loadObjetosGasto(); }
 
   loadItems() {
     const id = this.selectedVigenciaId(); if (!id) return;

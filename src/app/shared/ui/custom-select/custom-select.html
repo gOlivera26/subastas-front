@@ -6,7 +6,7 @@
         </label>
     }
 
-    <button type="button" (click)="toggle()"
+    <button #triggerButton type="button" (click)="toggle()"
             [class.opacity-60]="disabled"
             [class.cursor-not-allowed]="disabled"
             [class.cursor-pointer]="!disabled"
@@ -28,14 +28,11 @@
     </button>
 
     @if (isOpen() && !disabled) {
-        <div class="absolute left-0 w-full rounded-xl bg-white dark:bg-[#1c2128] shadow-2xl shadow-gray-900/20 dark:shadow-black/80 ring-1 ring-black/5 focus:outline-none border border-gray-200 dark:border-white/10 overflow-hidden flex max-h-80 z-[9999]"
+        <div #dropdownPanel class="fixed rounded-xl bg-white dark:bg-[#1c2128] shadow-2xl shadow-gray-900/20 dark:shadow-black/80 ring-1 ring-black/5 focus:outline-none border border-gray-200 dark:border-white/10 overflow-hidden flex z-[99999]"
+             [ngStyle]="dropdownStyles()"
              [class.flex-col]="dropdownPosition() === 'bottom'"
              [class.flex-col-reverse]="dropdownPosition() === 'top'"
-             [class.top-full]="dropdownPosition() === 'bottom'"
-             [class.mt-2]="dropdownPosition() === 'bottom'"
              [class.animate-slide-down-fade]="dropdownPosition() === 'bottom'"
-             [class.bottom-full]="dropdownPosition() === 'top'"
-             [class.mb-2]="dropdownPosition() === 'top'"
              [class.animate-slide-up-fade]="dropdownPosition() === 'top'">
 
             @if (options.length > 5) {

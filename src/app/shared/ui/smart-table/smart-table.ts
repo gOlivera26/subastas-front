@@ -17,11 +17,16 @@ export class SmartTableComponent {
   customTemplates = input<Record<string, TemplateRef<any>>>({});
   loading = input<boolean>(false);
   pageSize = input<number>(10);
+  searchPlaceholder = input<string>('Buscar en la tabla...');
+  emptyMessage = input<string>('No se encontraron resultados.');
+  emptySubMessage = input<string>('');
+  showSearch = input<boolean>(true);
 
   serverSide = input<boolean>(false);
   totalServerItems = input<number>(0);
   @Output() pageChange = new EventEmitter<number>();
   @Output() searchChange = new EventEmitter<string>();
+  @Output() sortChange = new EventEmitter<{ key: string; direction: 'asc' | 'desc' }>();
 
   selectable = input<boolean>(false);
   selectedIds = input<any[]>([]);
@@ -44,6 +49,7 @@ export class SmartTableComponent {
   onSearchInput(event: Event) {
     const val = (event.target as HTMLInputElement).value;
     this.searchTerm.set(val);
+    this.currentPage.set(1);
     if (this.serverSide()) {
       clearTimeout(this.searchTimeout);
       this.searchTimeout = setTimeout(() => {
@@ -74,7 +80,7 @@ export class SmartTableComponent {
     const colKey = this.sortColumn();
     const direction = this.sortDirection();
 
-    if (colKey) {
+    if (colKey && !this.serverSide()) {
       result.sort((a, b) => {
         const valA = a[colKey];
         const valB = b[colKey];
@@ -187,6 +193,10 @@ export class SmartTableComponent {
     } else {
       this.sortColumn.set(column.key);
       this.sortDirection.set('asc');
+    }
+    if (this.serverSide()) {
+      this.currentPage.set(1);
+      this.sortChange.emit({ key: column.key, direction: this.sortDirection() });
     }
   }
 

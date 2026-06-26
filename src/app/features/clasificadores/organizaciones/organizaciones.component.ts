@@ -1,14 +1,14 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
-import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
 import { OrganizationService, Organization, OrganizationRequest } from '../../../core/services/organization.service';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-organizaciones',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective],
+  imports: [FormsModule, LucideAngularModule, SmartTableComponent],
   templateUrl: './organizaciones.component.html',
 })
 export class OrganizacionesComponent implements OnInit {
@@ -26,19 +26,26 @@ export class OrganizacionesComponent implements OnInit {
 
   form: OrganizationRequest = this.getEmptyForm();
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach(d => { map[d.cellKey] = d.templateRef; });
-    return map;
+  activoTpl = viewChild<TemplateRef<any>>('activoTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const activo = this.activoTpl();
+    const acciones = this.accionesTpl();
+
+    if (activo) templates['activo'] = activo;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
   });
 
   columns: TableColumn[] = [
-    { key: 'nombre', label: 'Nombre' },
-    { key: 'cuit', label: 'CUIT' },
-    { key: 'abreviatura', label: 'Abreviatura' },
-    { key: 'activo', label: 'Estado' },
-    { key: 'acciones', label: 'Acciones', align: 'right', width: '120px' },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'cuit', header: 'CUIT', sortable: true },
+    { key: 'abreviatura', header: 'Abreviatura', sortable: true },
+    { key: 'activo', header: 'Estado', type: 'custom' },
+    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
 
   ngOnInit() { this.loadOrganizaciones(); }

@@ -113,6 +113,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
 
   get isPorRenglon(): boolean { return this.subasta()?.especificacion?.criterioAdjudicacion === 1; }
   get isDirecta(): boolean { return this.subasta()?.idTipoContratacion === 9; }
+  get requiereGestionDocumentacion(): boolean { return this.subasta()?.idTipoContratacion === 8 || this.subasta()?.especificacion?.gestionDocumentacion === true; }
 
   elementosOfertables = computed(() => {
     const s = this.subasta();

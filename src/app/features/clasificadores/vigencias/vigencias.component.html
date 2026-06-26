@@ -1,23 +1,23 @@
 <div class="mx-auto max-w-5xl">
-  <div class="mb-8 flex items-center justify-between">
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div><h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Vigencias</h1><p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Administración de años fiscales y ciclos presupuestarios.</p></div>
-    <button (click)="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[var(--color-cyan-spark)]/50 hover:shadow-[0_0_20px_rgba(2,184,204,0.08)]"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva Vigencia</button>
+    <button (click)="openCreateModal()" class="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[var(--color-cyan-spark)]/50 hover:shadow-[0_0_20px_rgba(2,184,204,0.08)]"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva Vigencia</button>
   </div>
 
   @if (successMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] font-[510] text-emerald-400 backdrop-blur-sm animate-slide-up"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
   @if (errorMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] font-[510] text-red-400 backdrop-blur-sm animate-slide-up"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
 
-  <ng-template cellKey="activoEjecucion" let-row>
+  <ng-template #activoEjecucionTpl let-row>
     @if (row.activoEjecucion) {
       <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[12px] font-[590] text-emerald-400"><span class="size-1.5 rounded-full bg-emerald-400"></span>Activo</span>
     } @else {
       <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-charcoal-grey)]/30 px-2.5 py-0.5 text-[12px] font-[590] text-[var(--color-storm-cloud)]">Inactivo</span>
     }
   </ng-template>
-  <ng-template cellKey="fecIng" let-row>
+  <ng-template #fecIngTpl let-row>
     <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.fecIng | date:'dd/MM/yyyy' }}</span>
   </ng-template>
-  <ng-template cellKey="acciones" let-row>
+  <ng-template #accionesTpl let-row>
     <div class="flex items-center justify-end gap-1">
       @if (!row.activoEjecucion) {
         <button (click)="setActiva(row)" title="Marcar como activa" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-emerald-400"><lucide-icon name="play" [size]="16"></lucide-icon></button>
@@ -27,7 +27,15 @@
     </div>
   </ng-template>
 
-  <app-data-table [columns]="columns" [data]="vigenciaOrdenada()" [totalRows]="vigencias().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" emptyMessage="No hay vigencias registradas" emptySubMessage="Creá la primera para comenzar."></app-data-table>
+  <app-smart-table
+    [columns]="columns"
+    [data]="vigenciaOrdenada()"
+    [customTemplates]="customTemplates()"
+    [loading]="isLoading()"
+    [pageSize]="999"
+    emptyMessage="No hay vigencias registradas"
+    emptySubMessage="Creá la primera para comenzar.">
+  </app-smart-table>
 </div>
 
 @if (isModalOpen()) {

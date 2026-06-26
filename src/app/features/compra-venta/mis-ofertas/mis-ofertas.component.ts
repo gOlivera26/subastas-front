@@ -1,15 +1,15 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren, Directive, Input } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
-import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
 import { CotizacionService } from '../../../core/services/cotizacion.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-mis-ofertas',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DataTableComponent, CellTemplateDirective, DatePipe],
+  imports: [CommonModule, LucideAngularModule, SmartTableComponent],
   templateUrl: './mis-ofertas.component.html',
 })
 export class MisOfertasComponent implements OnInit {
@@ -19,19 +19,35 @@ export class MisOfertasComponent implements OnInit {
   ofertas = signal<any[]>([]);
   loading = signal(true);
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach((d: any) => { map[d.cellKey] = d.templateRef; });
-    return map;
+  fechaOfertaTpl = viewChild<TemplateRef<any>>('fechaOfertaTpl');
+  cotizacionTpl = viewChild<TemplateRef<any>>('cotizacionTpl');
+  detalleTpl = viewChild<TemplateRef<any>>('detalleTpl');
+  montoTpl = viewChild<TemplateRef<any>>('montoTpl');
+  estadoTpl = viewChild<TemplateRef<any>>('estadoTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const fechaOferta = this.fechaOfertaTpl();
+    const cotizacion = this.cotizacionTpl();
+    const detalle = this.detalleTpl();
+    const monto = this.montoTpl();
+    const estado = this.estadoTpl();
+
+    if (fechaOferta) templates['fechaOferta'] = fechaOferta;
+    if (cotizacion) templates['cotizacion'] = cotizacion;
+    if (detalle) templates['detalle'] = detalle;
+    if (monto) templates['monto'] = monto;
+    if (estado) templates['estado'] = estado;
+
+    return templates;
   });
 
   columns: TableColumn[] = [
-    { key: 'fechaOferta', label: 'Fecha y Hora', width: '180px' },
-    { key: 'cotizacion', label: 'Subasta (Nro)', width: '150px' },
-    { key: 'detalle', label: 'Bien, Servicio o Lote' },
-    { key: 'monto', label: 'Importe Ofertado', align: 'right', width: '180px' },
-    { key: 'estado', label: 'Estado', align: 'center', width: '120px' }
+    { header: 'Fecha y Hora', key: 'fechaOferta', type: 'custom', sortable: true },
+    { header: 'Subasta (Nro)', key: 'cotizacion', type: 'custom', sortable: true },
+    { header: 'Bien, Servicio o Lote', key: 'detalle', type: 'custom', searchFields: ['detalle'] },
+    { header: 'Importe Ofertado', key: 'monto', type: 'custom', sortable: true },
+    { header: 'Estado', key: 'estado', type: 'custom' }
   ];
 
   ngOnInit() {

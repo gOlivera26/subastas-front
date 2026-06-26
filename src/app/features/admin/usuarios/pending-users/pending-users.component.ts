@@ -1,23 +1,15 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren, Directive, Input } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { UserService, PendingUser } from '../../../../core/services/user.service';
 import { RouterLink } from '@angular/router';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table';
-
-@Directive({
-  selector: 'ng-template[cellKey]',
-  standalone: true,
-})
-export class CellTemplateDirective {
-  @Input({ required: true }) cellKey!: string;
-  constructor(public templateRef: TemplateRef<any>) {}
-}
+import { SmartTableComponent } from '../../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-admin-usuarios',
   standalone: true,
-  imports: [LucideAngularModule, DatePipe, RouterLink, DataTableComponent, CellTemplateDirective],
+  imports: [LucideAngularModule, DatePipe, RouterLink, SmartTableComponent],
   templateUrl: './pending-users.component.html',
 })
 export class AdminUsuariosComponent implements OnInit {
@@ -32,20 +24,34 @@ export class AdminUsuariosComponent implements OnInit {
   selectedUserToApprove = signal<{id: string, nombre: string} | null>(null);
 
   columns: TableColumn[] = [
-    { key: 'nombreCompleto', label: 'Usuario / Contacto' },
-    { key: 'documento', label: 'Documento', width: '120px' },
-    { key: 'tipoUsuario', label: 'Rol / Entidad Representada' },
-    { key: 'fechaRegistro', label: 'Fecha Solicitud', width: '150px' },
-    { key: 'acciones', label: 'Acción', align: 'right', width: '130px' },
+    { key: 'nombreCompleto', header: 'Usuario / Contacto', type: 'custom', sortable: true },
+    { key: 'documento', header: 'Documento', type: 'custom', sortable: true },
+    { key: 'tipoUsuario', header: 'Rol / Entidad Representada', type: 'custom' },
+    { key: 'fechaRegistro', header: 'Fecha Solicitud', type: 'custom', sortable: true },
+    { key: 'acciones', header: 'Acción', type: 'custom' },
   ];
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach(d => {
-      map[d.cellKey] = d.templateRef;
-    });
-    return map;
+  nombreCompletoTpl = viewChild<TemplateRef<any>>('nombreCompletoTpl');
+  documentoTpl = viewChild<TemplateRef<any>>('documentoTpl');
+  tipoUsuarioTpl = viewChild<TemplateRef<any>>('tipoUsuarioTpl');
+  fechaRegistroTpl = viewChild<TemplateRef<any>>('fechaRegistroTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const nombreCompleto = this.nombreCompletoTpl();
+    const documento = this.documentoTpl();
+    const tipoUsuario = this.tipoUsuarioTpl();
+    const fechaRegistro = this.fechaRegistroTpl();
+    const acciones = this.accionesTpl();
+
+    if (nombreCompleto) templates['nombreCompleto'] = nombreCompleto;
+    if (documento) templates['documento'] = documento;
+    if (tipoUsuario) templates['tipoUsuario'] = tipoUsuario;
+    if (fechaRegistro) templates['fechaRegistro'] = fechaRegistro;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
   });
 
   ngOnInit() {

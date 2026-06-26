@@ -1,10 +1,10 @@
 <div class="mx-auto max-w-7xl">
-  <div class="mb-6 flex items-center justify-between">
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Nota de Pedido</h1>
       <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestioná las notas de pedido por área y ejercicio.</p>
     </div>
-    <button (click)="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[#448b54] hover:shadow-[0_0_20px_rgba(68,139,84,0.15)]">
+    <button (click)="openCreateModal()" class="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)] hover:border-[#448b54] hover:shadow-[0_0_20px_rgba(68,139,84,0.15)]">
       <lucide-icon name="plus" [size]="16"></lucide-icon>Nuevo
     </button>
   </div>
@@ -25,28 +25,18 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <div>
         <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Área</label>
-        <select [(ngModel)]="filtros().idUnidadAdm" (ngModelChange)="onFilterUnidadAdmChange($event)" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors">
-          <option [ngValue]="undefined">-- Consultar por Área --</option>
-          @for (ua of unidadesAdm(); track ua.idUnidadAdm) {
-            <option [ngValue]="ua.idUnidadAdm">{{ ua.nombreUnidadAdm }}</option>
-          }
-        </select>
+        <app-custom-select placeholder="-- Consultar por área --" [options]="filterUnidadAdmOptions()" [value]="filtros().idUnidadAdm" (valueChange)="onFilterUnidadAdmChange($event)"></app-custom-select>
       </div>
       <div>
         <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Ejercicio</label>
-        <select [(ngModel)]="filtros().idVigencia" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors">
-          <option [ngValue]="undefined">-- Todos --</option>
-          @for (vig of vigencias(); track vig.idVigencia) {
-            <option [ngValue]="vig.idVigencia">{{ vig.ejercicio }}</option>
-          }
-        </select>
+        <app-custom-select placeholder="-- Todos --" [options]="filterVigenciaOptions()" [value]="filtros().idVigencia" (valueChange)="onFilterVigenciaChange($event)"></app-custom-select>
       </div>
       <div>
-        <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nro. Provisión</label>
-        <input type="text" [(ngModel)]="filtros().nroReserva" placeholder="Nro Provisión" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors" />
+        <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nro. PROVISIÓN</label>
+        <input type="text" [(ngModel)]="filtros().nroReserva" placeholder="Nro PROVISIÓN" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors" />
       </div>
     </div>
-    <div class="mt-4 flex items-center justify-end gap-3">
+    <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
       <button (click)="limpiarFiltros()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-storm-cloud)] transition-colors hover:bg-[#448b54] hover:text-white">
         <lucide-icon name="rotate-ccw" [size]="14"></lucide-icon>Restablecer orden
       </button>
@@ -62,19 +52,19 @@
     </h3>
   </div>
 
-  <ng-template cellKey="descripcionEstado" let-row>
-    @if (row.descripcionEstado === 'AUTORIZADO') {
+  <ng-template #descripcionEstadoTpl let-row>
+    @if (esAutorizado(row)) {
       <span class="inline-flex items-center gap-1.5 rounded-full bg-[#448b54] px-2.5 py-0.5 text-[11px] font-[590] text-white uppercase shadow-sm">{{ row.descripcionEstado }}</span>
-    } @else if (row.descripcionEstado === 'GENERADO') {
+    } @else if (esGenerado(row)) {
       <span class="inline-flex items-center gap-1.5 rounded-full bg-[#f1c40f] px-2.5 py-0.5 text-[11px] font-[590] text-white uppercase shadow-sm">{{ row.descripcionEstado }}</span>
     } @else {
       <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-charcoal-grey)]/30 px-2.5 py-0.5 text-[11px] font-[590] text-[var(--color-storm-cloud)] uppercase">{{ row.descripcionEstado }}</span>
     }
   </ng-template>
 
-  <ng-template cellKey="acciones" let-row>
+  <ng-template #accionesTpl let-row>
     <div class="flex items-center justify-end gap-1">
-      @if (row.descripcionEstado === 'GENERADO') {
+      @if (esGenerado(row)) {
         <button (click)="openItemsList(row)" title="Gestionar Ítems" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
           <lucide-icon name="menu" [size]="16"></lucide-icon>
         </button>
@@ -85,7 +75,7 @@
       <button (click)="openCloneModal(row)" title="Clonar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
         <lucide-icon name="copy" [size]="16"></lucide-icon>
       </button>
-      @if (row.descripcionEstado === 'GENERADO') {
+      @if (esGenerado(row)) {
         <button (click)="openAuthorizeModal(row)" title="Autorizar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
           <lucide-icon name="check-circle" [size]="16"></lucide-icon>
         </button>
@@ -93,7 +83,17 @@
     </div>
   </ng-template>
 
-  <app-data-table [columns]="columns" [data]="reservas()" [totalRows]="reservas().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" (sortChange)="onSort($event)" emptyMessage="No hay notas de pedido registradas" emptySubMessage="Creá la primera para comenzar."></app-data-table>
+  <app-smart-table
+    [columns]="columns"
+    [data]="reservas()"
+    [customTemplates]="customTemplates()"
+    [loading]="isLoading()"
+    [pageSize]="999"
+    [showSearch]="false"
+    (sortChange)="onSort($event)"
+    emptyMessage="No hay notas de pedido registradas"
+    emptySubMessage="Creá la primera para comenzar.">
+  </app-smart-table>
 </div>
 
 @if (isItemsListOpen() && selectedReserva()) {
@@ -287,9 +287,9 @@
      
      <div class="absolute left-0 top-0 bottom-0 w-1.5 transition-colors" [ngClass]="isCatProgExpanded(node.idCatProg) ? 'bg-[#448b54]' : 'bg-transparent group-hover:bg-[#448b54]/50'"></div>
 
-     <div class="flex gap-4 items-center w-full ml-3">
+     <div class="flex items-center w-full ml-3">
        @if (node.hasChildren) {
-         <button (click)="toggleCatProgNode(node.idCatProg, $event)" class="w-10 h-10 flex items-center justify-center bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] group-hover:text-white shrink-0 rounded-lg shadow-sm group-hover:bg-[#448b54] transition-colors border border-[var(--color-charcoal-grey)]">
+         <button (click)="toggleCatProgNode(node.idCatProg, $event)" class="w-10 h-10 w-10 items-center justify-center bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] group-hover:text-white shrink-0 rounded-lg shadow-sm group-hover:bg-[#448b54] transition-colors border border-[var(--color-charcoal-grey)]">
             <lucide-icon [name]="isCatProgExpanded(node.idCatProg) ? 'chevron-up' : 'chevron-down'" [size]="20" class="stroke-[3]"></lucide-icon>
          </button>
        } @else {
@@ -362,7 +362,7 @@
       
       <div class="flex items-center justify-between px-6 py-5 shrink-0 bg-[var(--color-graphite)] border-b border-[var(--color-charcoal-grey)] rounded-t-xl">
         <h3 class="text-[18px] font-[700] text-[#448b54] uppercase tracking-wide">
-          CATÁLOGO BIENES Ó SERVICIOS
+          CATÁLOGO BIENES O SERVICIOS
         </h3>
         <button (click)="isSelectBienModalOpen.set(false)" class="rounded-xl p-2 text-[var(--color-storm-cloud)] hover:text-red-400 hover:bg-[var(--color-deep-slate)] transition-colors">
           <lucide-icon name="x" [size]="20"></lucide-icon>
@@ -384,7 +384,7 @@
           <table class="w-full text-left text-[13px]">
             <thead class="bg-[#448b54] text-white text-[11px] font-[600] uppercase tracking-widest">
               <tr>
-                <th class="px-6 py-3 border-r border-[#367043]/30 w-32">CÓDIGO</th>
+                <th class="px-6 py-3 border-r border-[#367043]/30 w-32">Código</th>
                 <th class="px-6 py-3 border-r border-[#367043]/30">NOMBRE</th>
                 <th class="px-6 py-3 w-16"></th>
               </tr>
@@ -439,21 +439,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Área Solicitante <span class="text-red-400">*</span></label>
-              <select [(ngModel)]="form.idUnidadAdm" name="idUnidadAdm" required (ngModelChange)="onModalUnidadAdmChange($event)" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors">
-                <option [ngValue]="0">-- Seleccione --</option>
-                @for (ua of unidadesAdm(); track ua.idUnidadAdm) {
-                  <option [ngValue]="ua.idUnidadAdm">{{ ua.nombreUnidadAdm }}</option>
-                }
-              </select>
+              <app-custom-select placeholder="-- Seleccione --" [options]="modalUnidadAdmOptions()" [(value)]="form.idUnidadAdm" (valueChange)="onModalUnidadAdmChange($event)"></app-custom-select>
             </div>
             <div>
               <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Oficina Responsable <span class="text-red-400">*</span></label>
-              <select [(ngModel)]="form.idSubResponsable" name="idSubResponsable" required class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] focus:outline-none transition-colors">
-                <option [ngValue]="0">-- Seleccione --</option>
-                @for (of of oficinas(); track $any(of).idSubResponsable || of.idSubResponsables) {
-                  <option [ngValue]="$any(of).idSubResponsable || of.idSubResponsables">{{ of.nombre }}</option>
-                }
-              </select>
+              <app-custom-select placeholder="-- Seleccione --" [options]="oficinaOptions()" [(value)]="form.idSubResponsable"></app-custom-select>
             </div>
           </div>
 

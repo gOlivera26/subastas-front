@@ -1,74 +1,191 @@
 <div class="animate-fade-in">
-    <div class="mb-4 relative w-full md:w-80">
-        <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none"><lucide-icon name="search" [size]="16" class="text-[var(--color-storm-cloud)]"></lucide-icon></div>
-        <input type="text" placeholder="Buscar en la tabla..." (input)="onSearchInput($event)"
-            class="w-full pl-10 pr-4 py-2.5 border border-[var(--color-charcoal-grey)] rounded-xl bg-[var(--color-pitch-black)] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none text-[14px] transition-all placeholder:text-[var(--color-fog-grey)]">
+  @if (showSearch()) {
+  <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="relative w-full sm:max-w-sm">
+      <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+        <lucide-icon name="search" [size]="16" class="text-[var(--color-storm-cloud)]"></lucide-icon>
+      </div>
+      <input
+        type="text"
+        [placeholder]="searchPlaceholder()"
+        (input)="onSearchInput($event)"
+        class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] py-2.5 pl-10 pr-4 text-[14px] text-[var(--color-porcelain)] placeholder:text-[var(--color-fog-grey)] shadow-sm transition-all focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-2 focus:ring-[var(--color-cyan-spark)]/15">
+    </div>
+  </div>
+  }
+
+  <div class="relative mb-0 flex flex-col overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-sm">
+    @if (loading()) {
+      <div class="absolute inset-0 z-50 flex items-center justify-center rounded-2xl bg-[var(--color-graphite)]/85 backdrop-blur-[2px] transition-all">
+        <app-loading-spinner label="Cargando..."></app-loading-spinner>
+      </div>
+    }
+
+    <div class="hidden w-full overflow-x-auto overflow-y-hidden md:block">
+      <table class="min-w-full whitespace-nowrap text-left">
+        <thead class="border-b border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/55">
+          <tr>
+            @for (col of columns(); track col.key) {
+              <th
+                (click)="handleSort(col)"
+                class="px-6 py-3 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] select-none"
+                [class.cursor-pointer]="col.sortable"
+                [class.hover:text-[var(--color-porcelain)]]="col.sortable">
+                <div class="flex items-center gap-1">
+                  {{ col.header }}
+                  @if (sortColumn() === col.key) {
+                    <lucide-icon [name]="sortDirection() === 'asc' ? 'chevron-up' : 'chevron-down'" [size]="12"></lucide-icon>
+                  }
+                </div>
+              </th>
+            }
+            @if (actions().length > 0) {
+              <th class="px-6 py-3 text-right text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Acciones</th>
+            }
+            @if (selectable()) {
+              <th class="w-10 px-6 py-3 text-center">
+                <input type="checkbox" [checked]="isAllSelected()" (change)="toggleAll()" class="rounded border-[var(--color-charcoal-grey)]">
+              </th>
+            }
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-[var(--color-charcoal-grey)] text-[14px]">
+          @for (row of paginatedData(); track $index) {
+            <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/45" [class.bg-[var(--color-cyan-spark)]/5]="isSelected(row)">
+              @for (col of columns(); track col.key) {
+                <td class="px-6 py-4 text-[var(--color-porcelain)]" [ngSwitch]="col.type">
+                  <ng-container *ngSwitchCase="'custom'">
+                    @if (customTemplates()[col.key]) {
+                      <ng-container *ngTemplateOutlet="customTemplates()[col.key]; context: { $implicit: row }"></ng-container>
+                    }
+                  </ng-container>
+                  <span *ngSwitchCase="'tag'" class="inline-flex items-center rounded-lg bg-[var(--color-deep-slate)] px-2 py-1 text-xs font-medium text-[var(--color-storm-cloud)] font-mono">{{ row[col.key] || '-' }}</span>
+                  <span *ngSwitchCase="'currency'" class="font-mono font-bold text-emerald-400">{{ row[col.key] | currency:'ARS':'symbol-narrow':'1.2-2' }}</span>
+                  <span *ngSwitchCase="'badge'" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [ngClass]="{'bg-emerald-500/10 text-emerald-500': row[col.key] === 'Activo', 'bg-red-500/10 text-red-500': row[col.key] !== 'Activo'}">{{ row[col.key] }}</span>
+                  <ng-container *ngSwitchCase="'boolean'">
+                    <div class="flex items-center">
+                      @if (row[col.key]) {
+                        <div class="rounded-full bg-emerald-500/10 p-1 text-emerald-500"><lucide-icon name="check" [size]="16"></lucide-icon></div>
+                      } @else {
+                        <div class="rounded-full p-1 text-[var(--color-storm-cloud)]"><lucide-icon name="x" [size]="16"></lucide-icon></div>
+                      }
+                    </div>
+                  </ng-container>
+                  <span *ngSwitchCase="'date'">{{ row[col.key] ? (row[col.key] | date:'dd/MM/yyyy HH:mm') : '-' }}</span>
+                  <span *ngSwitchDefault>{{ row[col.key] || '-' }}</span>
+                </td>
+              }
+
+              @if (actions().length > 0) {
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    @for (act of actions(); track act.action) {
+                      <button (click)="handleAction(act.action, row)" [title]="act.tooltip" class="rounded-lg p-1.5 transition-colors hover:bg-[var(--color-deep-slate)] {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
+                        <lucide-icon [name]="act.icon" [size]="16"></lucide-icon>
+                      </button>
+                    }
+                  </div>
+                </td>
+              }
+
+              @if (selectable()) {
+                <td class="px-6 py-4 text-center">
+                  <input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="rounded border-[var(--color-charcoal-grey)]">
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="columns().length + (actions().length ? 1 : 0) + (selectable() ? 1 : 0)" class="p-12 text-center text-[var(--color-storm-cloud)]">
+                <div class="flex flex-col items-center justify-center">
+                  <lucide-icon name="inbox" [size]="32" class="mb-2 text-[var(--color-fog-grey)]"></lucide-icon>
+                  <p class="text-[14px]">{{ emptyMessage() }}</p>
+                  @if (emptySubMessage()) {<p class="mt-1 text-[12px] text-[var(--color-fog-grey)]">{{ emptySubMessage() }}</p>}
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+
+        <tfoot class="border-t-2 border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/35 font-semibold text-[var(--color-porcelain)]">
+          <ng-content select="[table-footer]"></ng-content>
+        </tfoot>
+      </table>
     </div>
 
-    <div class="relative bg-[var(--color-graphite)] rounded-2xl shadow-sm border border-[var(--color-charcoal-grey)] flex flex-col mb-0">
-        @if (loading()) {
-            <div class="absolute inset-0 z-50 bg-[var(--color-graphite)]/80 backdrop-blur-[2px] flex items-center justify-center transition-all rounded-2xl">
-                <app-loading-spinner label="Cargando..."></app-loading-spinner>
+    <div class="divide-y divide-[var(--color-charcoal-grey)] md:hidden">
+      @for (row of paginatedData(); track $index) {
+        <article class="bg-[var(--color-graphite)] p-4 transition-colors hover:bg-[var(--color-deep-slate)]/35" [class.bg-[var(--color-cyan-spark)]/5]="isSelected(row)">
+          @if (selectable()) {
+            <div class="mb-3 flex justify-end">
+              <label class="inline-flex items-center gap-2 text-[12px] text-[var(--color-storm-cloud)]">
+                <span>Seleccionar</span>
+                <input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="rounded border-[var(--color-charcoal-grey)]">
+              </label>
             </div>
-        }
-        <div class="w-full overflow-x-auto overflow-y-hidden">
-            <table class="min-w-full whitespace-nowrap text-left">
-                <thead class="bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)]">
-                    <tr>
-                        @for (col of columns(); track col.key) {
-                            <th (click)="handleSort(col)" class="px-6 py-3 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] select-none" [class.cursor-pointer]="col.sortable" [class.hover:text-[var(--color-porcelain)]]="col.sortable">
-                                <div class="flex items-center gap-1">{{ col.header }}
-                                    @if (sortColumn() === col.key) {<lucide-icon [name]="sortDirection() === 'asc' ? 'chevron-up' : 'chevron-down'" [size]="12"></lucide-icon>}
-                                </div>
-                            </th>
-                        }
-                        @if (actions().length > 0) {<th class="px-6 py-3 text-right text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Acciones</th>}
-                        @if (selectable()) {<th class="px-6 py-3 text-center w-10"><input type="checkbox" [checked]="isAllSelected()" (change)="toggleAll()" class="rounded border-[var(--color-charcoal-grey)]"></th>}
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-[var(--color-charcoal-grey)] text-[14px]">
-                    @for (row of paginatedData(); track $index) {
-                        <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors" [class.bg-[var(--color-cyan-spark)]/5]="isSelected(row)">
-                            @for (col of columns(); track col.key) {
-                                <td class="px-6 py-4 text-[var(--color-porcelain)]" [ngSwitch]="col.type">
-                                    <ng-container *ngSwitchCase="'custom'"><ng-container *ngTemplateOutlet="customTemplates()[col.key]; context: { $implicit: row }"></ng-container></ng-container>
-                                    <span *ngSwitchCase="'tag'" class="inline-flex items-center rounded-lg bg-[var(--color-deep-slate)] px-2 py-1 text-xs font-medium text-[var(--color-storm-cloud)] font-mono">{{ row[col.key] || '-' }}</span>
-                                    <span *ngSwitchCase="'currency'" class="font-mono font-bold text-emerald-400">{{ row[col.key] | currency:'ARS':'symbol-narrow':'1.2-2' }}</span>
-                                    <span *ngSwitchCase="'badge'" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [ngClass]="{'bg-emerald-500/10 text-emerald-400': row[col.key] === 'Activo', 'bg-red-500/10 text-red-400': row[col.key] !== 'Activo'}">{{ row[col.key] }}</span>
-                                    <ng-container *ngSwitchCase="'boolean'"><div class="flex items-center">@if (row[col.key]) {<div class="p-1 rounded-full bg-emerald-500/10 text-emerald-400"><lucide-icon name="check" [size]="16"></lucide-icon></div>} @else {<div class="p-1 rounded-full text-[var(--color-storm-cloud)]"><lucide-icon name="x" [size]="16"></lucide-icon></div>}</div></ng-container>
-                                    <span *ngSwitchCase="'date'">{{ row[col.key] ? (row[col.key] | date:'dd/MM/yyyy HH:mm') : '-' }}</span>
-                                    <span *ngSwitchDefault>{{ row[col.key] }}</span>
-                                </td>
-                            }
-                            @if (actions().length > 0) {
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-1">
-                                        @for (act of actions(); track act.action) {
-                                            <button (click)="handleAction(act.action, row)" [title]="act.tooltip" class="p-1.5 rounded-lg hover:bg-[var(--color-deep-slate)] transition-colors {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}"><lucide-icon [name]="act.icon" [size]="16"></lucide-icon></button>
-                                        }
-                                    </div>
-                                </td>
-                            }
-                            @if (selectable()) {<td class="px-6 py-4 text-center"><input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="rounded border-[var(--color-charcoal-grey)]"></td>}
-                        </tr>
-                    } @empty {
-                        <tr><td [attr.colspan]="columns().length + (actions().length ? 1 : 0) + (selectable() ? 1 : 0)" class="p-12 text-center text-[var(--color-storm-cloud)]">
-                            <div class="flex flex-col items-center justify-center"><lucide-icon name="inbox" [size]="32" class="mb-2 text-[var(--color-fog-grey)]"></lucide-icon><p class="text-[14px]">No se encontraron resultados.</p></div>
-                        </td></tr>
+          }
+
+          <dl class="space-y-3">
+            @for (col of columns(); track col.key) {
+              <div class="rounded-xl border border-[var(--color-charcoal-grey)]/70 bg-[var(--color-pitch-black)]/45 p-3">
+                <dt class="mb-1 text-[10px] font-[700] uppercase tracking-widest text-[var(--color-storm-cloud)]">{{ col.header }}</dt>
+                <dd class="min-w-0 text-[14px] text-[var(--color-porcelain)]" [ngSwitch]="col.type">
+                  <ng-container *ngSwitchCase="'custom'">
+                    @if (customTemplates()[col.key]) {
+                      <ng-container *ngTemplateOutlet="customTemplates()[col.key]; context: { $implicit: row }"></ng-container>
                     }
-                </tbody>
-                <tfoot class="bg-[var(--color-deep-slate)]/20 border-t-2 border-[var(--color-charcoal-grey)] font-semibold text-[var(--color-porcelain)]"><ng-content select="[table-footer]"></ng-content></tfoot>
-            </table>
-        </div>
-        @if (processedData().length > 0) {
-            <div class="flex items-center justify-between px-6 py-4 bg-[var(--color-pitch-black)]/30 border-t border-[var(--color-charcoal-grey)]">
-                <span class="text-[13px] text-[var(--color-storm-cloud)]">Mostrando <span class="font-medium text-[var(--color-porcelain)]">{{ rangeInfo() }}</span></span>
-                <div class="flex items-center gap-2">
-                    <button (click)="prevPage()" [disabled]="currentPage() === 1" class="p-2 rounded-lg hover:bg-[var(--color-deep-slate)] border border-transparent text-[var(--color-storm-cloud)] disabled:opacity-50 transition-all"><lucide-icon name="chevron-left" [size]="18"></lucide-icon></button>
-                    <span class="text-[13px] font-medium text-[var(--color-porcelain)] px-2">{{ currentPage() }} / {{ totalPages() }}</span>
-                    <button (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="p-2 rounded-lg hover:bg-[var(--color-deep-slate)] border border-transparent text-[var(--color-storm-cloud)] disabled:opacity-50 transition-all"><lucide-icon name="chevron-right" [size]="18"></lucide-icon></button>
-                </div>
+                  </ng-container>
+                  <span *ngSwitchCase="'tag'" class="inline-flex max-w-full items-center rounded-lg bg-[var(--color-deep-slate)] px-2 py-1 text-xs font-medium text-[var(--color-storm-cloud)] font-mono">{{ row[col.key] || '-' }}</span>
+                  <span *ngSwitchCase="'currency'" class="font-mono font-bold text-emerald-500">{{ row[col.key] | currency:'ARS':'symbol-narrow':'1.2-2' }}</span>
+                  <span *ngSwitchCase="'badge'" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [ngClass]="{'bg-emerald-500/10 text-emerald-500': row[col.key] === 'Activo', 'bg-red-500/10 text-red-500': row[col.key] !== 'Activo'}">{{ row[col.key] }}</span>
+                  <ng-container *ngSwitchCase="'boolean'">
+                    @if (row[col.key]) {
+                      <span class="inline-flex items-center gap-1 text-emerald-500"><lucide-icon name="check" [size]="16"></lucide-icon>Sí</span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1 text-[var(--color-storm-cloud)]"><lucide-icon name="x" [size]="16"></lucide-icon>No</span>
+                    }
+                  </ng-container>
+                  <span *ngSwitchCase="'date'">{{ row[col.key] ? (row[col.key] | date:'dd/MM/yyyy HH:mm') : '-' }}</span>
+                  <span *ngSwitchDefault class="break-words">{{ row[col.key] || '-' }}</span>
+                </dd>
+              </div>
+            }
+          </dl>
+
+          @if (actions().length > 0) {
+            <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-[var(--color-charcoal-grey)] pt-3">
+              @for (act of actions(); track act.action) {
+                <button (click)="handleAction(act.action, row)" [title]="act.tooltip" class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-charcoal-grey)] px-3 py-2 text-[12px] transition-colors hover:bg-[var(--color-deep-slate)] {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
+                  <lucide-icon [name]="act.icon" [size]="16"></lucide-icon>
+                  <span>{{ act.tooltip || act.action }}</span>
+                </button>
+              }
             </div>
-        }
+          }
+        </article>
+      } @empty {
+        <div class="p-10 text-center text-[var(--color-storm-cloud)]">
+          <lucide-icon name="inbox" [size]="32" class="mx-auto mb-2 text-[var(--color-fog-grey)]"></lucide-icon>
+          <p class="text-[14px]">{{ emptyMessage() }}</p>
+                  @if (emptySubMessage()) {<p class="mt-1 text-[12px] text-[var(--color-fog-grey)]">{{ emptySubMessage() }}</p>}
+        </div>
+      }
     </div>
+
+    @if (processedData().length > 0) {
+      <div class="flex flex-col gap-3 border-t border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/35 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <span class="text-[13px] text-[var(--color-storm-cloud)]">Mostrando <span class="font-medium text-[var(--color-porcelain)]">{{ rangeInfo() }}</span></span>
+        <div class="flex items-center justify-between gap-2 sm:justify-end">
+          <button (click)="prevPage()" [disabled]="currentPage() === 1" class="rounded-lg border border-transparent p-2 text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] disabled:opacity-50">
+            <lucide-icon name="chevron-left" [size]="18"></lucide-icon>
+          </button>
+          <span class="px-2 text-[13px] font-medium text-[var(--color-porcelain)]">{{ currentPage() }} / {{ totalPages() }}</span>
+          <button (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="rounded-lg border border-transparent p-2 text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] disabled:opacity-50">
+            <lucide-icon name="chevron-right" [size]="18"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
 </div>

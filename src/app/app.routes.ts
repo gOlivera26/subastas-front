@@ -28,7 +28,6 @@ import { ProveedoresLayoutComponent } from './features/proveedores/proveedores-l
 import { ProveedoresHomeComponent } from './features/proveedores/home/home.component';
 import { ProveedoresComponent } from './features/proveedores/proveedores-layout/proveedores.component';
 import { RubrosListComponent } from './features/proveedores/rubros-list/rubros-list.component';
-import { RubrosTreeComponent } from './features/proveedores/rubros-tree/rubros-tree.component';
 import { CompraVentaLayoutComponent } from './features/compra-venta/compra-venta-layout/compra-venta-layout.component';
 import { DashboardCompraVentaComponent } from './features/compra-venta/dashboard/dashboard.component';
 import { SubastasComponent } from './features/compra-venta/subastas/subastas.component';
@@ -41,7 +40,10 @@ import { NotaPedidoComponent } from './features/licitaciones/nota-pedido/nota-pe
 import { SubastaComponent } from './features/licitaciones/subasta/subasta.component';
 import { SubastaCrearComponent } from './features/licitaciones/subasta/subasta-crear.component';
 import { InformesPlaceholderComponent } from './features/licitaciones/informes/informes.component';
-import { TableroPlaceholderComponent } from './features/licitaciones/tablero/tablero.component';
+import { TableroComponent } from './features/licitaciones/tablero/tablero.component';
+import { ConfigSubastasLayoutComponent } from './features/config-subastas/config-subastas-layout/config-subastas-layout.component';
+import { CotizacionesListComponent } from './features/config-subastas/cotizaciones-list/cotizaciones-list.component';
+import { CotizacionFormComponent } from './features/config-subastas/cotizacion-form/cotizacion-form.component';
 
 export const routes: Routes = [
   {
@@ -93,8 +95,8 @@ export const routes: Routes = [
     children: [
       { path: '', component: ProveedoresHomeComponent, data: { state: 'proveedores-home', title: 'Inicio' } },
       { path: 'listado', component: ProveedoresComponent, data: { state: 'proveedores-listado', title: 'Listado de Proveedores' } },
-      { path: 'rubros-list', component: RubrosListComponent, data: { state: 'rubros-list', title: 'Rubros (Lista)' } },
-      { path: 'rubros-tree', component: RubrosTreeComponent, data: { state: 'rubros-tree', title: 'Rubros (Árbol)' } }
+      { path: 'rubros-list', component: RubrosListComponent, data: { state: 'rubros', title: 'Rubros' } },
+      { path: 'rubros-tree', redirectTo: 'rubros-list', pathMatch: 'full' }
     ]
   },
 
@@ -120,7 +122,18 @@ export const routes: Routes = [
       { path: 'subasta', component: SubastaComponent, data: { state: 'subasta', title: 'Subasta' } },
       { path: 'subasta/crear', component: SubastaCrearComponent, data: { state: 'subasta-crear', title: 'Nueva Subasta' } },
       { path: 'informes', component: InformesPlaceholderComponent, data: { state: 'informes', title: 'Informes' } },
-      { path: 'tablero', component: TableroPlaceholderComponent, data: { state: 'tablero', title: 'Tablero' } },
+      { path: 'tablero', component: TableroComponent, data: { state: 'tablero', title: 'Tablero' } },
+    ]
+  },
+
+  {
+    path: 'config-subastas',
+    component: ConfigSubastasLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: '', component: CotizacionesListComponent, data: { state: 'cotizaciones', title: 'Cotizaciones' } },
+      { path: 'nueva', component: CotizacionFormComponent, data: { state: 'nueva-cotizacion', title: 'Nueva Subasta' } },
+      { path: ':id', component: CotizacionFormComponent, data: { state: 'editar-cotizacion', title: 'Editar Subasta' } },
     ]
   },
 

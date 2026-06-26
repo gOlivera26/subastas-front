@@ -115,7 +115,7 @@
   </div>
 
   <div 
-    class="absolute top-0 left-0 w-full h-screen bg-[var(--color-pitch-black)]/98 backdrop-blur-3xl border-b border-[var(--color-charcoal-grey)] transition-all duration-300 md:hidden overflow-y-auto flex flex-col shadow-2xl"
+    class="fixed inset-x-0 top-0 h-dvh max-h-dvh min-w-0 bg-[var(--color-pitch-black)]/98 backdrop-blur-3xl border-b border-[var(--color-charcoal-grey)] transition-all duration-300 md:hidden overflow-y-auto overscroll-contain flex flex-col shadow-2xl"
     [ngClass]="isMobileMenuOpen() ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
   >
     <div class="flex flex-col gap-3 px-6 pt-24 pb-8">
@@ -348,4 +348,3 @@
     </div>
   </div>
 }
-

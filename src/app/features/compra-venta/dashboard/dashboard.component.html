@@ -17,10 +17,7 @@
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 border-b border-[var(--color-charcoal-grey)] pb-8">
     <div>
       <label class="mb-2 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Vigencia</label>
-      <select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 px-4 py-3 text-[14px] font-[510] text-[var(--color-porcelain)] focus:border-[var(--color-neon-lime)] outline-none transition-colors"
-              [ngModel]="selectedVigenciaId()" (change)="onVigenciaChange($any($event.target).value)">
-        @for (v of vigencias(); track v.idVigencia) {<option [value]="v.idVigencia">Ejercicio {{ v.ejercicio }} {{ v.activoEjecucion ? '(Activo)' : '' }}</option>}
-      </select>
+      <app-custom-select placeholder="Ejercicio" [options]="vigenciaOptions()" [value]="selectedVigenciaId()" (valueChange)="onVigenciaChange($event)"></app-custom-select>
     </div>
     <div>
       <label class="mb-2 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Desde</label>
@@ -118,68 +115,33 @@
 
   <section>
     <h2 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-5">Calendario del Mes</h2>
-    <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/40 overflow-hidden shadow-lg">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-[14px] whitespace-nowrap">
-          <thead class="bg-[var(--color-deep-slate)]/30 border-b border-[var(--color-charcoal-grey)] text-[11px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)]">
-            <tr>
-              <th class="px-6 py-5">Nro</th>
-              <th class="px-6 py-5">Subasta</th>
-              <th class="px-6 py-5">Tipo</th>
-              <th class="px-6 py-5">Fecha</th>
-              <th class="px-6 py-5">Estado</th>
-              <th class="px-6 py-5 text-right">Acción</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
-            @if (delMes().length === 0) {
-              <tr><td colspan="6" class="px-6 py-16 text-center text-[var(--color-storm-cloud)]">No hay subastas programadas para este mes</td></tr>
-            } @else {
-              @for (sub of delMes(); track sub.idCotizacion) {
-                <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors">
-                  <td class="px-6 py-4 font-mono text-[var(--color-fog-grey)] text-[13px]">{{ sub.nroCotizacion }}</td>
-                  <td class="px-6 py-4 font-[510] text-[var(--color-porcelain)]">{{ sub.titulo }}</td>
-                  <td class="px-6 py-4 text-[var(--color-storm-cloud)]">{{ sub.tipo }}</td>
-                  <td class="px-6 py-4 text-[var(--color-porcelain)]">{{ sub.fechaInicio | date:'dd/MM/yyyy' }}</td>
-                  <td class="px-6 py-4">
-                    @if (sub.idEstado === 4) {
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.2)">
-                        <span class="size-1.5 rounded-full bg-[#94a3b8]"></span>Generado
-                      </span>
-                    }
-                    @else if (sub.idEstado === 39) {
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.2)">
-                        <span class="size-1.5 rounded-full animate-pulse bg-[#34d399]"></span>Enviada Pendiente
-                      </span>
-                    }
-                    @else if (sub.idEstado === 40) {
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid rgba(56,189,248,0.2)">
-                        <span class="size-1.5 rounded-full bg-[#38bdf8]"></span>Finalizada
-                      </span>
-                    }
-                    @else if (sub.idEstado === 20) {
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(248,113,113,0.1);color:#f87171;border:1px solid rgba(248,113,113,0.2)">
-                        <span class="size-1.5 rounded-full bg-[#f87171]"></span>Anulada
-                      </span>
-                    }
-                    @else if (sub.idEstado === 47) {
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-[590]" style="background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.2)">
-                        <span class="size-1.5 rounded-full bg-[#a78bfa]"></span>Desistida
-                      </span>
-                    }
-                    @else {
-                      <span class="px-2.5 py-1 rounded-md border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] text-[var(--color-storm-cloud)] text-[10px] font-[600] uppercase tracking-wider">{{ sub.estado }}</span>
-                    }
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <a [routerLink]="['/compra-venta/subastas', sub.idCotizacion]" class="text-[var(--color-neon-lime)] hover:underline text-[13px] font-[600] tracking-wide">Ver</a>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <ng-template #estadoTpl let-row>
+      @if (row.idEstado === 4) {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-[590]" style="background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.2)"><span class="size-1.5 rounded-full bg-[#94a3b8]"></span>Generado</span>
+      } @else if (row.idEstado === 39) {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-[590]" style="background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.2)"><span class="size-1.5 rounded-full animate-pulse bg-[#34d399]"></span>Enviada Pendiente</span>
+      } @else if (row.idEstado === 40) {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-[590]" style="background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid rgba(56,189,248,0.2)"><span class="size-1.5 rounded-full bg-[#38bdf8]"></span>Finalizada</span>
+      } @else if (row.idEstado === 20) {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-[590]" style="background:rgba(248,113,113,0.1);color:#f87171;border:1px solid rgba(248,113,113,0.2)"><span class="size-1.5 rounded-full bg-[#f87171]"></span>Anulada</span>
+      } @else if (row.idEstado === 47) {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-[590]" style="background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.2)"><span class="size-1.5 rounded-full bg-[#a78bfa]"></span>Desistida</span>
+      } @else {
+        <span class="rounded-md border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2.5 py-1 text-[10px] font-[600] uppercase tracking-wider text-[var(--color-storm-cloud)]">{{ row.estado }}</span>
+      }
+    </ng-template>
+
+    <ng-template #accionTpl let-row>
+      <div class="flex justify-end"><a [routerLink]="['/compra-venta/subastas', row.idCotizacion]" class="text-[13px] font-[600] tracking-wide text-[var(--color-neon-lime)] hover:underline">Ver</a></div>
+    </ng-template>
+
+    <app-smart-table
+      [columns]="calendarioColumns"
+      [data]="delMes()"
+      [customTemplates]="calendarioTemplates()"
+      [loading]="loading()"
+      [pageSize]="10"
+      emptyMessage="No hay subastas programadas para este mes">
+    </app-smart-table>
   </section>
 </div>

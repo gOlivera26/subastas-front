@@ -1,38 +1,43 @@
 <div class="mx-auto max-w-[1200px]">
   <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div><h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Áreas / Oficinas</h1><p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Sub-responsables dependientes de cada Unidad Administrativa.</p></div>
-    <div class="flex items-center gap-3">
-      <select class="rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] text-[var(--color-porcelain)]" [ngModel]="selectedUaId()" (change)="onUaChange($event)">
-        <option [ngValue]="null">Todas las UA</option>
-        @for (ua of unidadesAdm(); track ua.idUnidadAdm) {<option [value]="ua.idUnidadAdm">{{ ua.nombreUnidadAdm }}</option>}
-      </select>
-      <button (click)="openUpload()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)]"><lucide-icon name="upload" [size]="16"></lucide-icon>Importar CSV</button>
-      <button (click)="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)]"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva Área</button>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+      <div class="w-full sm:w-64"><app-custom-select placeholder="Todas las UA" [options]="uaOptions()" [value]="selectedUaId()" (valueChange)="onUaChange($event)"></app-custom-select></div>
+      <button (click)="openUpload()" class="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)]"><lucide-icon name="upload" [size]="16"></lucide-icon>Importar CSV</button>
+      <button (click)="openCreateModal()" class="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)]"><lucide-icon name="plus" [size]="16"></lucide-icon>Nueva Área</button>
     </div>
   </div>
   @if (successMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] text-emerald-400"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
   @if (errorMessage(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] text-red-400"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
 
-  <ng-template cellKey="vigente" let-row>
+  <ng-template #vigenteTpl let-row>
     @if (row.vigente) {<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[12px] font-[590] text-emerald-400"><span class="size-1.5 rounded-full bg-emerald-400"></span>Activo</span>}
     @else {<span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-charcoal-grey)]/30 px-2.5 py-0.5 text-[12px] font-[590] text-[var(--color-storm-cloud)]">Inactivo</span>}
   </ng-template>
-  <ng-template cellKey="acciones" let-row>
+  <ng-template #accionesTpl let-row>
     <div class="flex items-center justify-end gap-1">
       <button (click)="openEditModal(row)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
       <button (click)="confirmDelete(row)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-red-400"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
     </div>
   </ng-template>
-  <app-data-table [columns]="columns" [data]="items()" [totalRows]="items().length" [loading]="isLoading()" [pageSize]="999" [cellTemplates]="cellTemplatesMap()" emptyMessage="No hay áreas registradas" emptySubMessage="Creá la primera o importá un CSV."></app-data-table>
+  <app-smart-table
+    [columns]="columns"
+    [data]="items()"
+    [customTemplates]="customTemplates()"
+    [loading]="isLoading()"
+    [pageSize]="999"
+    emptyMessage="No hay áreas registradas"
+    emptySubMessage="Creá la primera o importá un CSV.">
+  </app-smart-table>
 </div>
 
 @if (isModalOpen()) {<div class="fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div><div class="relative w-full max-w-lg rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in"><div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar' : 'Nueva' }} Área</h3><button (click)="closeModal()" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>
 <div class="space-y-4 px-6 py-6"><div class="grid grid-cols-2 gap-4">
   <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Código <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.codigo" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"/></div>
-  <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Área Padre</label><select [(ngModel)]="form.idSubRespRel" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option [ngValue]="undefined">Ninguno (raíz)</option>@for (p of parentList(); track p.idSubResponsable) {<option [value]="p.idSubResponsable">{{ p.codigo }} - {{ p.nombre }}</option>}</select></div>
+  <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Área Padre</label><app-custom-select placeholder="Ninguno (raíz)" [options]="parentOptions()" [(value)]="form.idSubRespRel"></app-custom-select></div>
 </div>
 <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Nombre <span class="text-red-400">*</span></label><input type="text" [(ngModel)]="form.nombre" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"/></div>
-<div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Unidad Administrativa</label><select [(ngModel)]="form.idUnidadAdm" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option [ngValue]="undefined">Ninguna</option>@for (ua of unidadesAdm(); track ua.idUnidadAdm) {<option [value]="ua.idUnidadAdm">{{ ua.nombreUnidadAdm }}</option>}</select></div>
+<div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Unidad Administrativa</label><app-custom-select placeholder="Ninguna" [options]="formUaOptions()" [(value)]="form.idUnidadAdm"></app-custom-select></div>
 <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" [(ngModel)]="form.vigente" class="peer sr-only" /><div class="h-5 w-9 rounded-full bg-[var(--color-charcoal-grey)] peer-checked:bg-emerald-500/40 after:absolute after:h-4 after:w-4 after:rounded-full after:bg-[var(--color-storm-cloud)] after:transition-all peer-checked:after:translate-x-4 peer-checked:after:bg-emerald-400 relative"></div><span class="text-[13px] text-[var(--color-light-steel)]">Vigente</span></label></div>
 <div class="flex justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4"><button (click)="closeModal()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button><button (click)="save()" [disabled]="isSaving()" class="rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black disabled:opacity-50">@if (isSaving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Guardar</button></div></div></div>}
 

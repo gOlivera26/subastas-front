@@ -80,7 +80,13 @@ export class LoginComponent implements OnDestroy {
     this.authService.login(email, password).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.router.navigate(['/modulos']);
+        const user = this.authService.currentUser();
+        const proveedor = user?.entidades?.find(e => e.tipo === 'PROVEEDOR');
+        if (proveedor) {
+          this.authService.switchContext(proveedor.tipo, proveedor.id).subscribe();
+        } else {
+          this.router.navigate(['/modulos']);
+        }
       },
       error: (err) => {
         this.isLoading.set(false);

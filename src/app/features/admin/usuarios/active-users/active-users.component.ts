@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren, Directive, Input } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -7,22 +7,15 @@ import { ActiveUser, UserAudit, UserService } from '../../../../core/services/us
 import { Role, RoleService } from '../../../../core/services/role.service';
 import { Organization, OrganizationService } from '../../../../core/services/organization.service';
 import { ProviderService, ProviderResponse } from '../../../../core/services/provider.service';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table';
-
-@Directive({
-  selector: 'ng-template[cellKey]',
-  standalone: true,
-})
-export class CellTemplateDirective {
-  @Input({ required: true }) cellKey!: string;
-  constructor(public templateRef: TemplateRef<any>) {}
-}
+import { SmartTableComponent } from '../../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../../shared/ui/smart-table/table.models';
+import { CustomSelect, SelectOption } from '../../../../shared/ui/custom-select/custom-select';
 
 
 @Component({
   selector: 'app-active-users',
   standalone: true,
-  imports: [LucideAngularModule, ReactiveFormsModule, NgClass, DatePipe, DataTableComponent, CellTemplateDirective],
+  imports: [LucideAngularModule, ReactiveFormsModule, NgClass, DatePipe, SmartTableComponent, CustomSelect],
   templateUrl: './active-users.component.html'
 })
 export class ActiveUsersComponent implements OnInit {
@@ -42,22 +35,49 @@ export class ActiveUsersComponent implements OnInit {
   Math = Math;
 
   columns: TableColumn[] = [
-    { key: 'estado', label: 'Estado', sortable: true, width: '100px' },
-    { key: 'nombreCompleto', label: 'Usuario / Contacto', sortable: true },
-    { key: 'documento', label: 'Documento', sortable: true, width: '120px' },
-    { key: 'rol', label: 'Rol del Sistema', width: '120px' },
-    { key: 'tipoUsuario', label: 'Tipo / Entidad' },
-    { key: 'acciones', label: 'Acciones', align: 'right', width: '160px' },
+    { key: 'estado', header: 'Estado', type: 'custom', sortable: true },
+    { key: 'nombreCompleto', header: 'Usuario / Contacto', type: 'custom', sortable: true },
+    { key: 'documento', header: 'Documento', type: 'custom', sortable: true },
+    { key: 'rol', header: 'Rol del Sistema', type: 'custom' },
+    { key: 'tipoUsuario', header: 'Tipo / Entidad', type: 'custom' },
+    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach(d => {
-      map[d.cellKey] = d.templateRef;
-    });
-    return map;
+  estadoTpl = viewChild<TemplateRef<any>>('estadoTpl');
+  nombreCompletoTpl = viewChild<TemplateRef<any>>('nombreCompletoTpl');
+  documentoTpl = viewChild<TemplateRef<any>>('documentoTpl');
+  rolTpl = viewChild<TemplateRef<any>>('rolTpl');
+  tipoUsuarioTpl = viewChild<TemplateRef<any>>('tipoUsuarioTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const estado = this.estadoTpl();
+    const nombreCompleto = this.nombreCompletoTpl();
+    const documento = this.documentoTpl();
+    const rol = this.rolTpl();
+    const tipoUsuario = this.tipoUsuarioTpl();
+    const acciones = this.accionesTpl();
+
+    if (estado) templates['estado'] = estado;
+    if (nombreCompleto) templates['nombreCompleto'] = nombreCompleto;
+    if (documento) templates['documento'] = documento;
+    if (rol) templates['rol'] = rol;
+    if (tipoUsuario) templates['tipoUsuario'] = tipoUsuario;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
   });
+
+  roleOptions = computed<SelectOption[]>(() => [
+    { label: '-- Seleccionar Rol --', value: '' },
+    ...this.roles().map(rol => ({ label: rol.nombre, value: rol.id }))
+  ]);
+
+  organizationOptions = computed<SelectOption[]>(() => [
+    { label: '-- Seleccionar Organización --', value: '' },
+    ...this.organizations().map(org => ({ label: org.nombre, value: org.idOrganizacion }))
+  ]);
 
   sortKey = signal<string>('nombreCompleto');
   sortDirection = signal<'asc' | 'desc'>('asc');
@@ -69,9 +89,8 @@ export class ActiveUsersComponent implements OnInit {
     this.loadUsers();
   }
 
-  onPageChange(event: { page: number; pageSize: number }) {
-    this.currentPage.set(event.page);
-    this.pageSize.set(event.pageSize);
+  onPageChange(page: number) {
+    this.currentPage.set(page);
     this.loadUsers();
   }
 
@@ -133,6 +152,12 @@ export class ActiveUsersComponent implements OnInit {
     this.orgService.getActiveOrganizations().subscribe({
       next: (res) => { if (res.success && res.data) this.organizations.set(res.data); }
     });
+  }
+
+  onSearch(term: string) {
+    this.searchControl.setValue(term, { emitEvent: false });
+    this.currentPage.set(1);
+    this.loadUsers();
   }
 
   loadUsers() {

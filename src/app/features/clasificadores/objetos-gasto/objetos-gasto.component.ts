@@ -1,19 +1,20 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChildren } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table';
-import { CellTemplateDirective } from '../../../shared/directives/cell-template.directive';
 import { ObjetoGastoService, ObjetoGastoRequest, ObjetoGastoBulkItem } from '../../../core/services/objeto-gasto.service';
 import { ObjetoGasto } from '../../../core/models/objeto-gasto.model';
 import { VigenciaService } from '../../../core/services/vigencia.service';
 import { Vigencia } from '../../../core/models/vigencia.model';
 import { OrganizationService, Organization } from '../../../core/services/organization.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 
 @Component({
   selector: 'app-objetos-gasto',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DataTableComponent, CellTemplateDirective],
+  imports: [FormsModule, LucideAngularModule, SmartTableComponent, CustomSelect],
   templateUrl: './objetos-gasto.component.html',
 })
 export class ObjetosGastoComponent implements OnInit {
@@ -41,21 +42,52 @@ export class ObjetosGastoComponent implements OnInit {
   uploadOrgId = signal<number | undefined>(undefined);
   isUploading = signal(false);
 
-  cellTemplateDirectives = viewChildren(CellTemplateDirective);
-  cellTemplatesMap = computed(() => {
-    const map: Record<string, TemplateRef<any>> = {};
-    this.cellTemplateDirectives().forEach(d => { map[d.cellKey] = d.templateRef; });
-    return map;
+  numeroObjetoTpl = viewChild<TemplateRef<any>>('numeroObjetoTpl');
+  idObjetoGastoRelTpl = viewChild<TemplateRef<any>>('idObjetoGastoRelTpl');
+  imputaEjecucionTpl = viewChild<TemplateRef<any>>('imputaEjecucionTpl');
+  organizacionNombreTpl = viewChild<TemplateRef<any>>('organizacionNombreTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const numeroObjeto = this.numeroObjetoTpl();
+    const idObjetoGastoRel = this.idObjetoGastoRelTpl();
+    const imputaEjecucion = this.imputaEjecucionTpl();
+    const organizacionNombre = this.organizacionNombreTpl();
+    const acciones = this.accionesTpl();
+
+    if (numeroObjeto) templates['numeroObjeto'] = numeroObjeto;
+    if (idObjetoGastoRel) templates['idObjetoGastoRel'] = idObjetoGastoRel;
+    if (imputaEjecucion) templates['imputaEjecucion'] = imputaEjecucion;
+    if (organizacionNombre) templates['organizacionNombre'] = organizacionNombre;
+    if (acciones) templates['acciones'] = acciones;
+
+    return templates;
   });
 
   columns: TableColumn[] = [
-    { key: 'numeroObjeto', label: 'Número', width: '120px' },
-    { key: 'nombreObjeto', label: 'Nombre' },
-    { key: 'idObjetoGastoRel', label: 'Padre', width: '100px' },
-    { key: 'imputaEjecucion', label: 'Ejecución', width: '100px' },
-    { key: 'organizacionNombre', label: 'Org.', width: '100px' },
-    { key: 'acciones', label: 'Acciones', align: 'right', width: '100px' },
+    { key: 'numeroObjeto', header: 'Número', type: 'custom', sortable: true },
+    { key: 'nombreObjeto', header: 'Nombre', sortable: true },
+    { key: 'idObjetoGastoRel', header: 'Padre', type: 'custom' },
+    { key: 'imputaEjecucion', header: 'Ejecución', type: 'custom' },
+    { key: 'organizacionNombre', header: 'Org.', type: 'custom', sortable: true },
+    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
+
+  vigenciaOptions = computed<SelectOption[]>(() => this.vigencias().map(v => ({
+    label: `Ejercicio ${v.ejercicio}${v.activoEjecucion ? ' (Activo)' : ''}`,
+    value: v.idVigencia
+  })));
+
+  parentOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguno (raíz)', value: undefined },
+    ...this.parentList().map(p => ({ label: `${p.numeroObjeto} - ${p.nombreObjeto}`, value: p.idObjetoGasto }))
+  ]);
+
+  organizacionOptions = computed<SelectOption[]>(() => [
+    { label: 'Ninguna / Global', value: undefined },
+    ...this.organizaciones().map(org => ({ label: org.nombre, value: org.idOrganizacion }))
+  ]);
 
   ngOnInit() { this.loadVigencias(); this.loadOrganizaciones(); }
 
@@ -80,7 +112,7 @@ export class ObjetosGastoComponent implements OnInit {
 
   loadOrganizaciones() { this.orgService.getActiveOrganizations().subscribe({ next: (res: any) => { if (res.success && res.data) this.organizaciones.set(res.data); } }); }
 
-  onVigenciaChange(event: any) { this.selectedVigenciaId.set(Number(event.target.value)); this.loadItems(); }
+  onVigenciaChange(value: any) { this.selectedVigenciaId.set(Number(value)); this.loadItems(); }
 
   loadItems() {
     const id = this.selectedVigenciaId(); if (!id) return;

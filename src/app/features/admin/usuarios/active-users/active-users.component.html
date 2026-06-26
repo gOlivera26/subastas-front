@@ -7,15 +7,6 @@
         <p class="text-[14px] text-[var(--color-storm-cloud)]">Listado maestro de cuentas empadronadas.</p>
       </div>
 
-      <div class="relative w-full sm:w-80">
-        <lucide-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
-        <input 
-          [formControl]="searchControl"
-          type="text" 
-          placeholder="Buscar por DNI, Nombre o Email..." 
-          class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 pl-10 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors"
-        >
-      </div>
     </div>
 
     @if (errorMessage()) {
@@ -25,18 +16,7 @@
       </div>
     }
 
-    <app-data-table
-      [columns]="columns"
-      [data]="activeUsers()"
-      [totalRows]="totalRows()"
-      [loading]="isLoading()"
-      [currentPage]="currentPage()"
-      [pageSize]="pageSize()"
-      [cellTemplates]="cellTemplatesMap()"
-      (sortChange)="onSort($event)"
-      (pageChange)="onPageChange($event)">
-
-      <ng-template cellKey="estado" let-row>
+    <ng-template #estadoTpl let-row>
         <span [ngClass]="{
                 'bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]': row.estado === 'ACTIVO',
                 'bg-red-500/10 text-red-400': row.estado === 'BAJA' || row.estado === 'INACTIVO',
@@ -48,29 +28,29 @@
         </span>
       </ng-template>
 
-      <ng-template cellKey="nombreCompleto" let-row>
+      <ng-template #nombreCompletoTpl let-row>
         <p class="font-[590] text-[var(--color-porcelain)]">{{ row.nombreCompleto }}</p>
         <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5">{{ row.email }}</p>
       </ng-template>
 
-      <ng-template cellKey="documento" let-row>
+      <ng-template #documentoTpl let-row>
         <span class="text-[var(--color-fog-grey)] font-mono text-[13px]">{{ row.documento }}</span>
       </ng-template>
 
-      <ng-template cellKey="rol" let-row>
+      <ng-template #rolTpl let-row>
         <span class="bg-[var(--color-pitch-black)] border border-[var(--color-charcoal-grey)] px-2 py-1 rounded text-[11px] font-[510] text-[var(--color-porcelain)]">
           {{ row.rol }}
         </span>
       </ng-template>
 
-      <ng-template cellKey="tipoUsuario" let-row>
+      <ng-template #tipoUsuarioTpl let-row>
         <p class="text-[11px] uppercase tracking-widest font-bold text-[var(--color-cyan-spark)] mb-0.5">{{ row.tipoUsuario }}</p>
         <p class="text-[13px] text-[var(--color-porcelain)] truncate max-w-[200px]" [title]="row.entidadRepresentada">
           {{ row.entidadRepresentada }}
         </p>
       </ng-template>
 
-      <ng-template cellKey="acciones" let-row>
+      <ng-template #accionesTpl let-row>
         <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
           
           <button (click)="linkEntity(row)" title="Vincular a Entidad (Proveedor/Org)" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
@@ -94,7 +74,20 @@
           </button>
         </div>
       </ng-template>
-    </app-data-table>
+
+    <app-smart-table
+      [columns]="columns"
+      [data]="activeUsers()"
+      [customTemplates]="customTemplates()"
+      [loading]="isLoading()"
+      [serverSide]="true"
+      [totalServerItems]="totalRows()"
+      [pageSize]="pageSize()"
+      searchPlaceholder="Buscar por DNI, nombre o email..."
+      (sortChange)="onSort($event)"
+      (pageChange)="onPageChange($event)"
+      (searchChange)="onSearch($event)">
+    </app-smart-table>
   </div>
 </div>
 
@@ -197,15 +190,7 @@
       </div>
       <div class="mb-8">
         <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Nuevo Rol *</label>
-        <select 
-          [value]="selectedRoleId()"
-          (change)="selectedRoleId.set($any($event.target).value)"
-          class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
-          <option value="" disabled>-- Seleccionar Rol --</option>
-          @for (rol of roles(); track rol.id) {
-            <option [value]="rol.id">{{ rol.nombre }}</option>
-          }
-        </select>
+        <app-custom-select placeholder="-- Seleccionar Rol --" [options]="roleOptions()" [value]="selectedRoleId()" (valueChange)="selectedRoleId.set($event)"></app-custom-select>
       </div>
       <div class="flex gap-3">
         <button (click)="closeRoleModal()" class="w-1/2 rounded-xl bg-[var(--color-deep-slate)] py-3 text-[14px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
@@ -274,15 +259,7 @@
         @if (linkType() === 'GESTOR') {
           <div class="animate-fade-in">
             <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Seleccionar Organización *</label>
-            <select 
-              [value]="selectedOrgId()" 
-              (change)="selectedOrgId.set($any($event.target).value)"
-              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
-              <option value="" disabled>-- Seleccionar Organización --</option>
-              @for (org of organizations(); track org.idOrganizacion) {
-                <option [value]="org.idOrganizacion">{{ org.nombre }}</option>
-              }
-            </select>
+            <app-custom-select placeholder="-- Seleccionar Organización --" [options]="organizationOptions()" [value]="selectedOrgId()" (valueChange)="selectedOrgId.set($event)"></app-custom-select>
           </div>
         }
 
