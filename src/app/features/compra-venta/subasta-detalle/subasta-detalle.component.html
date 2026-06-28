@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-[1500px]">
+﻿<div class="mx-auto max-w-[1500px]">
   <span class="hidden">{{ tick() }}</span>
 
   @if (loading()) {
@@ -51,7 +51,7 @@
             <div class="absolute inset-0 z-20 bg-[var(--color-pitch-black)]/70 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-none">
               <lucide-icon name="lock" [size]="48" class="text-[var(--color-storm-cloud)] mb-4 opacity-50"></lucide-icon>
               <p class="text-[18px] font-[590] uppercase tracking-widest text-[var(--color-porcelain)]">Sala Cerrada</p>
-              <p class="text-[13px] text-[var(--color-storm-cloud)] mt-2">La subasta ha finalizado o aún no comienza.</p>
+              <p class="text-[13px] text-[var(--color-storm-cloud)] mt-2">La subasta ha finalizado o aÃºn no comienza.</p>
             </div>
           }
 
@@ -62,14 +62,14 @@
               </div>
               <h2 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Has desistido de esta subasta</h2>
               <p class="text-[14px] text-[var(--color-storm-cloud)] max-w-md mx-auto">
-                Declinaste tu participación. Tu decisión ha sido registrada y el panel de pujas se ha bloqueado de forma permanente.
+                Declinaste tu participaciÃ³n. Tu decisiÃ³n ha sido registrada y el panel de pujas se ha bloqueado de forma permanente.
               </p>
             </div>
           } @else {
             <div class="flex items-center justify-between mb-5 border-b border-[var(--color-charcoal-grey)] pb-4">
               <h2 class="text-[14px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)] flex items-center gap-2">
                 <lucide-icon name="list" [size]="18" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-                Panel de Ofertas ({{ isPorRenglon ? 'Por Renglón' : 'Por Ítem' }})
+                Panel de Ofertas ({{ isPorRenglon ? 'Por RenglÃ³n' : 'Por Ãtem' }})
               </h2>
               <button (click)="enviarOfertasSeleccionadas()" [disabled]="ofertando() || !isLive" class="relative z-30 rounded-lg bg-[var(--color-neon-lime)] px-8 py-3 text-[13px] font-[600] text-black uppercase tracking-wider transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-[0_0_20px_rgba(228,242,34,0.2)]">
                 @if (ofertando()) {
@@ -103,7 +103,7 @@
 
                     <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors" [class.bg-[var(--color-neon-lime)]/5]="rowState?.ofertar" [class.bg-red-500/5]="rowState?.textoError">
                       <td class="px-4 py-4 text-center">
-                        <button title="Ver historial de este ítem" class="p-1.5 rounded-lg text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors">
+                        <button title="Ver historial de este Ã­tem" class="p-1.5 rounded-lg text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors">
                           <lucide-icon name="history" [size]="16"></lucide-icon>
                         </button>
                       </td>
@@ -150,7 +150,7 @@
                         <div class="inline-flex rounded-lg border border-[var(--color-charcoal-grey)] p-1 bg-[var(--color-pitch-black)] relative z-20">
                           <button (click)="toggleOfertar(rowId, true)" [disabled]="!isLive"
                                   [class]="rowState.ofertar ? 'bg-[var(--color-neon-lime)] text-black font-[600]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"
-                                  class="px-4 py-1 text-[11px] uppercase tracking-wider rounded transition-colors disabled:opacity-50">Sí</button>
+                                  class="px-4 py-1 text-[11px] uppercase tracking-wider rounded transition-colors disabled:opacity-50">SÃ­</button>
                           <button (click)="toggleOfertar(rowId, false)" [disabled]="!isLive"
                                   [class]="!rowState.ofertar ? 'bg-red-500/20 text-red-400 font-[600]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"
                                   class="px-4 py-1 text-[11px] uppercase tracking-wider rounded transition-colors disabled:opacity-50">No</button>
@@ -191,7 +191,7 @@
               <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-[var(--color-storm-cloud)]">
                 <lucide-icon name="bar-chart" [size]="48" class="mb-4 opacity-30"></lucide-icon>
                 <p class="text-[14px] font-[510]">Esperando actividad de mercado...</p>
-                <p class="text-[12px] mt-1 opacity-70">El gráfico se dibujará al ingresar la primera puja.</p>
+                <p class="text-[12px] mt-1 opacity-70">El grÃ¡fico se dibujarÃ¡ al ingresar la primera puja.</p>
               </div>
             } @else {
               <apx-chart
@@ -250,7 +250,7 @@
                 <lucide-icon name="shield-alert" [size]="24" class="text-amber-400"></lucide-icon>
               </div>
               <div class="text-left">
-                <h3 class="text-[13px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)]">Garantía / Pagaré</h3>
+                <h3 class="text-[13px] font-[600] uppercase tracking-widest text-[var(--color-porcelain)]">GarantÃ­a / PagarÃ©</h3>
                 <p class="text-[11px] text-[var(--color-storm-cloud)] mt-1">Requisito validador</p>
               </div>
             </div>
@@ -286,11 +286,18 @@
                       <span class="text-[9px] font-mono text-[var(--color-fog-grey)]">{{ oferta.fecha | date:'ss' }}s</span>
                     </div>
                     
-                    <div class="flex-1 min-w-0 flex items-center justify-between">
-                      <p class="text-[12px] font-[590] text-[var(--color-porcelain)] truncate">
-                        {{ isDirecta ? 'Oferente' : 'Proveedor' }} #{{ oferta.idProveedor }}
-                      </p>
-                      <p class="text-[14px] font-mono font-bold" [class.text-[var(--color-neon-lime)]]="!isDirecta" [class.text-[var(--color-cyan-spark)]]="isDirecta">${{ oferta.monto | number:'1.2-2' }}</p>
+                    <div class="flex-1 min-w-0 flex items-center justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-[12px] font-[650] text-[var(--color-porcelain)] truncate">
+                          {{ oferta.representante || oferta.usuario || ((isDirecta ? 'Oferente' : 'Proveedor') + ' #' + oferta.idProveedor) }}
+                        </p>
+                        @if (oferta.proveedor) {
+                          <p class="mt-0.5 text-[10px] uppercase tracking-wide text-[var(--color-storm-cloud)] truncate">
+                            {{ oferta.proveedor }}
+                          </p>
+                        }
+                      </div>
+                      <p class="shrink-0 text-[14px] font-mono font-bold" [class.text-[var(--color-neon-lime)]]="!isDirecta" [class.text-[var(--color-cyan-spark)]]="isDirecta">${{ oferta.monto | number:'1.2-2' }}</p>
                     </div>
 
                   </div>
@@ -305,7 +312,7 @@
   }
 </div>
 
-<app-modal [isOpen]="isGarantiasModalOpen()" title="Garantías / Pagarés de Mantenimiento" subtitle="Adjuntá la documentación requerida" maxWidthClass="max-w-3xl" (close)="closeGarantiasModal()">
+<app-modal [isOpen]="isGarantiasModalOpen()" title="GarantÃ­as / PagarÃ©s de Mantenimiento" subtitle="AdjuntÃ¡ la documentaciÃ³n requerida" maxWidthClass="max-w-3xl" (close)="closeGarantiasModal()">
   <div class="p-6">
     <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 p-5 mb-6">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -313,8 +320,8 @@
           <label class="mb-1 block text-[11px] uppercase tracking-widest text-[var(--color-storm-cloud)]">Tipo de Documento</label>
           <select [(ngModel)]="garantiaForm.idTipoDocumento" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]">
             <option value="0">-- Seleccionar --</option>
-            <option value="1">Póliza de Caución</option>
-            <option value="2">Pagaré</option>
+            <option value="1">PÃ³liza de CauciÃ³n</option>
+            <option value="2">PagarÃ©</option>
           </select>
         </div>
         
@@ -332,15 +339,15 @@
       @if (garantiaForm.idTipoDocumento === '1') {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 animate-fade-in">
           <div>
-            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Compañía Aseguradora</label>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">CompaÃ±Ã­a Aseguradora</label>
             <input type="text" [(ngModel)]="garantiaForm.companiaAseguradora" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
           </div>
           <div>
-            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Número de Póliza</label>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">NÃºmero de PÃ³liza</label>
             <input type="text" [(ngModel)]="garantiaForm.nroPoliza" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
           </div>
           <div>
-            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Monto Caución</label>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Monto CauciÃ³n</label>
             <input type="number" [(ngModel)]="garantiaForm.montoCaucion" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
           </div>
           <div>
@@ -353,11 +360,11 @@
       @if (garantiaForm.idTipoDocumento === '2') {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 animate-fade-in">
           <div>
-            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Monto Pagaré</label>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Monto PagarÃ©</label>
             <input type="number" [(ngModel)]="garantiaForm.montoPagare" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
           </div>
           <div>
-            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Fecha de Confección</label>
+            <label class="mb-1 block text-[11px] uppercase text-[var(--color-storm-cloud)]">Fecha de ConfecciÃ³n</label>
             <input type="date" [(ngModel)]="garantiaForm.fechaPagare" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] outline-none focus:border-[var(--color-cyan-spark)]" />
           </div>
         </div>
@@ -369,7 +376,7 @@
             <input type="file" id="fileGuaranty" class="hidden" (change)="onFileGarantiaSelected($event)" accept=".pdf,.png,.jpg,.jpeg">
             <label for="fileGuaranty" class="flex items-center justify-center gap-2 w-full rounded-xl border-2 border-dashed border-[var(--color-cyan-spark)]/40 bg-[var(--color-cyan-spark)]/5 px-4 py-6 text-[13px] font-[590] text-[var(--color-cyan-spark)] hover:bg-[var(--color-cyan-spark)]/10 transition-colors cursor-pointer">
               <lucide-icon name="upload" [size]="18"></lucide-icon>
-              {{ garantiaForm.archivo ? garantiaForm.archivo.name : 'Subir Archivo Digitalizado (Máx 20MB)' }}
+              {{ garantiaForm.archivo ? garantiaForm.archivo.name : 'Subir Archivo Digitalizado (MÃ¡x 20MB)' }}
             </label>
           </div>
           <button (click)="guardarGarantia()" [disabled]="!garantiaForm.archivo || savingGarantia()" class="rounded-xl bg-[var(--color-neon-lime)] px-8 py-6 text-[14px] font-[590] text-black transition-all hover:brightness-110 disabled:opacity-50">
@@ -395,7 +402,7 @@
         <tbody class="divide-y divide-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30">
           @for (g of garantiasList(); track g.idGarantia) {
             <tr class="hover:bg-[var(--color-deep-slate)]/40 transition-colors">
-              <td class="px-4 py-3 font-[590] text-[var(--color-porcelain)]">{{ g.idTipoDocumento === 1 ? 'Póliza' : 'Pagaré' }}</td>
+              <td class="px-4 py-3 font-[590] text-[var(--color-porcelain)]">{{ g.idTipoDocumento === 1 ? 'PÃ³liza' : 'PagarÃ©' }}</td>
               <td class="px-4 py-3 text-[var(--color-light-steel)]">{{ g.companiaAseguradora || (g.fechaPagare | date:'dd/MM/yyyy') }}</td>
               <td class="px-4 py-3 text-right font-mono text-[var(--color-cyan-spark)]">${{ (g.montoCaucion || g.montoPagare) | number:'1.2-2' }}</td>
               <td class="px-4 py-3 text-center">
@@ -410,7 +417,7 @@
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="5" class="px-4 py-8 text-center text-[var(--color-storm-cloud)]">Aún no cargaste ninguna garantía.</td></tr>
+            <tr><td colspan="5" class="px-4 py-8 text-center text-[var(--color-storm-cloud)]">AÃºn no cargaste ninguna garantÃ­a.</td></tr>
           }
         </tbody>
       </table>

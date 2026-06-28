@@ -33,6 +33,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   // Lógica de Caminos (Gestor vs Proveedor)
   registrationType = signal<'GESTOR' | 'PROVEEDOR'>('GESTOR');
+  hasChosenRegistrationType = signal(false);
   isVerifyingCuit = signal(false);
   verifiedProvider = signal<ProviderResponse | null>(null);
 
@@ -97,6 +98,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   setRegistrationType(type: 'GESTOR' | 'PROVEEDOR') {
+    this.hasChosenRegistrationType.set(true);
     this.registrationType.set(type);
     this.errorMessage.set(null);
     this.verifiedProvider.set(null);
@@ -134,6 +136,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
+    if (!this.hasChosenRegistrationType()) {
+      this.errorMessage.set('Primero seleccioná el tipo de usuario que querés registrar.');
+      return;
+    }
+
     if (this.registrationType() === 'GESTOR' && !this.registerForm.get('idOrganizacion')?.value) {
       this.errorMessage.set('Debe seleccionar una Organización para registrarse.');
       return;

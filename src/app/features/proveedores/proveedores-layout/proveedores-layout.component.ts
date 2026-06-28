@@ -4,12 +4,13 @@ import { LucideAngularModule } from 'lucide-angular';
 import { NgClass } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { routeFade } from '../../../core/animations/route-animations';
 
 @Component({
   selector: 'app-proveedores-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, NgClass],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, NgClass, HeaderComponent],
   templateUrl: './proveedores-layout.component.html',
   animations: [routeFade],
 })

@@ -78,41 +78,16 @@
 
   <div class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
     
-    <header class="flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 z-20">
-      <div class="flex items-center gap-2">
-        <button (click)="toggleSidebar()" class="lg:hidden flex items-center justify-center p-2 rounded-lg text-[var(--color-storm-cloud)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+    <app-header variant="module" title="Administración">
+      <ng-container header-left>
+        <button (click)="toggleSidebar()" class="lg:hidden flex items-center justify-center rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
           <lucide-icon name="menu" [size]="24"></lucide-icon>
         </button>
-        <button (click)="toggleSidebar()" class="hidden lg:flex items-center justify-center p-2 rounded-lg text-[var(--color-storm-cloud)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+        <button (click)="toggleSidebar()" class="hidden items-center justify-center rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] lg:flex">
           <lucide-icon [name]="isSidebarOpen() ? 'panel-left-close' : 'panel-left'" [size]="20"></lucide-icon>
         </button>
-      </div>
-      
-      <div class="flex items-center gap-4 ml-auto">
-        <button (click)="toggleTheme()" class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-[var(--color-storm-cloud)] hover:border-[var(--color-charcoal-grey)] hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)] transition-all">
-          <lucide-icon [name]="isDarkMode() ? 'sun' : 'moon'" [size]="18"></lucide-icon>
-        </button>
-
-        <div class="relative">
-          <button (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95 ring-2 ring-[var(--color-pitch-black)] uppercase">
-            {{ user()?.nombreUsuario?.charAt(0) || 'U' }}
-          </button>
-
-          @if (isUserMenuOpen()) {
-            <div class="absolute right-0 top-12 w-56 rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-2 shadow-2xl backdrop-blur-xl animate-fade-in z-50">
-              <div class="px-3 py-2 border-b border-[var(--color-charcoal-grey)]/60 mb-2">
-                <p class="text-[13px] font-[590] text-[var(--color-porcelain)] truncate">{{ user()?.nombreUsuario }}</p>
-                <p class="text-[11px] text-[var(--color-storm-cloud)] truncate">{{ user()?.email }}</p>
-              </div>
-              <button (click)="logout()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13px] font-[510] text-red-400 hover:bg-red-500/10 transition-colors">
-                <lucide-icon name="log-out" [size]="16"></lucide-icon>
-                Cerrar Sesión
-              </button>
-            </div>
-          }
-        </div>
-      </div>
-    </header>
+      </ng-container>
+    </app-header>
 
     <main [@routeFade]="routeState()"
           class="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-pitch-black)]">

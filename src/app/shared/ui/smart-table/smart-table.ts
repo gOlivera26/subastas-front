@@ -39,6 +39,7 @@ export class SmartTableComponent {
 
   currentPage = signal(1);
   private searchTimeout: any;
+  private readonly collator = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
 
   constructor() {
     effect(() => {
@@ -88,9 +89,14 @@ export class SmartTableComponent {
         if (valA === null || valA === undefined) return direction === 'asc' ? -1 : 1;
         if (valB === null || valB === undefined) return direction === 'asc' ? 1 : -1;
 
-        if (valA < valB) return direction === 'asc' ? -1 : 1;
-        if (valA > valB) return direction === 'asc' ? 1 : -1;
-        return 0;
+        let comparison: number;
+        if (typeof valA === 'string' || typeof valB === 'string') {
+          comparison = this.collator.compare(String(valA), String(valB));
+        } else {
+          comparison = valA < valB ? -1 : valA > valB ? 1 : 0;
+        }
+
+        return direction === 'asc' ? comparison : -comparison;
       });
     }
 

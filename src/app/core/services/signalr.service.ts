@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+﻿import { Injectable, inject, signal } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { environment } from '../../../environments/environment';
 import { Consulta } from './consulta.service';
@@ -12,6 +12,8 @@ export interface OfertaEnVivo {
   idProveedor: number;
   fecha: string;
   usuario: string;
+  proveedor?: string;
+  representante?: string;
 }
 
 export interface MensajeEnVivo {
@@ -130,3 +132,4 @@ export class SignalRService {
     this.connected.set(false);
   }
 }
+

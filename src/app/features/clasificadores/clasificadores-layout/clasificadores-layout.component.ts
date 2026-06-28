@@ -5,11 +5,12 @@ import { NgClass } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { routeFade } from '../../../core/animations/route-animations';
 import { AuthService } from '../../../core/services/auth.service';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 
 @Component({
   selector: 'app-clasificadores-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, NgClass],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, NgClass, HeaderComponent],
   templateUrl: './clasificadores-layout.component.html',
   animations: [routeFade],
 })

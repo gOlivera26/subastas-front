@@ -13,18 +13,39 @@
           <p class="text-[14px] text-[var(--color-storm-cloud)]">Seleccione el motivo por el que quiere registrarse</p>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-3 mb-8 bg-[var(--color-pitch-black)]/50 p-1.5 rounded-xl border border-[var(--color-charcoal-grey)]">
+        <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <button type="button"
                   (click)="setRegistrationType('GESTOR')"
-                  class="flex-1 py-3 px-4 rounded-lg text-[13px] font-[590] transition-all duration-300"
-                  [class]="registrationType() === 'GESTOR' ? 'bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] shadow-md border border-[var(--color-charcoal-grey)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/30'">
-            Usuario Subasta Inversa / Licitación
+                  class="group relative overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300"
+                  [class]="hasChosenRegistrationType() && registrationType() === 'GESTOR' ? 'border-[var(--color-cyan-spark)]/60 bg-[var(--color-cyan-spark)]/10 shadow-[0_16px_44px_rgba(2,184,204,0.12)]' : 'border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/35 hover:border-[var(--color-cyan-spark)]/35 hover:bg-[var(--color-deep-slate)]/45'">
+            <div class="mb-4 flex items-start justify-between gap-3">
+              <span class="flex size-11 items-center justify-center rounded-2xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] ring-1 ring-[var(--color-cyan-spark)]/20">
+                <lucide-icon name="building-2" [size]="22"></lucide-icon>
+              </span>
+              <span class="rounded-full bg-[var(--color-deep-slate)] px-2.5 py-1 text-[10px] font-[800] uppercase tracking-widest text-[var(--color-light-steel)]">Organismo</span>
+            </div>
+            <h3 class="mb-1 text-[16px] font-[650] text-[var(--color-porcelain)]">Operador de organismo</h3>
+            <p class="text-[12px] leading-relaxed text-[var(--color-storm-cloud)]">Para usuarios que pertenecen a una jurisdicción u organización y gestionan notas, licitaciones o subastas.</p>
+            <div class="mt-4 rounded-xl bg-[var(--color-pitch-black)]/45 px-3 py-2 text-[11px] leading-relaxed text-[var(--color-fog-grey)]">
+              <span class="font-[700] text-[var(--color-cyan-spark)]">Tip:</span> elegí esta opción si trabajás para el organismo comprador.
+            </div>
           </button>
+
           <button type="button"
                   (click)="setRegistrationType('PROVEEDOR')"
-                  class="flex-1 py-3 px-4 rounded-lg text-[13px] font-[590] transition-all duration-300"
-                  [class]="registrationType() === 'PROVEEDOR' ? 'bg-[var(--color-deep-slate)] text-[var(--color-porcelain)] shadow-md border border-[var(--color-charcoal-grey)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/30'">
-            Usuario Subasta Directa (Proveedor)
+                  class="group relative overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300"
+                  [class]="hasChosenRegistrationType() && registrationType() === 'PROVEEDOR' ? 'border-[var(--color-neon-lime)]/60 bg-[var(--color-neon-lime)]/10 shadow-[0_16px_44px_rgba(228,242,34,0.10)]' : 'border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/35 hover:border-[var(--color-neon-lime)]/35 hover:bg-[var(--color-deep-slate)]/45'">
+            <div class="mb-4 flex items-start justify-between gap-3">
+              <span class="flex size-11 items-center justify-center rounded-2xl bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)] ring-1 ring-[var(--color-neon-lime)]/20">
+                <lucide-icon name="truck" [size]="22"></lucide-icon>
+              </span>
+              <span class="rounded-full bg-[var(--color-deep-slate)] px-2.5 py-1 text-[10px] font-[800] uppercase tracking-widest text-[var(--color-light-steel)]">Proveedor</span>
+            </div>
+            <h3 class="mb-1 text-[16px] font-[650] text-[var(--color-porcelain)]">Representante de proveedor</h3>
+            <p class="text-[12px] leading-relaxed text-[var(--color-storm-cloud)]">Para personas que representan a una empresa/proveedor y necesitan participar u ofertar.</p>
+            <div class="mt-4 rounded-xl bg-[var(--color-pitch-black)]/45 px-3 py-2 text-[11px] leading-relaxed text-[var(--color-fog-grey)]">
+              <span class="font-[700] text-[var(--color-neon-lime)]">Tip:</span> necesitás validar el CUIT del proveedor empadronado.
+            </div>
           </button>
         </div>
 
@@ -35,6 +56,7 @@
           </div>
         }
 
+        @if (hasChosenRegistrationType()) {
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
 
           @if (registrationType() === 'GESTOR') {
@@ -123,6 +145,11 @@
             </button>
           </div>
         </form>
+        } @else {
+          <div class="rounded-2xl border border-dashed border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/25 px-5 py-6 text-center text-[13px] text-[var(--color-storm-cloud)]">
+            Seleccioná una opción para ver los datos requeridos del registro.
+          </div>
+        }
       }
 
       <!-- ═══════════════ PASO 2: CÓDIGO DE CONFIRMACIÓN ═══════════════ -->

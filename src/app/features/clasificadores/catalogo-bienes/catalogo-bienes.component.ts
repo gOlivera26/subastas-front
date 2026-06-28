@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -10,13 +10,14 @@ import { VigenciaService } from '../../../core/services/vigencia.service';
 import { Vigencia } from '../../../core/models/vigencia.model';
 import { OrganizationService, Organization } from '../../../core/services/organization.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-catalogo-bienes',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, LoadingSpinnerComponent, CustomSelect],
+  imports: [CommonModule, FormsModule, LucideAngularModule, CustomSelect, SmartTableComponent],
   templateUrl: './catalogo-bienes.component.html',
 })
 export class CatalogoBienesComponent implements OnInit {
@@ -37,6 +38,24 @@ export class CatalogoBienesComponent implements OnInit {
   success = signal<string | null>(null);
   expandedNodes = signal<Set<number>>(new Set());
   searchTerm = signal('');
+  jerarquiaTpl = viewChild<TemplateRef<any>>('jerarquiaTpl');
+  codigoTpl = viewChild<TemplateRef<any>>('codigoTpl');
+  objetoGastoTpl = viewChild<TemplateRef<any>>('objetoGastoTpl');
+  nivelTpl = viewChild<TemplateRef<any>>('nivelTpl');
+  hijosTpl = viewChild<TemplateRef<any>>('hijosTpl');
+  organizacionTpl = viewChild<TemplateRef<any>>('organizacionTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  columns: TableColumn[] = [
+    { header: 'Jerarqu?a', key: 'jerarquia', type: 'custom', sortable: true, searchFields: ['nItem', 'codigo', 'objetoGastoNombre', 'organizacionNombre', 'tipoJerarquia'] },
+    { header: 'Nivel', key: 'nivelOrden', type: 'custom', sortable: true },
+    { header: 'Hijos', key: 'descendientes', type: 'custom', sortable: true },
+    { header: 'C?digo', key: 'codigo', type: 'custom', sortable: true },
+    { header: 'Objeto Gasto', key: 'objetoGastoNombre', type: 'custom', sortable: true },
+    { header: 'Org.', key: 'organizacionNombre', type: 'custom', sortable: true },
+    { header: 'Acciones', key: 'acciones', type: 'custom' },
+  ];
+
 
   isModalOpen = signal(false);
   isEditing = signal(false);
@@ -53,6 +72,27 @@ export class CatalogoBienesComponent implements OnInit {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.treeNodes();
     return this.filterNodes(this.treeNodes(), term);
+  });
+
+  visibleRows = computed(() => this.flattenTree(this.filteredTree()));
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const jerarquia = this.jerarquiaTpl();
+    const codigo = this.codigoTpl();
+    const objetoGasto = this.objetoGastoTpl();
+    const organizacion = this.organizacionTpl();
+    const nivel = this.nivelTpl();
+    const hijos = this.hijosTpl();
+    const acciones = this.accionesTpl();
+    if (jerarquia) templates['jerarquia'] = jerarquia;
+    if (codigo) templates['codigo'] = codigo;
+    if (objetoGasto) templates['objetoGastoNombre'] = objetoGasto;
+    if (organizacion) templates['organizacionNombre'] = organizacion;
+    if (nivel) templates['nivelOrden'] = nivel;
+    if (hijos) templates['descendientes'] = hijos;
+    if (acciones) templates['acciones'] = acciones;
+    return templates;
   });
 
   vigenciaOptions = computed<SelectOption[]>(() => this.vigencias().map(v => ({
@@ -92,6 +132,43 @@ export class CatalogoBienesComponent implements OnInit {
     }
     return roots;
   }
+
+  flattenTree(nodes: CatalogoBienTreeItem[], level = 0): Array<CatalogoBienTreeItem & { id: number; level: number; nivelOrden: number; jerarquia: string; childCount: number; descendientes: number; tipoJerarquia: string }> {
+    return nodes.flatMap(node => {
+      const childCount = node.children?.length || 0;
+      const descendientes = this.countDescendants(node);
+      const row = {
+        ...node,
+        id: node.idItem,
+        level,
+        nivelOrden: level,
+        jerarquia: node.nItem || '',
+        childCount,
+        descendientes,
+        tipoJerarquia: descendientes > childCount ? 'Con nietos' : childCount > 0 ? 'Con hijos' : 'Sin hijos'
+      };
+      const children = node.hasChildren && this.isExpanded(node.idItem)
+        ? this.flattenTree(node.children, level + 1)
+        : [];
+      return [row, ...children];
+    });
+  }
+
+  countDescendants(node: CatalogoBienTreeItem): number {
+    return (node.children || []).reduce((total, child) => total + 1 + this.countDescendants(child), 0);
+  }
+
+  expandAll() {
+    const ids = new Set<number>();
+    const visit = (nodes: CatalogoBienTreeItem[]) => nodes.forEach(node => {
+      if (node.hasChildren) ids.add(node.idItem);
+      visit(node.children || []);
+    });
+    visit(this.treeNodes());
+    this.expandedNodes.set(ids);
+  }
+
+  collapseAll() { this.expandedNodes.set(new Set()); }
 
   filterNodes(nodes: CatalogoBienTreeItem[], term: string): CatalogoBienTreeItem[] {
     return nodes.map(node => {

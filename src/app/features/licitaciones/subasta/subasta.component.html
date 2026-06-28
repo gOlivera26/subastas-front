@@ -90,6 +90,10 @@
         <button (click)="abrirDesistimiento(row)" title="Constancia de desistimiento" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><lucide-icon name="file-x" [size]="16"></lucide-icon></button>
       }
 
+      @if (row.idEstado === 40 && auth.isSuperAdmin()) {
+        <button (click)="generarGanadores(row)" [disabled]="generatingGanadores() === row.idCotizacion" title="Generar ganadores" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-neon-lime)] hover:bg-[var(--color-deep-slate)] disabled:opacity-40 disabled:cursor-wait transition-colors"><lucide-icon name="trophy" [size]="16"></lucide-icon></button>
+      }
+
       @if (row.idEstado === 40 && row.idTipoContratacion !== TIPO_DIRECTA) {
         <button (click)="abrirActaPrelacion(row)" title="Informe final de subasta" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-emerald-400 hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="file-badge" [size]="16"></lucide-icon></button>
         <button (click)="openGraficos(row)" title="Ver Gráficos" class="p-1.5 rounded-lg text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-deep-slate)] transition-colors"><lucide-icon name="pie-chart" [size]="16"></lucide-icon></button>
@@ -183,18 +187,22 @@
 
   @if (pasoCrear() === 2) {
     <div class="space-y-4">
-      <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div class="flex items-center gap-3">
-          <app-custom-select label="Área" [options]="areaOptions()" placeholder="Filtrar por área" (valueChange)="onModalAreaChange($event)" />
-          <app-custom-select label="Oficina" [options]="oficinaOptions()" placeholder="Todas" (valueChange)="onModalOficinaChange($event)" [disabled]="!modalAreaId()" />
-          <div>
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div class="flex w-full flex-wrap items-end gap-3 lg:w-auto">
+          <div class="w-full sm:w-[320px]">
+            <app-custom-select label="Área" [options]="areaOptions()" placeholder="Filtrar por área" [dropdownMinWidth]="380" (valueChange)="onModalAreaChange($event)" />
+          </div>
+          <div class="w-full sm:w-[280px]">
+            <app-custom-select label="Oficina" [options]="oficinaOptions()" placeholder="Todas" [dropdownMinWidth]="360" (valueChange)="onModalOficinaChange($event)" [disabled]="!modalAreaId()" />
+          </div>
+          <div class="w-full sm:w-[240px]">
             <label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Buscar Nota</label>
             <div class="flex gap-2">
-              <div class="relative">
+              <div class="relative w-full">
                 <lucide-icon name="search" [size]="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
-                <input class="w-40 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] pl-9 pr-3 py-2.5 text-[13px] text-[var(--color-porcelain)]" placeholder="Nro. nota..." [(ngModel)]="filterNroProvision" (keyup.enter)="buscarReservas()" />
+                <input class="w-full min-w-[220px] rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] pl-9 pr-3 py-3 text-[13px] text-[var(--color-porcelain)]" placeholder="Nro. nota..." [(ngModel)]="filterNroProvision" (keyup.enter)="buscarReservas()" />
               </div>
-              <button (click)="buscarReservas()" class="rounded-xl bg-[var(--color-cyan-spark)] px-3 py-2.5 text-[13px] font-[590] text-black hover:brightness-110 flex items-center gap-1"><lucide-icon name="search" [size]="14"></lucide-icon></button>
+              <button (click)="buscarReservas()" class="h-[46px] rounded-xl bg-[var(--color-cyan-spark)] px-4 text-[13px] font-[590] text-black hover:brightness-110 flex items-center gap-1"><lucide-icon name="search" [size]="16"></lucide-icon></button>
             </div>
           </div>
         </div>
@@ -736,14 +744,15 @@
         </div>
         <div class="space-y-3">
           <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Criterio</h4>
+          <p class="text-[11px] leading-4 text-[var(--color-storm-cloud)]">El criterio de adjudicaci?n se define al crear la subasta y no puede modificarse desde especificaciones.</p>
           <div class="flex rounded-lg border border-[var(--color-charcoal-grey)] overflow-hidden w-fit">
-            <button (click)="especCriterio.set(0)"
-              class="px-4 py-1.5 text-[12px] font-[590] transition-colors"
+            <button type="button" disabled
+              class="px-4 py-1.5 text-[12px] font-[590] transition-colors cursor-not-allowed opacity-80"
               [class.bg-[var(--color-neon-lime)]]="especCriterio() === 0"
               [class.text-black]="especCriterio() === 0"
               [class.text-[var(--color-storm-cloud)]]="especCriterio() !== 0">Por Ítem</button>
-            <button (click)="especCriterio.set(1)"
-              class="px-4 py-1.5 text-[12px] font-[590] transition-colors"
+            <button type="button" disabled
+              class="px-4 py-1.5 text-[12px] font-[590] transition-colors cursor-not-allowed opacity-80"
               [class.bg-[var(--color-neon-lime)]]="especCriterio() === 1"
               [class.text-black]="especCriterio() === 1"
               [class.text-[var(--color-storm-cloud)]]="especCriterio() !== 1">Por Renglón</button>

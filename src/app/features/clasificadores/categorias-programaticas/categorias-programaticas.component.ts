@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -10,12 +10,13 @@ import { OrganizationService, Organization } from '../../../core/services/organi
 import { UnidadAdministrativaService } from '../../../core/services/unidad-administrativa.service';
 import { UnidadAdministrativa } from '../../../core/models/unidad-administrativa.model';
 import { AuthService } from '../../../core/services/auth.service';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableColumn } from '../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-categorias-programaticas', standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, LoadingSpinnerComponent, CustomSelect],
+  imports: [CommonModule, FormsModule, LucideAngularModule, CustomSelect, SmartTableComponent],
   templateUrl: './categorias-programaticas.component.html',
 })
 export class CategoriasProgramaticasComponent implements OnInit {
@@ -37,6 +38,24 @@ export class CategoriasProgramaticasComponent implements OnInit {
   success = signal<string | null>(null);
   expandedNodes = signal<Set<number>>(new Set());
   searchTerm = signal('');
+  jerarquiaTpl = viewChild<TemplateRef<any>>('jerarquiaTpl');
+  codigoTpl = viewChild<TemplateRef<any>>('codigoTpl');
+  unidadTpl = viewChild<TemplateRef<any>>('unidadTpl');
+  nivelTpl = viewChild<TemplateRef<any>>('nivelTpl');
+  hijosTpl = viewChild<TemplateRef<any>>('hijosTpl');
+  naturalezaTpl = viewChild<TemplateRef<any>>('naturalezaTpl');
+  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
+
+  columns: TableColumn[] = [
+    { header: 'Jerarqu?a', key: 'jerarquia', type: 'custom', sortable: true, searchFields: ['nombre', 'codigo', 'unidadAdmNombre', 'naturaleza', 'tipoJerarquia'] },
+    { header: 'Nivel', key: 'nivelOrden', type: 'custom', sortable: true },
+    { header: 'Hijos', key: 'descendientes', type: 'custom', sortable: true },
+    { header: 'C?digo', key: 'codigo', type: 'custom', sortable: true },
+    { header: 'UA', key: 'unidadAdmNombre', type: 'custom', sortable: true },
+    { header: 'Nat.', key: 'naturaleza', type: 'custom', sortable: true },
+    { header: 'Acciones', key: 'acciones', type: 'custom' },
+  ];
+
 
   isUploadOpen = signal(false);
   uploadRows = signal<{ codigo: string; nombre: string; naturaleza: string; nombreUA: string }[]>([]);
@@ -53,6 +72,27 @@ export class CategoriasProgramaticasComponent implements OnInit {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.treeNodes();
     return this.filterNodes(this.treeNodes(), term);
+  });
+
+  visibleRows = computed(() => this.flattenTree(this.filteredTree()));
+
+  customTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const jerarquia = this.jerarquiaTpl();
+    const codigo = this.codigoTpl();
+    const unidad = this.unidadTpl();
+    const naturaleza = this.naturalezaTpl();
+    const nivel = this.nivelTpl();
+    const hijos = this.hijosTpl();
+    const acciones = this.accionesTpl();
+    if (jerarquia) templates['jerarquia'] = jerarquia;
+    if (codigo) templates['codigo'] = codigo;
+    if (unidad) templates['unidadAdmNombre'] = unidad;
+    if (naturaleza) templates['naturaleza'] = naturaleza;
+    if (nivel) templates['nivelOrden'] = nivel;
+    if (hijos) templates['descendientes'] = hijos;
+    if (acciones) templates['acciones'] = acciones;
+    return templates;
   });
 
   vigenciaOptions = computed<SelectOption[]>(() => this.vigencias().map(v => ({
@@ -103,6 +143,43 @@ export class CategoriasProgramaticasComponent implements OnInit {
     }
     return roots;
   }
+
+  flattenTree(nodes: CategoriaTreeItem[], level = 0): Array<CategoriaTreeItem & { id: number; level: number; nivelOrden: number; jerarquia: string; childCount: number; descendientes: number; tipoJerarquia: string }> {
+    return nodes.flatMap(node => {
+      const childCount = node.children?.length || 0;
+      const descendientes = this.countDescendants(node);
+      const row = {
+        ...node,
+        id: node.idCatProg,
+        level,
+        nivelOrden: level,
+        jerarquia: node.nombre || '',
+        childCount,
+        descendientes,
+        tipoJerarquia: descendientes > childCount ? 'Con nietos' : childCount > 0 ? 'Con hijos' : 'Sin hijos'
+      };
+      const children = node.hasChildren && this.isExpanded(node.idCatProg)
+        ? this.flattenTree(node.children, level + 1)
+        : [];
+      return [row, ...children];
+    });
+  }
+
+  countDescendants(node: CategoriaTreeItem): number {
+    return (node.children || []).reduce((total, child) => total + 1 + this.countDescendants(child), 0);
+  }
+
+  expandAll() {
+    const ids = new Set<number>();
+    const visit = (nodes: CategoriaTreeItem[]) => nodes.forEach(node => {
+      if (node.hasChildren) ids.add(node.idCatProg);
+      visit(node.children || []);
+    });
+    visit(this.treeNodes());
+    this.expandedNodes.set(ids);
+  }
+
+  collapseAll() { this.expandedNodes.set(new Set()); }
 
   filterNodes(nodes: CategoriaTreeItem[], term: string): CategoriaTreeItem[] {
     return nodes.map(node => {

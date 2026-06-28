@@ -106,20 +106,16 @@
 
   <div class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
 
-    <header class="flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 backdrop-blur-md px-4 sm:px-6 lg:px-8 z-20">
-      <div class="flex items-center gap-2">
-        <button (click)="toggleSidebar()" class="lg:hidden flex items-center justify-center p-2 rounded-lg text-[var(--color-storm-cloud)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+    <app-header variant="module" title="Subasta / Licitación">
+      <ng-container header-left>
+        <button (click)="toggleSidebar()" class="lg:hidden flex items-center justify-center rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
           <lucide-icon name="menu" [size]="24"></lucide-icon>
         </button>
-        <button (click)="toggleSidebar()" class="hidden lg:flex items-center justify-center p-2 rounded-lg text-[var(--color-storm-cloud)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+        <button (click)="toggleSidebar()" class="hidden items-center justify-center rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] lg:flex">
           <lucide-icon [name]="isSidebarOpen() ? 'panel-left-close' : 'panel-left'" [size]="20"></lucide-icon>
         </button>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <span class="text-[13px] font-[590] text-[var(--color-porcelain)] hidden sm:block">Sistema de Subastas Electrónicas Inversas, Directas y Licitaciones</span>
-      </div>
-    </header>
+      </ng-container>
+    </app-header>
 
     <main [@routeFade]="routeState()"
           class="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-pitch-black)]">

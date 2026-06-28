@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed, effect, ViewChild } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, inject, signal, computed, effect, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -150,7 +150,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     archivo: null as File | null
   };
 
-  // Helper para desencapsular los valores numéricos extraños de la API
+  // Helper para desencapsular los valores numÃ©ricos extraÃ±os de la API
   getVal(campo: any): number {
     if (campo && campo.parsedValue !== undefined) return campo.parsedValue;
     return Number(campo) || 0;
@@ -158,7 +158,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
 
   constructor() {
     this.chartOptions = {
-      series: [{ name: "Total Subasta", data: [] }],
+      series: [{ name: "Ofertas", data: [] }],
       chart: { 
         type: "area", 
         height: '100%', 
@@ -172,7 +172,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
         } 
       },
       colors: [this.isDirecta ? '#02b8cc' : '#e4f222'],
-      stroke: { curve: "stepline", width: 3 },
+      stroke: { curve: "straight", width: 3 },
       fill: { 
         type: "gradient", 
         gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.02, stops: [0, 100] } 
@@ -195,7 +195,28 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
           formatter: (val) => "$" + val.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) 
         } 
       },
-      tooltip: { theme: "dark", x: { format: 'HH:mm:ss' } },
+      tooltip: {
+        theme: "dark",
+        x: { format: 'HH:mm:ss' },
+        custom: ({ seriesIndex, dataPointIndex, w }) => {
+          const point = w.config.series?.[seriesIndex]?.data?.[dataPointIndex] || {};
+          const proveedor = point.proveedor ? `<div style="margin-top:4px;color:#8a8f98;font-size:11px;text-transform:uppercase;letter-spacing:.04em;">${point.proveedor}</div>` : '';
+          const representante = point.representante || point.usuario || `Proveedor #${point.idProveedor ?? ''}`;
+          const monto = Number(point.y || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          const fecha = point.x ? new Date(point.x).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+
+          return `
+            <div style="padding:10px 12px;background:#1b1d22;border:1px solid #2b3038;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.35);">
+              <div style="color:#8a8f98;font-size:11px;font-family:monospace;margin-bottom:6px;">${fecha}</div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:9px;height:9px;border-radius:999px;background:${this.isDirecta ? '#02b8cc' : '#e4f222'};display:inline-block;"></span>
+                <strong style="color:#f4f7fb;font-size:12px;">${representante}</strong>
+              </div>
+              ${proveedor}
+              <div style="margin-top:8px;color:${this.isDirecta ? '#02b8cc' : '#e4f222'};font-family:monospace;font-weight:800;font-size:13px;">$${monto}</div>
+            </div>`;
+        }
+      },
       markers: {
         size: 6,
         strokeColors: '#0B0E14',
@@ -238,44 +259,31 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
 
       const margen = this.subasta()?.especificacion?.margenMejora || 5;
       
-      let totalActual = elementos.reduce((sum: number, el: any) => {
-        const base = this.isPorRenglon ? (el._importeBaseConsolidado || 0) : (this.getVal(el.importeBase) * this.getVal(el.cantidad));
-        return sum + base;
-      }, 0);
-      
       const bestPerItem: Record<number, number> = {};
       elementos.forEach((el: any) => {
         const base = this.isPorRenglon ? (el._importeBaseConsolidado || 0) : (this.getVal(el.importeBase) * this.getVal(el.cantidad));
         bestPerItem[this.isPorRenglon ? el.idRenglon : el.idCotizacionDetalle] = base;
       });
 
-      const dataPoints: [number, number][] = [];
-      const fechaInicioStr = this.subasta()?.especificacion?.fechaInicioSubasta || this.subasta()?.fechaInicio;
-      
-      if (fechaInicioStr) {
-        dataPoints.push([new Date(fechaInicioStr).getTime(), totalActual]);
-      }
-
       const pujasOrdenadas = [...pujas].sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+      const dataPoints = pujasOrdenadas.map((puja) => ({
+        x: new Date(puja.fecha).getTime(),
+        y: puja.monto,
+        idProveedor: puja.idProveedor,
+        proveedor: puja.proveedor,
+        representante: puja.representante,
+        usuario: puja.usuario
+      }));
 
       pujasOrdenadas.forEach(puja => {
         const idItem = this.isPorRenglon ? puja.idRenglon : puja.idCotizacionDetalle;
         if (idItem && bestPerItem[idItem] !== undefined) {
           const precioAnterior = bestPerItem[idItem];
-          const cantidad = this.isPorRenglon ? 1 : this.getVal(elementos.find((e: any) => e.idCotizacionDetalle === idItem)?.cantidad);
-
           if ((!this.isDirecta && puja.monto < precioAnterior) || (this.isDirecta && puja.monto > precioAnterior)) {
-            const diff = precioAnterior - puja.monto;
-            totalActual -= (diff * cantidad); 
             bestPerItem[idItem] = puja.monto;
-            dataPoints.push([new Date(puja.fecha).getTime(), totalActual]);
           }
         }
       });
-
-      if (dataPoints.length > 0 && this.isLive) {
-        dataPoints.push([this.timeService.now(), totalActual]);
-      }
 
       this.ofertasForm.update(state => {
         const newState = { ...state };
@@ -300,7 +308,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
         return newState;
       });
 
-      this.chartOptions.series = [{ name: 'Total Subasta', data: dataPoints }];
+      this.chartOptions.series = [{ name: 'Ofertas', data: dataPoints }];
       this.chartOptions.colors = [this.isDirecta ? '#02b8cc' : '#e4f222'];
 
     }, { allowSignalWrites: true });
@@ -337,7 +345,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
 
       this.signalR['connection']?.on('SubastaCerradaPorTope', (cerradaId: number) => {
         if (cerradaId === this.idCotizacion()) {
-          this.notify.showWarning('La subasta ha finalizado porque se alcanzó el importe mínimo permitido.');
+          this.notify.showWarning('La subasta ha finalizado porque se alcanzÃ³ el importe mÃ­nimo permitido.');
           
           this.subasta.update(s => {
             if (!s) return s;
@@ -374,7 +382,9 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
             monto: o.monto,
             idProveedor: o.idProveedor,
             fecha: o.fechaOferta,
-            usuario: `Proveedor #${o.idProveedor}`
+            usuario: o.usuario || o.representante || o.proveedor || `Proveedor #${o.idProveedor}`,
+            proveedor: o.proveedor,
+            representante: o.representante
           }));
           this.signalR.ofertas.set(mapeadas); 
         }
@@ -450,7 +460,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
       .filter(id => state[id].ofertar && state[id].miImporte > 0);
 
     if (ofertasCandidatas.length === 0) {
-      this.notify.showWarning('No hay ofertas marcadas con "Sí" o con importes válidos.');
+      this.notify.showWarning('No hay ofertas marcadas con "SÃ­" o con importes vÃ¡lidos.');
       return;
     }
 
@@ -480,7 +490,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
               if (r.textoError) {
                 const nombreItem = this.elementosOfertables().find((e: any) => 
                   isRenglon ? e.idRenglon === id : e.idCotizacionDetalle === id
-                )?.nItem || 'Ítem #' + id;
+                )?.nItem || 'Ãtem #' + id;
 
                 listaErrores.push({ item: nombreItem, error: r.textoError });
                 newState[id].textoError = r.textoError;
@@ -495,7 +505,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
           });
 
           if (exitos > 0) {
-            this.notify.showSuccess(`¡Se registraron ${exitos} ofertas con éxito!`);
+            this.notify.showSuccess(`Â¡Se registraron ${exitos} ofertas con Ã©xito!`);
             this.feedView.set('CHART'); 
           }
 
@@ -512,7 +522,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
           const listaErrores = ofertasCandidatas.map(id => {
             const nombreItem = this.elementosOfertables().find((e: any) => 
               isRenglon ? e.idRenglon === id : e.idCotizacionDetalle === id
-            )?.nItem || 'Lote / Ítem';
+            )?.nItem || 'Lote / Ãtem';
             
             this.ofertasForm.update(st => {
               const newState = { ...st };
@@ -532,7 +542,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- GARANTÍAS ---
+  // --- GARANTÃAS ---
   openGarantiasModal() { 
     this.cargarGarantias(); 
     this.resetGarantiaForm(); 
@@ -583,11 +593,11 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     const monedaId = Number(f.idMoneda);
 
     if (tipoDoc === 1 && (!f.companiaAseguradora || !f.montoCaucion || !f.nroPoliza || monedaId === 0)) { 
-      this.notify.showWarning('Completá los datos obligatorios de la Póliza.'); 
+      this.notify.showWarning('CompletÃ¡ los datos obligatorios de la PÃ³liza.'); 
       return; 
     }
     if (tipoDoc === 2 && (!f.montoPagare || !f.fechaPagare || monedaId === 0)) { 
-      this.notify.showWarning('Completá los datos obligatorios del Pagaré.'); 
+      this.notify.showWarning('CompletÃ¡ los datos obligatorios del PagarÃ©.'); 
       return; 
     }
     if (!f.archivo) { 
@@ -622,7 +632,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
       next: (res: any) => { 
         this.savingGarantia.set(false); 
         if (res.success) { 
-          this.notify.showSuccess('Garantía guardada.'); 
+          this.notify.showSuccess('GarantÃ­a guardada.'); 
           this.resetGarantiaForm(); 
           this.cargarGarantias(); 
         } else { 
@@ -637,16 +647,16 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
   }
 
   eliminarGarantia(id: number) {
-    if (!confirm('¿Eliminar garantía?')) return;
+    if (!confirm('Â¿Eliminar garantÃ­a?')) return;
     this.cotService.eliminarGarantia(id).subscribe({ 
       next: (res: any) => { 
         if (res.success) { 
-          this.notify.showSuccess('Garantía eliminada.'); 
+          this.notify.showSuccess('GarantÃ­a eliminada.'); 
           this.cargarGarantias(); 
         } 
       },
       error: (err) => {
-        this.notify.showError(err.error?.message || 'No se pudo eliminar la garantía.');
+        this.notify.showError(err.error?.message || 'No se pudo eliminar la garantÃ­a.');
       }
     });
   }
@@ -657,7 +667,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
   }
 
   desistirDeSubasta() {
-  if (!confirm('¿Estás seguro de que deseas desistir de esta subasta? Ya no podrás enviar ofertas.')) return;
+  if (!confirm('Â¿EstÃ¡s seguro de que deseas desistir de esta subasta? Ya no podrÃ¡s enviar ofertas.')) return;
   
   this.desistiendo.set(true);
   this.cotService.desistirParticipacion(this.idCotizacion()).subscribe({
@@ -672,8 +682,10 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     },
     error: (err) => {
       this.desistiendo.set(false);
-      this.notify.showError(err.error?.message || 'Error de conexión.');
+      this.notify.showError(err.error?.message || 'Error de conexiÃ³n.');
     }
   });
 }
 }
+
+

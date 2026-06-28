@@ -1,3 +1,70 @@
+@if (variant === 'module') {
+  <header class="relative z-[10000] flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/95 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+    <div class="flex min-w-0 items-center gap-2">
+      <ng-content select="[header-left]"></ng-content>
+      <span class="truncate text-[13px] font-[510] text-[var(--color-storm-cloud)]">{{ title }}</span>
+    </div>
+
+    <div class="relative flex items-center gap-2 sm:gap-3">
+      <button (click)="toggleTheme()" class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-[var(--color-storm-cloud)] transition-all hover:border-[var(--color-charcoal-grey)] hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]" title="Cambiar tema">
+        <lucide-icon [name]="isDarkMode() ? 'sun' : 'moon'" [size]="18"></lucide-icon>
+      </button>
+
+      @if (authService.isAuthenticated() && user()) {
+        <button id="user-menu-button" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] uppercase ring-2 ring-[var(--color-pitch-black)] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95">
+          {{ userInitials() }}
+        </button>
+
+        <div id="user-dropdown"
+             style="z-index: 10001" class="fixed right-4 top-[4.5rem] w-[18rem] max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-3 shadow-[0_24px_80px_rgba(15,43,92,0.18)] backdrop-blur-2xl transition-all duration-200 dark:border-[rgba(2,184,204,0.10)] dark:bg-[linear-gradient(145deg,rgba(27,34,46,0.99),rgba(9,13,20,0.99))] dark:shadow-[0_24px_80px_rgba(0,0,0,0.72)]"
+             [ngClass]="isUserMenuOpen() ? 'scale-100 opacity-100 visible' : 'scale-95 opacity-0 invisible'">
+          <div class="mb-3 flex items-center gap-3 rounded-xl bg-[var(--color-pitch-black)]/45 px-3 py-3 shadow-[0_1px_0_rgba(18,104,196,0.14)] dark:bg-transparent dark:px-1 dark:pb-3 dark:pt-0 dark:shadow-[0_1px_0_rgba(2,184,204,0.10)]">
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] text-[17px] font-[800] uppercase tracking-tight ring-2 ring-[var(--color-graphite)] shadow-[0_0_18px_rgba(2,184,204,0.20)]">
+              {{ userInitials() }}
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-[15px] font-[650] leading-tight text-[var(--color-porcelain)]">{{ user()?.nombreUsuario }}</p>
+              <p class="mt-1 truncate text-[11px] font-[510] uppercase tracking-wide text-[var(--color-fog-grey)]">{{ user()?.email }}</p>
+              <span class="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-cyan-spark)]/10 px-2 py-0.5 text-[10px] font-[800] uppercase tracking-widest text-[var(--color-cyan-spark)] dark:bg-[var(--color-light-steel)]/12 dark:text-[var(--color-light-steel)]">
+                {{ user()?.rol }}
+                <lucide-icon [name]="roleIcon()" [size]="15" class="text-current opacity-90"></lucide-icon>
+              </span>
+            </div>
+          </div>
+
+          @if (visibleEntidades().length > 0) {
+            <div class="mb-3 px-1">
+              <p class="mb-2 px-2 text-[10px] font-[800] uppercase tracking-[0.18em] text-[var(--color-fog-grey)]">Operando como:</p>
+              <div class="overflow-hidden rounded-2xl border border-transparent bg-[var(--color-pitch-black)]/55 shadow-none dark:bg-[var(--color-pitch-black)]/38">
+                @for (ent of visibleEntidades(); track ent.id + ent.tipo) {
+                  <button (click)="switchContext(ent.tipo, ent.id)" class="w-full border-0 outline-none ring-0 focus:outline-none focus:ring-0 px-3 py-2.5 text-left text-[13px] font-[650] transition-all" [ngClass]="isCurrentContext(ent.tipo, ent.id) ? 'bg-[var(--color-cyan-spark)]/12 text-[var(--color-cyan-spark)] cursor-default' : 'text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/70 dark:hover:bg-[rgba(2,184,204,0.08)]'">
+                    <div class="flex items-center gap-3">
+                      @if (isCurrentContext(ent.tipo, ent.id)) {
+                        <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] shadow-[0_0_12px_rgba(2,184,204,0.30)]"><lucide-icon name="check" [size]="13" [strokeWidth]="3"></lucide-icon></span>
+                      } @else {
+                        <lucide-icon [name]="ent.tipo === 'PROVEEDOR' ? 'truck' : 'building-2'" [size]="17" class="shrink-0 text-[var(--color-light-steel)]"></lucide-icon>
+                      }
+                      <span class="min-w-0 flex-1 truncate">{{ ent.nombre }}</span>
+                      @if (isCurrentContext(ent.tipo, ent.id)) { <lucide-icon name="chevron-down" [size]="16" class="text-[var(--color-light-steel)]"></lucide-icon> }
+                    </div>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="flex flex-col gap-1">
+            <button (click)="openProfile()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[rgba(2,184,204,0.08)]"><lucide-icon name="user-circle" [size]="17" class="text-[var(--color-porcelain)]/90"></lucide-icon>Mi Perfil</button>
+            <button (click)="openPassword()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[rgba(2,184,204,0.08)]"><lucide-icon name="key-round" [size]="17" class="text-[var(--color-porcelain)]/90"></lucide-icon>Cambiar Contraseña</button>
+            <button (click)="logout()" class="mt-1 flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-left text-[13px] font-[700] text-red-300 transition-all hover:border-red-500/20 hover:bg-red-500/10"><lucide-icon name="log-out" [size]="17"></lucide-icon>Cerrar Sesión</button>
+          </div>
+        </div>
+      } @else {
+        <a routerLink="/login" class="inline-flex items-center justify-center rounded-xl bg-[var(--color-neon-lime)] px-4 py-2 text-[13px] font-[590] text-[var(--color-pitch-black)] transition-all active:scale-[0.97]">Iniciar Sesión</a>
+      }
+    </div>
+  </header>
+} @else {
 <header
   class="fixed top-0 z-50 w-full transition-all duration-300"
   [ngClass]="isScrolled() 
@@ -46,33 +113,34 @@
           
           <div>
             <button id="user-menu-button" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95 ring-2 ring-[var(--color-pitch-black)] uppercase">
-              {{ user()?.nombreUsuario?.charAt(0) || 'U' }}
+              {{ userInitials() }}
             </button>
 
             <div id="user-dropdown" 
-                 class="absolute right-0 top-12 w-64 rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/95 p-2 shadow-2xl backdrop-blur-xl transition-all duration-200 transform origin-top-right"
+                 class="absolute right-0 top-12 w-[22rem] overflow-hidden rounded-[1.8rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-4 shadow-[0_24px_80px_rgba(15,43,92,0.18)] backdrop-blur-2xl transition-all duration-200 transform origin-top-right dark:border-transparent dark:bg-[radial-gradient(circle_at_20%_0%,rgba(2,184,204,0.12),transparent_32%),linear-gradient(145deg,rgba(31,38,51,0.98),rgba(13,17,25,0.98))] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(2,184,204,0.08)]"
                  [ngClass]="isUserMenuOpen() ? 'scale-100 opacity-100 visible' : 'scale-95 opacity-0 invisible'">
               
-              <div class="px-4 py-3 border-b border-[var(--color-charcoal-grey)]/60 mb-2">
+              <div class="mb-2 rounded-2xl border border-transparent bg-[var(--color-pitch-black)]/45 px-4 py-3 shadow-[0_1px_0_rgba(18,104,196,0.14)] dark:bg-[var(--color-pitch-black)]/35 dark:shadow-[0_1px_0_rgba(2,184,204,0.08)]">
                 <p class="text-[14px] font-[590] text-[var(--color-porcelain)] truncate">{{ user()?.nombreUsuario }}</p>
                 <p class="text-[12px] text-[var(--color-storm-cloud)] truncate">{{ user()?.email }}</p>
-                <span class="mt-2 inline-block rounded-md bg-[var(--color-deep-slate)] px-2 py-0.5 text-[10px] font-bold tracking-widest text-[var(--color-light-steel)] uppercase">
+                <span class="mt-2 inline-flex items-center gap-1.5 rounded-full border border-transparent bg-[var(--color-cyan-spark)]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-cyan-spark)]">
                   {{ user()?.rol }}
+                  <lucide-icon [name]="roleIcon()" [size]="13" class="text-[var(--color-cyan-spark)]/90"></lucide-icon>
                 </span>
               </div>
 
-              @if (user()?.entidades && user()!.entidades.length > 0) {
-                <div class="px-4 py-3 border-b border-[var(--color-charcoal-grey)]/60 mb-2 bg-[var(--color-pitch-black)]/30 rounded-lg mx-2">
+              @if (visibleEntidades().length > 0) {
+                <div class="mb-5 px-1">
                   <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-2">Operando como:</p>
-                  <div class="space-y-1">
-                    @for (ent of user()!.entidades; track ent.id + ent.tipo) {
+                  <div class="overflow-hidden rounded-2xl border border-transparent bg-[var(--color-pitch-black)]/55 shadow-none dark:bg-[var(--color-pitch-black)]/38">
+                    @for (ent of visibleEntidades(); track ent.id + ent.tipo) {
                       <button (click)="switchContext(ent.tipo, ent.id)"
-                              class="w-full text-left rounded-lg px-2.5 py-2 text-[12px] font-[510] transition-all"
-                              [ngClass]="isCurrentContext(ent.tipo, ent.id) ? 'bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] border border-[var(--color-cyan-spark)]/30 cursor-default' : 'text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] border border-transparent'">
+                              class="w-full text-left rounded-lg border-0 outline-none ring-0 focus:outline-none focus:ring-0 px-2.5 py-2 text-[12px] font-[510] transition-all"
+                              [ngClass]="isCurrentContext(ent.tipo, ent.id) ? 'bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] cursor-default' : 'text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]'">
                         <div class="flex items-center justify-between">
                           <span class="truncate">{{ ent.nombre }}</span>
                           @if (isCurrentContext(ent.tipo, ent.id)) {
-                            <lucide-icon name="check-circle" [size]="14"></lucide-icon>
+                            <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-cyan-spark)] text-[var(--color-pitch-black)]"><lucide-icon name="check" [size]="14" [strokeWidth]="3"></lucide-icon></span>
                           }
                         </div>
                       </button>
@@ -142,7 +210,7 @@
       @if (authService.isAuthenticated() && user()) {
         <div class="mb-4 flex items-center gap-4 rounded-3xl border border-[var(--color-charcoal-grey)]/80 bg-[var(--color-graphite)] p-5">
           <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[20px] font-bold text-[var(--color-pitch-black)] uppercase">
-            {{ user()?.nombreUsuario?.charAt(0) || 'U' }}
+            {{ userInitials() }}
           </div>
           <div class="flex flex-col overflow-hidden text-left">
             <span class="text-[16px] font-[590] text-[var(--color-porcelain)] truncate">{{ user()?.nombreUsuario }}</span>
@@ -188,6 +256,8 @@
     </div>
   </div>
 </header>
+
+}
 
 @if (isProfileModalOpen() && user()) {
   <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">

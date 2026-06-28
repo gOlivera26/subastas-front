@@ -6,75 +6,62 @@
       <button (click)="openCreateModal()" [disabled]="!selectedVigenciaId()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] disabled:opacity-50"><lucide-icon name="plus" [size]="16"></lucide-icon><span class="hidden sm:inline">Nuevo</span></button>
       <button (click)="openUpload()" [disabled]="!selectedVigenciaId()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] disabled:opacity-50"><lucide-icon name="upload" [size]="16"></lucide-icon><span class="hidden sm:inline">Importar CSV</span></button>
     </div>
+    <div class="flex flex-wrap justify-end gap-2">
+      <button type="button" (click)="expandAll()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[12px] font-[650] text-[var(--color-light-steel)] transition-all hover:border-[var(--color-cyan-spark)]/50 hover:text-[var(--color-porcelain)]"><lucide-icon name="chevrons-down" [size]="15"></lucide-icon>Expandir todo</button>
+      <button type="button" (click)="collapseAll()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[12px] font-[650] text-[var(--color-light-steel)] transition-all hover:border-[var(--color-cyan-spark)]/50 hover:text-[var(--color-porcelain)]"><lucide-icon name="chevrons-up" [size]="15"></lucide-icon>Colapsar</button>
+    </div>
   </div>
 
   @if (success(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] text-emerald-400 animate-slide-up"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
   @if (error(); as msg) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] text-red-400 animate-slide-up"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ msg }}</div>}
 
-  <div class="relative w-full sm:w-80 mb-6">
-    <lucide-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
-    <input [(ngModel)]="searchTerm" type="text" placeholder="Buscar por nombre, código..." class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 pl-10 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none transition-colors">
-  </div>
-
-  <div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-0 shadow-lg overflow-hidden">
-    @if (loading()) {
-      <app-loading-spinner label="Cargando bienes..." containerClass="py-16"></app-loading-spinner>
-    } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-[14px] whitespace-nowrap">
-          <thead class="bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
-            <tr>
-              <th class="px-6 py-4 font-medium transition-colors w-[35%]">Jerarquía</th>
-              <th class="px-6 py-4 font-medium transition-colors w-[15%]">Código</th>
-              <th class="px-6 py-4 font-medium transition-colors w-[25%]">Objeto Gasto</th>
-              <th class="px-6 py-4 font-medium transition-colors w-[10%]">Org.</th>
-              <th class="px-6 py-4 font-medium transition-colors text-right w-[15%]">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
-            @for (item of filteredTree(); track trackByFn($index, item)) {
-              <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: item, level: 0 }"></ng-container>
-            } @empty {
-              <tr>
-                <td colspan="5" class="px-6 py-16 text-center">
-                  <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)]"><lucide-icon name="folder-tree" [size]="32"></lucide-icon></div>
-                  <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">No hay bienes en esta vigencia</p>
-                  <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Creá uno nuevo o importá un CSV.</p>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    }
-  </div>
+  <app-smart-table
+    [columns]="columns"
+    [data]="visibleRows()"
+    [customTemplates]="customTemplates()"
+    [loading]="loading()"
+    [pageSize]="20"
+    searchPlaceholder="Buscar por nombre, c?digo, objeto u organizaci?n..."
+    emptyMessage="No hay bienes en esta vigencia"
+    emptySubMessage="Cre? uno nuevo o import? un CSV.">
+  </app-smart-table>
 </div>
 
-<ng-template #treeRow let-item let-level="level">
-  <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/50 group cursor-pointer" (click)="openEditModal(item)">
-    <td class="px-6 py-4">
-      <div class="flex items-center gap-2" [style.padding-left.px]="level * 32">
-        @if (level > 0) {<lucide-icon name="corner-down-right" [size]="16" class="text-[var(--color-storm-cloud)] shrink-0"></lucide-icon>}
-        <button (click)="toggleNode(item.idItem, $event); $event.stopPropagation()" [class.invisible]="!item.hasChildren" class="p-0.5 rounded shrink-0 transition-colors w-5 h-5 flex items-center justify-center text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)]"><lucide-icon [name]="isExpanded(item.idItem) ? 'chevron-down' : 'chevron-right'" [size]="16"></lucide-icon></button>
-        <lucide-icon [name]="item.hasChildren ? 'folder' : 'file-text'" [size]="16" class="shrink-0 transition-colors text-[var(--color-storm-cloud)]"></lucide-icon>
-        <span class="font-[590] text-[var(--color-porcelain)] text-[14px] truncate">{{ item.nItem }}</span>
-      </div>
-    </td>
-    <td class="px-6 py-4"><span class="font-mono text-[13px] text-[var(--color-cyan-spark)]">{{ item.codigo }}</span></td>
-    <td class="px-6 py-4"><span class="text-[13px] text-[var(--color-storm-cloud)]">{{ item.objetoGastoNombre || '-' }}</span></td>
-    <td class="px-6 py-4"><span class="text-[13px] text-[var(--color-storm-cloud)]">{{ item.organizacionNombre || 'Global' }}</span></td>
-    <td class="px-6 py-4 text-right">
-      <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-        <button (click)="openEditModal(item); $event.stopPropagation()" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
-        <button (click)="confirmDelete(item); $event.stopPropagation()" class="p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)] transition-colors border border-red-500/20"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
-      </div>
-    </td>
-  </tr>
-  @if (item.hasChildren && isExpanded(item.idItem)) {
-    @for (child of item.children; track trackByFn($index, child)) {
-      <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: child, level: level + 1 }"></ng-container>
-    }
-  }
+<ng-template #jerarquiaTpl let-item>
+  <button type="button" class="flex max-w-[36rem] items-center gap-2 text-left" (click)="openEditModal(item)">
+    <span class="inline-flex" [style.width.px]="item.level * 28"></span>
+    @if (item.level > 0) {<lucide-icon name="corner-down-right" [size]="16" class="shrink-0 text-[var(--color-storm-cloud)]"></lucide-icon>}
+    <button type="button" (click)="toggleNode(item.idItem, $event)" [class.invisible]="!item.hasChildren" class="flex size-6 shrink-0 items-center justify-center rounded-lg text-[var(--color-light-steel)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
+      <lucide-icon [name]="isExpanded(item.idItem) ? 'chevron-down' : 'chevron-right'" [size]="16"></lucide-icon>
+    </button>
+    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+      <lucide-icon [name]="item.hasChildren ? 'folder-tree' : 'file-text'" [size]="16"></lucide-icon>
+    </span>
+    <span class="min-w-0">
+      <span class="block truncate text-[13px] font-[700] text-[var(--color-porcelain)]" [title]="item.nItem">{{ item.nItem }}</span>
+      <span class="block truncate text-[11px] text-[var(--color-storm-cloud)]">{{ item.hasChildren ? 'Agrupador' : 'Bien / servicio' }}</span>
+      <span class="mt-1 inline-flex rounded-md bg-[var(--color-deep-slate)] px-2 py-0.5 text-[10px] font-[700] uppercase tracking-wider text-[var(--color-storm-cloud)]">{{ item.tipoJerarquia }}</span>
+    </span>
+  </button>
+</ng-template>
+
+<ng-template #codigoTpl let-item>
+  <span class="rounded-lg border border-[var(--color-cyan-spark)]/20 bg-[var(--color-cyan-spark)]/10 px-2.5 py-1 font-mono text-[12px] font-[700] text-[var(--color-cyan-spark)]">{{ item.codigo }}</span>
+</ng-template>
+
+<ng-template #objetoGastoTpl let-item>
+  <span class="block max-w-[22rem] truncate text-[13px] text-[var(--color-light-steel)]" [title]="item.objetoGastoNombre || '-'">{{ item.objetoGastoNombre || '-' }}</span>
+</ng-template>
+
+<ng-template #organizacionTpl let-item>
+  <span class="rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2.5 py-1 text-[11px] font-[650] uppercase tracking-wider text-[var(--color-storm-cloud)]">{{ item.organizacionNombre || 'Global' }}</span>
+</ng-template>
+
+<ng-template #accionesTpl let-item>
+  <div class="flex items-center justify-end gap-1.5">
+    <button (click)="openEditModal(item)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-cyan-spark)]" title="Editar"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
+    <button (click)="confirmDelete(item)" class="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition-colors hover:bg-red-500 hover:text-black" title="Eliminar"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+  </div>
 </ng-template>
 
 @if (isModalOpen()) {<div class="fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div><div class="relative w-full max-w-lg rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in"><div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar' : 'Nuevo' }} Bien</h3><button (click)="closeModal()" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>

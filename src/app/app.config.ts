@@ -10,7 +10,7 @@ import {
   List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
   Banknote, Network, Upload, LayoutDashboard, Clock, Construction, BarChart, RotateCcw, Copy, Send, HelpCircle, SearchX, Inbox,
   FileBadge, History, TrendingDown, MessageSquareDashed, ShieldAlert, MailOpen,Image, PieChart, MessageSquare, Download, FolderOpen,
-  FileX, UploadCloud, ClipboardList
+  FileX, UploadCloud, ClipboardList, Truck, Factory
 
 } from 'lucide-angular/src/icons';
 import { routes } from './app.routes';
@@ -35,7 +35,7 @@ export const appConfig: ApplicationConfig = {
         Sun, Moon, PanelLeft, PanelLeftClose, List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
         Banknote, Network, Upload, LayoutDashboard, Clock, Construction, BarChart, RotateCcw, Copy, Send, HelpCircle, SearchX, Inbox,
         FileBadge, History, TrendingDown, MessageSquareDashed, ShieldAlert, MailOpen, MessageSquare, FolderOpen,
-        Image, PieChart, Download, FileX, Layers, UploadCloud, ClipboardList
+        Image, PieChart, Download, FileX, Layers, UploadCloud, ClipboardList, Truck, Factory
       }),
       multi: true,
     },

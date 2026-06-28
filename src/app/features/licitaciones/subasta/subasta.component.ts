@@ -68,6 +68,7 @@ export class SubastaComponent implements OnInit {
   itemToPublish = signal<any>(null);
   itemToAnular = signal<any>(null);
   itemToDesistir = signal<any>(null);
+  generatingGanadores = signal<number | null>(null);
 
   items = signal<SubastaDashboard[]>([]); loading = signal(true);
   filterVigencia = signal<number | null>(null); filterEstado = signal<number | null>(null);
@@ -197,6 +198,29 @@ export class SubastaComponent implements OnInit {
     this.reporteService.descargarActaPrelacion(item.idCotizacion).subscribe({
       next: (blob) => this.reporteService.abrirPdf(blob),
       error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el informe final de subasta.')
+    });
+  }
+
+  generarGanadores(item: any) {
+    if (!item?.idCotizacion || this.generatingGanadores() === item.idCotizacion) return;
+
+    this.generatingGanadores.set(item.idCotizacion);
+    this.http.post<any>(`${this.api}/Ganador/${item.idCotizacion}/generar`, {}).subscribe({
+      next: (res) => {
+        this.generatingGanadores.set(null);
+        if (res?.success) {
+          const count = Array.isArray(res.data) ? res.data.length : 0;
+          this.notify.showSuccess(count > 0
+            ? `Ganadores registrados: ${count}`
+            : 'No se generaron ganadores: no hay ofertas válidas para adjudicar.');
+        } else {
+          this.notify.showError(res?.message || 'No se pudieron generar los ganadores.');
+        }
+      },
+      error: (err) => {
+        this.generatingGanadores.set(null);
+        this.notify.showError(err.error?.message || 'No se pudieron generar los ganadores.');
+      }
     });
   }
 
@@ -541,7 +565,7 @@ getRenglonOfItem(itemId: number): string {
   showEspec = signal(false); especItem = signal<any>(null);
   especNroExpediente = signal(''); especFechaInicio = signal(''); especFechaFin = signal('');
   especFechaLimite = signal(''); especMargen = signal(5);
-  especCriterio = signal(0); especProrroga = signal(false);
+  especCriterio = signal(0); especCriterioOriginal = signal(0); especProrroga = signal(false);
   especProrrogaMin = signal(0); especRedet = signal('');
   savingEspec = signal(false);
 
@@ -557,6 +581,7 @@ getRenglonOfItem(itemId: number): string {
           this.especFechaLimite.set(e.fechaLimiteConsultas || '');
           this.especMargen.set(e.margenMejora || 5);
           this.especCriterio.set(e.criterioAdjudicacion ?? 0);
+          this.especCriterioOriginal.set(e.criterioAdjudicacion ?? 0);
           this.especProrroga.set(e.permiteProrroga || false);
           this.especProrrogaMin.set(e.prorrogaMinutos || 0);
           this.especRedet.set(e.redeterminacion || '');
@@ -581,7 +606,7 @@ getRenglonOfItem(itemId: number): string {
         fechaFinalizacionSubasta: this.especFechaFin() || null,
         fechaLimiteConsultas: this.especFechaLimite() || null,
         margenMejora: this.especMargen(),
-        criterioAdjudicacion: this.especCriterio(),
+        criterioAdjudicacion: this.especCriterioOriginal(),
         permiteProrroga: this.especProrroga(),
         prorrogaMinutos: this.especProrrogaMin() || null,
         redeterminacion: this.especRedet() || null,

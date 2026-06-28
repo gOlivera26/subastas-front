@@ -27,6 +27,7 @@ export class CustomSelect implements AfterViewChecked {
   @Input() label = '';
   @Input() placeholder = 'Seleccione...';
   @Input() disabled: boolean = false;
+  @Input() dropdownMinWidth = 0;
 
   private _options = signal<SelectOption[]>([]);
 
@@ -106,12 +107,13 @@ export class CustomSelect implements AfterViewChecked {
     const spaceAbove = rect.top - gap;
     const openToTop = spaceBelow < preferredHeight && spaceAbove > spaceBelow;
     const availableHeight = Math.max(minHeight, Math.min(preferredHeight, openToTop ? spaceAbove : spaceBelow));
-    const left = Math.min(Math.max(gap, rect.left), Math.max(gap, windowWidth - rect.width - gap));
+    const desiredWidth = Math.min(Math.max(rect.width, this.dropdownMinWidth || 0), windowWidth - gap * 2);
+    const left = Math.min(Math.max(gap, rect.left), Math.max(gap, windowWidth - desiredWidth - gap));
 
     this.dropdownPosition.set(openToTop ? 'top' : 'bottom');
     this.dropdownStyles.set({
       left: `${left}px`,
-      width: `${rect.width}px`,
+      width: `${desiredWidth}px`,
       maxHeight: `${availableHeight}px`,
       ...(openToTop
         ? { bottom: `${windowHeight - rect.top + gap}px` }

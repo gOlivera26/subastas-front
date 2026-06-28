@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, HostListener, Input, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgClass } from '@angular/common';
@@ -13,6 +13,8 @@ import { ProfileResponse } from '../../../core/models/auth.model';
   templateUrl: './header.component.html',
 })
 export class HeaderComponent implements OnInit {
+  @Input() variant: 'public' | 'module' = 'public';
+  @Input() title = '';
   authService = inject(AuthService);
   private fb = inject(FormBuilder);
   
@@ -24,6 +26,48 @@ export class HeaderComponent implements OnInit {
   isDarkMode = signal(true);
 
   user = computed(() => this.authService.currentUser());
+  visibleEntidades = computed(() => {
+    const user = this.user();
+    if (!user?.entidades) return [];
+    return user.entidades.filter(ent => this.canOperateContext(ent.tipo));
+  });
+
+  userInitials(): string {
+    const name = this.user()?.nombreUsuario?.trim();
+    if (!name) return 'U';
+    const parts = name.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  roleIcon(): string {
+    const role = this.user()?.rol?.toUpperCase() || '';
+    if (role.includes('PROVEEDOR')) return 'truck';
+    if (role.includes('GESTOR') || role.includes('OPERADOR') || role.includes('ADMIN') || role.includes('LICIT')) return 'building-2';
+    return 'user-circle';
+  }
+
+  canOperateContext(tipo: string): boolean {
+    const role = this.user()?.rol?.toUpperCase() || '';
+    const context = (tipo || '').toUpperCase();
+
+    if (role.includes('SUPERADMIN')) return true;
+
+    if (context === 'GESTOR') {
+      return role.includes('GESTOR') ||
+        role.includes('OPERADOR') ||
+        role.includes('ADMIN') ||
+        role.includes('LICITACION') ||
+        role.includes('LICITACIÓN') ||
+        role.includes('INVERSA');
+    }
+
+    if (context === 'PROVEEDOR') {
+      return role.includes('PROVEEDOR') || role.includes('DIRECTA');
+    }
+
+    return false;
+  }
 
   profileData = signal<ProfileResponse | null>(null);
   isLoadingProfile = signal(false);
