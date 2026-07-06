@@ -1,4 +1,4 @@
-<div class="animate-fade-in">
+﻿<div class="animate-fade-in">
   @if (showSearch()) {
   <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div class="relative w-full sm:max-w-sm">
@@ -21,17 +21,21 @@
       </div>
     }
 
-    <div class="hidden w-full overflow-x-auto overflow-y-hidden md:block">
-      <table class="min-w-full whitespace-nowrap text-left">
+    <div class="flex items-center justify-between gap-3 border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 px-3 py-2 text-[11px] font-medium text-[var(--color-storm-cloud)] md:hidden">
+      <span class="uppercase tracking-[0.18em]">Tabla</span>
+      <span>Deslizá para ver más columnas →</span>
+    </div>
+    <div class="smart-table-scroll w-full overflow-x-auto overflow-y-hidden" role="region" aria-label="Tabla de resultados">
+      <table class="smart-table-native min-w-full text-left">
         <thead class="border-b border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/55">
           <tr>
             @for (col of columns(); track col.key) {
               <th
                 (click)="handleSort(col)"
-                class="px-6 py-3 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] select-none"
+                class="px-3 py-3 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] select-none sm:px-4 md:px-6 md:text-[11px]"
                 [class.cursor-pointer]="col.sortable"
                 [class.hover:text-[var(--color-porcelain)]]="col.sortable">
-                <div class="flex items-center gap-1">
+                <div class="flex min-w-0 items-center gap-1">
                   {{ col.header }}
                   @if (sortColumn() === col.key) {
                     <lucide-icon [name]="sortDirection() === 'asc' ? 'chevron-up' : 'chevron-down'" [size]="12"></lucide-icon>
@@ -40,10 +44,10 @@
               </th>
             }
             @if (actions().length > 0) {
-              <th class="px-6 py-3 text-right text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Acciones</th>
+              <th class="px-3 py-3 text-right text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] sm:px-4 md:px-6 md:text-[11px]">Acciones</th>
             }
             @if (selectable()) {
-              <th class="w-10 px-6 py-3 text-center">
+              <th class="w-10 px-3 py-3 text-center sm:px-4 md:px-6">
                 <input type="checkbox" [checked]="isAllSelected()" (change)="toggleAll()" class="rounded border-[var(--color-charcoal-grey)]">
               </th>
             }
@@ -54,7 +58,7 @@
           @for (row of paginatedData(); track $index) {
             <tr class="transition-colors hover:bg-[var(--color-deep-slate)]/45" [class.bg-[var(--color-cyan-spark)]/5]="isSelected(row)">
               @for (col of columns(); track col.key) {
-                <td class="px-6 py-4 text-[var(--color-porcelain)]" [ngSwitch]="col.type">
+                <td class="px-3 py-3 align-middle text-[13px] text-[var(--color-porcelain)] sm:px-4 md:px-6 md:py-4 md:text-[14px]" [ngSwitch]="col.type">
                   <ng-container *ngSwitchCase="'custom'">
                     @if (customTemplates()[col.key]) {
                       <ng-container *ngTemplateOutlet="customTemplates()[col.key]; context: { $implicit: row }"></ng-container>
@@ -78,19 +82,46 @@
               }
 
               @if (actions().length > 0) {
-                <td class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end gap-1">
-                    @for (act of actions(); track act.action) {
-                      <button (click)="handleAction(act.action, row)" [title]="act.tooltip" class="rounded-lg p-1.5 transition-colors hover:bg-[var(--color-deep-slate)] {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
-                        <lucide-icon [name]="act.icon" [size]="16"></lucide-icon>
-                      </button>
+                <td class="px-3 py-3 text-right align-middle sm:px-4 md:px-6 md:py-4">
+                  <div class="flex justify-end">
+                    @if (actions().length === 1) {
+                      @for (act of actions(); track act.action) {
+                        <button (click)="handleAction(act.action, row)" [title]="act.tooltip" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-charcoal-grey)]/70 bg-[var(--color-pitch-black)]/45 p-1.5 transition-colors hover:bg-[var(--color-deep-slate)] {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
+                          <lucide-icon [name]="act.icon" [size]="16"></lucide-icon>
+                        </button>
+                      }
+                    } @else {
+                      <div class="smart-table-action-menu-wrap">
+                        <button
+                          type="button"
+                          (click)="toggleActionsMenu(rowActionKey(row, $index), $event)"
+                          class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[var(--color-charcoal-grey)]/80 bg-[var(--color-pitch-black)]/60 px-2 text-[var(--color-porcelain)] transition-colors hover:border-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]"
+                          [attr.aria-expanded]="isActionsMenuOpen(rowActionKey(row, $index))"
+                          aria-label="Abrir acciones">
+                          <span class="action-menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+                        </button>
+
+                        @if (isActionsMenuOpen(rowActionKey(row, $index))) {
+                          <div class="smart-table-action-menu mt-2 min-w-40 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] p-1.5 text-left shadow-lg">
+                            @for (act of actions(); track act.action) {
+                              <button
+                                type="button"
+                                (click)="handleActionFromMenu(act.action, row, $event)"
+                                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[12px] transition-colors hover:bg-[var(--color-deep-slate)] {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
+                                <lucide-icon [name]="act.icon" [size]="15"></lucide-icon>
+                                <span class="truncate">{{ act.tooltip || act.action }}</span>
+                              </button>
+                            }
+                          </div>
+                        }
+                      </div>
                     }
                   </div>
                 </td>
               }
 
               @if (selectable()) {
-                <td class="px-6 py-4 text-center">
+                <td class="px-3 py-3 text-center sm:px-4 md:px-6 md:py-4">
                   <input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="rounded border-[var(--color-charcoal-grey)]">
                 </td>
               }
@@ -114,64 +145,7 @@
       </table>
     </div>
 
-    <div class="divide-y divide-[var(--color-charcoal-grey)] md:hidden">
-      @for (row of paginatedData(); track $index) {
-        <article class="bg-[var(--color-graphite)] p-4 transition-colors hover:bg-[var(--color-deep-slate)]/35" [class.bg-[var(--color-cyan-spark)]/5]="isSelected(row)">
-          @if (selectable()) {
-            <div class="mb-3 flex justify-end">
-              <label class="inline-flex items-center gap-2 text-[12px] text-[var(--color-storm-cloud)]">
-                <span>Seleccionar</span>
-                <input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="rounded border-[var(--color-charcoal-grey)]">
-              </label>
-            </div>
-          }
 
-          <dl class="space-y-3">
-            @for (col of columns(); track col.key) {
-              <div class="rounded-xl border border-[var(--color-charcoal-grey)]/70 bg-[var(--color-pitch-black)]/45 p-3">
-                <dt class="mb-1 text-[10px] font-[700] uppercase tracking-widest text-[var(--color-storm-cloud)]">{{ col.header }}</dt>
-                <dd class="min-w-0 text-[14px] text-[var(--color-porcelain)]" [ngSwitch]="col.type">
-                  <ng-container *ngSwitchCase="'custom'">
-                    @if (customTemplates()[col.key]) {
-                      <ng-container *ngTemplateOutlet="customTemplates()[col.key]; context: { $implicit: row }"></ng-container>
-                    }
-                  </ng-container>
-                  <span *ngSwitchCase="'tag'" class="inline-flex max-w-full items-center rounded-lg bg-[var(--color-deep-slate)] px-2 py-1 text-xs font-medium text-[var(--color-storm-cloud)] font-mono">{{ row[col.key] || '-' }}</span>
-                  <span *ngSwitchCase="'currency'" class="font-mono font-bold text-emerald-500">{{ row[col.key] | currency:'ARS':'symbol-narrow':'1.2-2' }}</span>
-                  <span *ngSwitchCase="'badge'" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [ngClass]="{'bg-emerald-500/10 text-emerald-500': row[col.key] === 'Activo', 'bg-red-500/10 text-red-500': row[col.key] !== 'Activo'}">{{ row[col.key] }}</span>
-                  <ng-container *ngSwitchCase="'boolean'">
-                    @if (row[col.key]) {
-                      <span class="inline-flex items-center gap-1 text-emerald-500"><lucide-icon name="check" [size]="16"></lucide-icon>Sí</span>
-                    } @else {
-                      <span class="inline-flex items-center gap-1 text-[var(--color-storm-cloud)]"><lucide-icon name="x" [size]="16"></lucide-icon>No</span>
-                    }
-                  </ng-container>
-                  <span *ngSwitchCase="'date'">{{ row[col.key] ? (row[col.key] | date:'dd/MM/yyyy HH:mm') : '-' }}</span>
-                  <span *ngSwitchDefault class="break-words">{{ row[col.key] || '-' }}</span>
-                </dd>
-              </div>
-            }
-          </dl>
-
-          @if (actions().length > 0) {
-            <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-[var(--color-charcoal-grey)] pt-3">
-              @for (act of actions(); track act.action) {
-                <button (click)="handleAction(act.action, row)" [title]="act.tooltip" class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-charcoal-grey)] px-3 py-2 text-[12px] transition-colors hover:bg-[var(--color-deep-slate)] {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
-                  <lucide-icon [name]="act.icon" [size]="16"></lucide-icon>
-                  <span>{{ act.tooltip || act.action }}</span>
-                </button>
-              }
-            </div>
-          }
-        </article>
-      } @empty {
-        <div class="p-10 text-center text-[var(--color-storm-cloud)]">
-          <lucide-icon name="inbox" [size]="32" class="mx-auto mb-2 text-[var(--color-fog-grey)]"></lucide-icon>
-          <p class="text-[14px]">{{ emptyMessage() }}</p>
-                  @if (emptySubMessage()) {<p class="mt-1 text-[12px] text-[var(--color-fog-grey)]">{{ emptySubMessage() }}</p>}
-        </div>
-      }
-    </div>
 
     @if (processedData().length > 0) {
       <div class="flex flex-col gap-3 border-t border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/35 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -189,3 +163,8 @@
     }
   </div>
 </div>
+
+
+
+
+

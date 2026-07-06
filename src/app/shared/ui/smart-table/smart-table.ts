@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, TemplateRef, computed, input, signal, effect } from '@angular/core';
+﻿import { Component, EventEmitter, Output, TemplateRef, computed, input, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
@@ -9,6 +9,7 @@ import { TableColumn, TableAction } from './table.models';
   standalone: true,
   imports: [CommonModule, LucideAngularModule, LoadingSpinnerComponent],
   templateUrl: './smart-table.html',
+  styleUrls: ['./smart-table.css'],
 })
 export class SmartTableComponent {
   data = input.required<any[]>();
@@ -38,6 +39,7 @@ export class SmartTableComponent {
   sortDirection = signal<'asc' | 'desc'>('asc');
 
   currentPage = signal(1);
+  openActionsMenu = signal<string | null>(null);
   private searchTimeout: any;
   private readonly collator = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
 
@@ -137,6 +139,7 @@ export class SmartTableComponent {
     if (this.currentPage() < this.totalPages()) {
       const newPage = this.currentPage() + 1;
       this.currentPage.set(newPage);
+      this.openActionsMenu.set(null);
       if (this.serverSide()) {
         this.pageChange.emit(newPage);
       }
@@ -147,6 +150,7 @@ export class SmartTableComponent {
     if (this.currentPage() > 1) {
       const newPage = this.currentPage() - 1;
       this.currentPage.set(newPage);
+      this.openActionsMenu.set(null);
       if (this.serverSide()) {
         this.pageChange.emit(newPage);
       }
@@ -206,7 +210,29 @@ export class SmartTableComponent {
     }
   }
 
+  rowActionKey(row: any, index: number): string {
+    return `${this.currentPage()}-${row?.id ?? index}`;
+  }
+
+  isActionsMenuOpen(key: string): boolean {
+    return this.openActionsMenu() === key;
+  }
+
+  toggleActionsMenu(key: string, event?: Event) {
+    event?.stopPropagation();
+    this.openActionsMenu.set(this.openActionsMenu() === key ? null : key);
+  }
+
+  handleActionFromMenu(action: string, row: any, event?: Event) {
+    event?.stopPropagation();
+    this.openActionsMenu.set(null);
+    this.handleAction(action, row);
+  }
   handleAction(action: string, row: any) {
+    this.openActionsMenu.set(null);
     this.onAction.emit({ action, row });
   }
 }
+
+
+

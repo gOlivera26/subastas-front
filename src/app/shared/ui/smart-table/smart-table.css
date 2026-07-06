@@ -1,0 +1,64 @@
+﻿:host {
+  display: block;
+}
+
+.smart-table-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-charcoal-grey) transparent;
+}
+
+.smart-table-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.smart-table-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--color-charcoal-grey);
+}
+
+.smart-table-native {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+@media (max-width: 767px) {
+  .smart-table-scroll {
+    overscroll-behavior-x: contain;
+  }
+
+  .smart-table-native {
+    min-width: 760px;
+    table-layout: auto;
+  }
+
+  .smart-table-native th,
+  .smart-table-native td {
+    min-width: 120px;
+    max-width: 220px;
+    white-space: normal;
+    vertical-align: middle;
+  }
+
+  .smart-table-native th:last-child,
+  .smart-table-native td:last-child {
+    min-width: 132px;
+    max-width: none;
+    white-space: nowrap;
+  }
+
+  .smart-table-native tbody tr:nth-child(even) td {
+    background-color: rgba(255, 255, 255, 0.015);
+  }
+}
+
+.smart-table-action-menu-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.smart-table-action-menu {
+  max-width: min(220px, calc(100vw - 48px));
+}
+

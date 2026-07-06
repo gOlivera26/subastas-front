@@ -1,12 +1,12 @@
-<div class="mx-auto max-w-[1500px]">
-  <div class="mb-6">
+<div class="page-container max-w-[1500px]">
+  <div class="page-heading">
     <h1 class="text-[24px] font-[590] text-[var(--color-porcelain)]">Subasta / Licitación</h1>
     <p class="text-[14px] text-[var(--color-storm-cloud)]">Administración de procesos de compra y subastas electrónicas.</p>
   </div>
 
   <!-- FILTROS -->
-  <div class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 mb-6">
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+  <div class="surface-card mb-6 p-4 sm:p-5 lg:p-6">
+    <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
       <div>
         <label class="mb-1 block text-[11px] uppercase tracking-wider text-[var(--color-storm-cloud)]">Área</label>
         <select class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"><option value="">Consultar por Área</option></select>
@@ -32,10 +32,10 @@
         <input type="date" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]" />
       </div>
     </div>
-    <div class="flex items-center gap-3">
-      <a routerLink="/licitaciones/subasta" class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-neon-lime)] px-5 py-2.5 text-[14px] font-[590] text-black hover:brightness-110"><lucide-icon name="plus" [size]="16"></lucide-icon>Nuevo</a>
-      <button (click)="buscar()" class="rounded-xl bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] font-[590] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">Ver Todas las subastas</button>
-      <button class="rounded-xl bg-[var(--color-deep-slate)] border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[14px] font-[590] text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">Ver Mí Subastas</button>
+    <div class="action-row">
+      <a routerLink="/licitaciones/subasta" class="btn-primary"><lucide-icon name="plus" [size]="16"></lucide-icon>Nuevo</a>
+      <button (click)="buscar()" class="btn-secondary">Ver Todas las subastas</button>
+      <button class="btn-secondary">Ver Mí Subastas</button>
     </div>
   </div>
 

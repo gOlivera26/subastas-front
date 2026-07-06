@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, TemplateRef, viewChild } from '@angular/core';
+﻿import { Component, OnInit, inject, signal, computed, TemplateRef, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -69,6 +69,8 @@ export class SubastaComponent implements OnInit {
   itemToAnular = signal<any>(null);
   itemToDesistir = signal<any>(null);
   generatingGanadores = signal<number | null>(null);
+  openSubastaActions = signal<string | null>(null);
+  subastaActionsMenuPosition = signal<{ top: number; left: number; maxHeight: number } | null>(null);
 
   items = signal<SubastaDashboard[]>([]); loading = signal(true);
   filterVigencia = signal<number | null>(null); filterEstado = signal<number | null>(null);
@@ -185,6 +187,65 @@ export class SubastaComponent implements OnInit {
     return new Date(fecha).getTime() < this.ahora();
   }
 
+
+  rowActionKey(item: any): string {
+    return String(item?.idCotizacion ?? item?.id ?? item?.nroCotizacion ?? '');
+  }
+
+  subastaActionsPopoverId(item: any): string {
+    return `subasta-actions-${this.rowActionKey(item)}`;
+  }
+  isSubastaActionsOpen(key: string): boolean {
+    return this.openSubastaActions() === key;
+  }
+
+  toggleSubastaActions(item: any, event?: Event) {
+    event?.stopPropagation();
+    const key = this.rowActionKey(item);
+    const popoverId = this.subastaActionsPopoverId(item);
+    const popover = document.getElementById(popoverId) as HTMLElement & { showPopover?: () => void; hidePopover?: () => void } | null;
+
+    if (this.openSubastaActions() === key) {
+      popover?.hidePopover?.();
+      this.closeSubastaActions();
+      return;
+    }
+
+    const target = event?.currentTarget as HTMLElement | null;
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      const margin = 12;
+      const gap = 8;
+      const menuWidth = 240;
+      const preferredHeight = 420;
+      const minUsableHeight = 180;
+      const availableBelow = Math.max(0, window.innerHeight - rect.bottom - gap - margin);
+      const availableAbove = Math.max(0, rect.top - gap - margin);
+      const openUp = availableBelow < minUsableHeight && availableAbove > availableBelow;
+      const maxHeight = Math.max(
+        140,
+        Math.min(preferredHeight, openUp ? availableAbove : availableBelow)
+      );
+      const left = Math.max(margin, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - margin));
+      const top = openUp
+        ? Math.max(margin, rect.top - gap - maxHeight)
+        : Math.max(margin, Math.min(rect.bottom + gap, window.innerHeight - maxHeight - margin));
+
+      this.subastaActionsMenuPosition.set({ top, left, maxHeight });
+    }
+
+    this.openSubastaActions.set(key);
+    setTimeout(() => popover?.showPopover?.());
+  }
+
+  closeSubastaActions() {
+    if (this.openSubastaActions()) {
+      const current = document.getElementById(`subasta-actions-${this.openSubastaActions()}`) as HTMLElement & { hidePopover?: () => void } | null;
+      current?.hidePopover?.();
+    }
+    this.openSubastaActions.set(null);
+    this.subastaActionsMenuPosition.set(null);
+  }
   ngOnInit() {
     this.loadVigencias();
     this.loadAreas();
@@ -288,6 +349,7 @@ export class SubastaComponent implements OnInit {
   onModalOficinaChange(val: number | null) { this.modalOficinaId.set(val); this.buscarReservas(); }
 
   buscar() {
+    this.closeSubastaActions();
     this.loading.set(true);
     this.cotService.buscar({
       idVigencia: this.filterVigencia() ?? undefined,
@@ -1325,5 +1387,7 @@ public chartOptionsAhorro: Partial<DonutChartOptions> = {
     }
   }
 }
+
+
 
 
