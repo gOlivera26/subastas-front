@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -45,11 +45,11 @@ interface InformeTipo {
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button (click)="buscar()" class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-4 py-2.5 text-[13px] font-[700] text-black transition-all hover:brightness-110">
+            <button (click)="buscar()" class="btn-accent">
               <lucide-icon name="search" [size]="16"></lucide-icon>
               Buscar
             </button>
-            <button (click)="limpiar()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:border-[var(--color-cyan-spark)]/40">
+            <button (click)="limpiar()" class="btn-secondary">
               <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
               Limpiar
             </button>
@@ -84,7 +84,7 @@ interface InformeTipo {
             <h2 class="text-[15px] font-[700] text-[var(--color-porcelain)]">Filtros del informe</h2>
             <p class="text-[12px] text-[var(--color-storm-cloud)]">Filtr&aacute; las subastas y gener&aacute; el informe que necesit&aacute;s.</p>
           </div>
-          <button (click)="exportarCsv()" [disabled]="itemsFiltrados().length === 0" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[12px] font-[650] text-[var(--color-porcelain)] transition-all hover:border-[var(--color-neon-lime)]/60 disabled:opacity-40">
+          <button (click)="exportarCsv()" [disabled]="itemsFiltrados().length === 0" class="btn-secondary btn-compact disabled:opacity-40">
             <lucide-icon name="download" [size]="15"></lucide-icon>
             Exportar grilla
           </button>
@@ -148,7 +148,7 @@ interface InformeTipo {
         </ng-template>
 
         <ng-template #accionesTpl let-row>
-          <button (click)="generar(row)" [disabled]="generatingId() === row.idCotizacion" class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-cyan-spark)] px-3 py-1.5 text-[11px] font-[800] text-black transition-all hover:brightness-110 disabled:opacity-50">
+          <button (click)="generar(row)" [disabled]="generatingId() === row.idCotizacion" class="btn-accent btn-compact">
             @if (generatingId() === row.idCotizacion) {
               Generando...
             } @else {

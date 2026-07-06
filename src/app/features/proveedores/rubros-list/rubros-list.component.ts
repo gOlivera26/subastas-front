@@ -170,8 +170,11 @@ export class RubrosListComponent implements OnInit {
     else expanded.add(rubroId);
     this.expandedNodes.set(expanded);
   }
-
   isExpanded(rubroId: number): boolean { return this.expandedNodes().has(rubroId); }
+
+  treeIndent(level: number): number {
+    return Math.min(Math.max(Number(level) || 0, 0), 6) * 14;
+  }
 
   openCreateModal() {
     this.createForm = { codigo: '', descripcion: '', idRubroPadre: null, imputable: false };

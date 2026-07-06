@@ -124,24 +124,52 @@
 </div>
 
 <ng-template #treeRow let-rubro let-level="level">
-  <div class="group grid grid-cols-1 gap-3 px-4 py-3 transition-colors hover:bg-[var(--color-deep-slate)]/45 md:grid-cols-[minmax(0,1fr)_140px_120px_100px] md:items-center md:px-6" [style.padding-left.px]="16 + (level * 28)">
-    <div class="flex min-w-0 items-center gap-2">
-      <button (click)="toggleNode(rubro.id, $event)" [class.invisible]="!rubro.hasChildren" class="flex size-6 shrink-0 items-center justify-center rounded text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)]">
+  <div class="group border-b border-[var(--color-charcoal-grey)]/70 px-3 py-3 transition-colors last:border-b-0 hover:bg-[var(--color-deep-slate)]/40 sm:px-5">
+    <div class="flex min-w-0 items-start gap-2.5" [style.padding-left.px]="treeIndent(level)">
+      <button
+        type="button"
+        (click)="toggleNode(rubro.id, $event)"
+        [class.opacity-0]="!rubro.hasChildren"
+        [class.pointer-events-none]="!rubro.hasChildren"
+        class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] text-[var(--color-porcelain)] transition-colors hover:border-[var(--color-cyan-spark)]/60 hover:text-[var(--color-cyan-spark)]"
+        [attr.aria-label]="isExpanded(rubro.id) ? 'Contraer rubro' : 'Expandir rubro'">
         <lucide-icon [name]="isExpanded(rubro.id) ? 'chevron-down' : 'chevron-right'" [size]="16"></lucide-icon>
       </button>
-      <lucide-icon [name]="rubro.hasChildren ? 'folder' : 'file-text'" [size]="16" class="shrink-0 text-[var(--color-storm-cloud)]"></lucide-icon>
-      <div class="min-w-0">
-        <p class="truncate text-[14px] font-[590] text-[var(--color-porcelain)]">{{ rubro.descripcion }}</p>
-        <p class="font-mono text-[12px] text-[var(--color-fog-grey)] md:hidden">{{ rubro.codigo }}</p>
+
+      <div class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/55 text-[var(--color-storm-cloud)]">
+        <lucide-icon [name]="rubro.hasChildren ? 'folder' : 'file-text'" [size]="16"></lucide-icon>
       </div>
-    </div>
-    <span class="hidden font-mono text-[13px] text-[var(--color-fog-grey)] md:block">{{ rubro.codigo }}</span>
-    <span [ngClass]="rubro.imputable ? 'border-[var(--color-cyan-spark)]/20 bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]' : 'border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] text-[var(--color-storm-cloud)]'" class="w-fit rounded-md border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider">
-      {{ rubro.imputable ? 'Imputable' : 'No imputable' }}
-    </span>
-    <div class="flex justify-end gap-1.5">
-      <button (click)="openEditModal(rubro)" title="Editar" class="rounded-md bg-[var(--color-deep-slate)] p-1.5 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
-      <button (click)="deleteRubro(rubro.id)" title="Eliminar" class="rounded-md border border-red-500/20 bg-red-500/10 p-1.5 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)]"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+
+      <div class="min-w-0 flex-1">
+        <div class="flex min-w-0 flex-wrap items-center gap-2">
+          <p class="min-w-0 max-w-full truncate text-[14px] font-[650] leading-5 text-[var(--color-porcelain)] sm:text-[15px]" [title]="rubro.descripcion">{{ rubro.descripcion }}</p>
+          @if (rubro.hasChildren) {
+            <span class="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2 py-0.5 text-[10px] font-[700] uppercase tracking-wider text-[var(--color-fog-grey)]">
+              <lucide-icon name="folder-tree" [size]="12"></lucide-icon>
+              {{ rubro.children?.length || 0 }} hijos
+            </span>
+          }
+        </div>
+
+        <div class="mt-2 flex flex-wrap items-center gap-2">
+          <span class="rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2 py-1 font-mono text-[11px] text-[var(--color-fog-grey)]">{{ rubro.codigo }}</span>
+          <span [ngClass]="rubro.imputable ? 'border-[var(--color-cyan-spark)]/30 bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]' : 'border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] text-[var(--color-storm-cloud)]'" class="rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
+            {{ rubro.imputable ? 'Imputable' : 'No imputable' }}
+          </span>
+          @if (level > 0) {
+            <span class="rounded-lg bg-[var(--color-deep-slate)]/70 px-2 py-1 text-[10px] font-[650] uppercase tracking-wider text-[var(--color-storm-cloud)]">Nivel {{ level + 1 }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="flex shrink-0 items-center gap-1">
+        <button (click)="openEditModal(rubro)" title="Editar" class="rounded-lg bg-[var(--color-deep-slate)] p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-charcoal-grey)] hover:text-[var(--color-cyan-spark)]">
+          <lucide-icon name="pencil" [size]="16"></lucide-icon>
+        </button>
+        <button (click)="deleteRubro(rubro.id)" title="Eliminar" class="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition-colors hover:bg-red-500 hover:text-white">
+          <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+        </button>
+      </div>
     </div>
   </div>
   @if (rubro.hasChildren && isExpanded(rubro.id)) {

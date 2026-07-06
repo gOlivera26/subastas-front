@@ -420,6 +420,64 @@ export type ChartOptions = {
       background: var(--color-charcoal-grey);
     }
 
+    :host-context(.dark) .tablero-hero,
+    :host-context(.dark) .summary-card,
+    :host-context(.dark) .insight-card {
+      border-color: color-mix(in srgb, var(--color-charcoal-grey) 86%, white 14%);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.008)),
+        var(--color-graphite);
+      box-shadow:
+        0 12px 34px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    }
+
+    :host-context(.dark) .summary-card-accent {
+      background:
+        linear-gradient(180deg, rgba(2, 184, 204, 0.055), rgba(2, 184, 204, 0.01)),
+        var(--color-graphite);
+    }
+
+    :host-context(.dark) .summary-card-positive {
+      background:
+        linear-gradient(180deg, rgba(228, 242, 34, 0.04), rgba(228, 242, 34, 0.008)),
+        var(--color-graphite);
+    }
+
+    :host-context(.dark) .summary-card-neutral {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0.006)),
+        var(--color-graphite);
+    }
+
+    :host-context(.dark) .section-meta {
+      border-color: var(--color-charcoal-grey);
+      background: rgba(0, 0, 0, 0.16);
+      color: var(--color-fog-grey);
+    }
+
+    :host-context(.dark) .context-strip {
+      border-color: color-mix(in srgb, var(--color-charcoal-grey) 78%, transparent);
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    :host-context(.dark) .context-chip {
+      border-color: var(--color-charcoal-grey);
+      background: color-mix(in srgb, var(--color-deep-slate) 72%, var(--color-graphite) 28%);
+      color: var(--color-porcelain);
+    }
+
+    :host-context(.dark) .section-head {
+      border-bottom-color: color-mix(in srgb, var(--color-charcoal-grey) 78%, transparent);
+    }
+
+    :host-context(.dark) .state-card {
+      border-color: var(--color-charcoal-grey);
+      background: var(--color-graphite);
+      color: var(--color-storm-cloud);
+    }
+
+
     @media (max-width: 1180px) {
       .summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -632,6 +690,7 @@ export class TableroComponent implements OnInit {
     const cyan = this.getCssVar('--color-cyan-spark', '#02b8cc');
     const lime = this.getCssVar('--color-neon-lime', '#e4f222');
     const charcoal = this.getCssVar('--color-charcoal-grey', '#23252a');
+    const isDark = document.documentElement.classList.contains('dark');
 
     const chartHeight = Math.min(620, Math.max(260, top.length * 42));
 
@@ -707,7 +766,7 @@ export class TableroComponent implements OnInit {
         opacity: 1,
       },
       tooltip: {
-        theme: 'dark',
+        theme: isDark ? 'dark' : 'light',
         style: {
           fontSize: '12px',
         },
@@ -716,7 +775,7 @@ export class TableroComponent implements OnInit {
         },
       },
       theme: {
-        mode: 'dark' as any,
+        mode: (isDark ? 'dark' : 'light') as any,
       },
       legend: {
         position: 'top',

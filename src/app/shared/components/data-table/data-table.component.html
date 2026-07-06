@@ -1,6 +1,6 @@
-<div class="rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-0 shadow-lg overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="w-full text-left text-[14px] whitespace-nowrap">
+<div class="w-full min-w-0 overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-sm">
+  <div class="w-full overflow-x-auto overscroll-x-contain">
+    <table class="min-w-[760px] w-full text-left text-[13px] sm:text-[14px] whitespace-nowrap">
       <thead class="bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
         <tr>
           @for (col of columns(); track col.key) {
@@ -58,7 +58,7 @@
   </div>
 
   @if (totalRows() > 0) {
-    <div class="px-6 py-4 border-t border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 flex items-center justify-between">
+    <div class="flex flex-col gap-3 border-t border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
       <p class="text-[12px] text-[var(--color-storm-cloud)]">
         Mostrando pág. {{ currentPage() }} de {{ totalPages() }}
         (Total: {{ totalRows() }})

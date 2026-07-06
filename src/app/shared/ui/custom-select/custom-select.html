@@ -1,7 +1,7 @@
 <div class="w-full group/container">
 
     @if (label) {
-        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide ml-1">
+        <label class="ml-1 mb-1.5 block text-[11px] font-[700] uppercase tracking-wider text-[var(--color-storm-cloud)]">
             {{ label }}
         </label>
     }
@@ -10,14 +10,11 @@
             [class.opacity-60]="disabled"
             [class.cursor-not-allowed]="disabled"
             [class.cursor-pointer]="!disabled"
-            class="w-full flex items-center justify-between bg-white dark:bg-[#1c2128] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 py-2.5 px-4 rounded-xl
-            shadow-sm hover:border-gray-300 dark:hover:border-white/20 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all duration-200 ease-in-out min-h-[42px]"
-            [class.ring-4]="isOpen()" [class.ring-brand-500/10]="isOpen()" [class.border-brand-500]="isOpen()">
+            class="flex min-h-[42px] w-full items-center justify-between rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[var(--color-porcelain)] shadow-sm transition-all duration-200 ease-in-out hover:border-[var(--color-cyan-spark)]/45 focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-4 focus:ring-[var(--color-cyan-spark)]/10"
+            [ngClass]="isOpen() ? 'ring-4 ring-[var(--color-cyan-spark)]/10 border-[var(--color-cyan-spark)]' : ''">
 
-        <span class="block truncate font-medium text-sm"
-              [class.text-gray-400]="(!value || (multi && value.length === 0))"
-              [class.text-gray-900]="(value && (!multi || value.length > 0))"
-              [class.dark:text-white]="(value && (!multi || value.length > 0))">
+        <span class="block truncate text-sm font-medium"
+              [ngClass]="(!value || (multi && value.length === 0)) ? 'text-[var(--color-fog-grey)]' : 'text-[var(--color-porcelain)]'">
             {{ (value && (!multi || value.length > 0)) ? selectedLabel : placeholder }}
         </span>
 
@@ -28,7 +25,7 @@
     </button>
 
     @if (isOpen() && !disabled) {
-        <div #dropdownPanel class="fixed rounded-xl bg-white dark:bg-[#1c2128] shadow-2xl shadow-gray-900/20 dark:shadow-black/80 ring-1 ring-black/5 focus:outline-none border border-gray-200 dark:border-white/10 overflow-hidden flex z-[99999]"
+        <div #dropdownPanel class="fixed z-[99999] flex overflow-hidden rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl ring-1 ring-black/5 focus:outline-none"
              [ngStyle]="dropdownStyles()"
              [class.flex-col]="dropdownPosition() === 'bottom'"
              [class.flex-col-reverse]="dropdownPosition() === 'top'"
@@ -36,40 +33,36 @@
              [class.animate-slide-up-fade]="dropdownPosition() === 'top'">
 
             @if (options.length > 5) {
-                <div class="p-2 shrink-0 bg-white dark:bg-[#1c2128] border-gray-100 dark:border-white/5 z-20"
+                <div class="z-20 shrink-0 border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-2"
                      [class.border-b]="dropdownPosition() === 'bottom'"
                      [class.border-t]="dropdownPosition() === 'top'">
 
                     <div class="relative group/search">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <lucide-icon name="search" class="w-4 h-4 text-gray-400 group-focus-within/search:text-brand-500 transition-colors"></lucide-icon>
+                            <lucide-icon name="search" class="h-4 w-4 text-[var(--color-storm-cloud)] transition-colors group-focus-within/search:text-[var(--color-cyan-spark)]"></lucide-icon>
                         </div>
                         <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" (click)="onSearchClick($event)"
                                placeholder="Buscar..."
-                               class="block w-full pl-10 pr-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white dark:focus:bg-black/40 transition-all">
+                               class="block w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] py-2 pl-10 pr-3 text-sm text-[var(--color-porcelain)] placeholder:text-[var(--color-fog-grey)] transition-all focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-2 focus:ring-[var(--color-cyan-spark)]/20">
                     </div>
                 </div>
             }
 
-            <ul class="overflow-y-auto py-2 flex-grow custom-scrollbar space-y-0.5 bg-white dark:bg-[#1c2128]">
+            <ul class="custom-scrollbar flex-grow space-y-0.5 overflow-y-auto bg-[var(--color-graphite)] py-2">
                 @for (option of filteredOptions(); track option.value) {
                     <li (click)="select(option)"
                         [ngClass]="option.disabled ?
-                            'cursor-default text-[10px] font-extrabold uppercase tracking-widest text-gray-400 dark:text-gray-500 mt-4 first:mt-0 mb-2 px-4 select-none' :
+                            'mt-4 mb-2 cursor-default select-none px-4 text-[10px] font-extrabold uppercase tracking-widest text-[var(--color-fog-grey)] first:mt-0' :
                             'group/item relative cursor-pointer select-none py-2 pl-3 pr-3 mx-2 rounded-lg text-sm transition-all duration-200 ' +
                             (isSelected(option.value)
-                                ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300 font-semibold'
-                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white')"
+                                ? 'bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] font-semibold'
+                                : 'text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]')"
                     >
                         <div class="flex items-center justify-between overflow-hidden">
                             <span class="flex items-center gap-3 overflow-hidden" [class.pl-1]="!option.disabled">
                                 @if (multi && !option.disabled) {
-                                    <div class="w-4 h-4 shrink-0 rounded-[4px] border flex items-center justify-center transition-all duration-200"
-                                         [class.bg-brand-500]="isSelected(option.value)"
-                                         [class.border-brand-500]="isSelected(option.value)"
-                                         [class.border-gray-300]="!isSelected(option.value)"
-                                         [class.dark:border-white/20]="!isSelected(option.value)"
-                                         [class.group-hover/item:border-brand-400]="!isSelected(option.value)">
+                                    <div class="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-all duration-200"
+                                         [ngClass]="isSelected(option.value) ? 'bg-[var(--color-cyan-spark)] border-[var(--color-cyan-spark)]' : 'border-[var(--color-charcoal-grey)] group-hover/item:border-[var(--color-cyan-spark)]'">
 
                                         @if (isSelected(option.value)) {
                                             <lucide-icon name="check" class="w-3 h-3 text-white stroke-[3] animate-scale-in"></lucide-icon>
@@ -82,7 +75,7 @@
                             </span>
 
                             @if (!multi && isSelected(option.value) && !option.disabled) {
-                                <span class="flex items-center text-brand-600 dark:text-brand-400 animate-scale-in shrink-0 ml-2">
+                                <span class="ml-2 flex shrink-0 animate-scale-in items-center text-[var(--color-cyan-spark)]">
                                     <lucide-icon name="check" class="w-4 h-4 stroke-[3]"></lucide-icon>
                                 </span>
                             }
@@ -92,10 +85,10 @@
 
                 @if (filteredOptions().length === 0) {
                     <li class="py-8 px-3 text-center flex flex-col items-center justify-center gap-3 select-none">
-                        <div class="p-3 bg-gray-50 dark:bg-white/5 rounded-full">
-                            <lucide-icon name="search-x" class="w-6 h-6 text-gray-400"></lucide-icon>
+                        <div class="rounded-full bg-[var(--color-deep-slate)] p-3">
+                            <lucide-icon name="search-x" class="h-6 w-6 text-[var(--color-storm-cloud)]"></lucide-icon>
                         </div>
-                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">No hay coincidencias.</span>
+                        <span class="text-xs font-medium text-[var(--color-storm-cloud)]">No hay coincidencias.</span>
                     </li>
                 }
             </ul>

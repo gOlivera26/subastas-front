@@ -1,53 +1,35 @@
 @if (isOpen) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 z-[60] flex items-end justify-center p-2 sm:items-center sm:p-6" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-slate-950/55 backdrop-blur-sm transition-opacity animate-fade-in" (click)="onCancel()"></div>
 
-      <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity animate-fade-in" (click)="onCancel()"></div>
-
-      <div class="relative bg-white dark:bg-[#1c2128] rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all animate-scale-in flex flex-col p-6 border border-gray-100 dark:border-white/10">
-
-        <div class="flex items-start gap-4">
-          <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full"
-               [ngClass]="{
-                 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400': type === 'danger',
-                 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400': type === 'warning',
-                 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400': type === 'info'
-               }">
-            @if (type === 'danger') { <lucide-icon name="alert-circle" class="w-6 h-6"></lucide-icon> }
-            @if (type === 'warning') { <lucide-icon name="alert-triangle" class="w-6 h-6"></lucide-icon> }
-            @if (type === 'info') { <lucide-icon name="info" class="w-6 h-6"></lucide-icon> }
-          </div>
-
-          <div class="flex-1">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white leading-6">
-              {{ title }}
-            </h3>
-            <div class="mt-2">
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ message }}
-              </p>
-            </div>
-          </div>
+    <div class="relative flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-5 shadow-2xl animate-scale-in sm:p-6">
+      <div class="flex items-start gap-4">
+        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full"
+             [ngClass]="{
+               'bg-red-500/10 text-red-400 ring-1 ring-red-500/20': type === 'danger',
+               'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20': type === 'warning',
+               'bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] ring-1 ring-[var(--color-cyan-spark)]/20': type === 'info'
+             }">
+          @if (type === 'danger') { <lucide-icon name="alert-circle" class="h-6 w-6"></lucide-icon> }
+          @if (type === 'warning') { <lucide-icon name="alert-triangle" class="h-6 w-6"></lucide-icon> }
+          @if (type === 'info') { <lucide-icon name="info" class="h-6 w-6"></lucide-icon> }
         </div>
 
-        <div class="mt-6 flex justify-end gap-3">
-          <button type="button"
-                  (click)="onCancel()"
-                  class="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium dark:bg-white/5 dark:text-white dark:border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200">
-            Cancelar
-          </button>
-
-          <button type="button"
-                  (click)="onConfirm()"
-                  class="px-4 py-2 text-white rounded-lg text-sm font-medium shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2"
-                  [ngClass]="{
-                    'bg-red-600 hover:bg-red-700 focus:ring-red-500': type === 'danger',
-                    'bg-orange-600 hover:bg-orange-700 focus:ring-orange-500': type === 'warning',
-                    'bg-brand-600 hover:bg-brand-700 focus:ring-brand-500': type === 'info'
-                  }">
-            {{ confirmText }}
-          </button>
+        <div class="min-w-0 flex-1">
+          <h3 class="text-[17px] font-[650] leading-6 text-[var(--color-porcelain)]">{{ title }}</h3>
+          <p class="mt-2 text-[14px] leading-6 text-[var(--color-storm-cloud)]">{{ message }}</p>
         </div>
+      </div>
 
+      <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+        <button type="button" (click)="onCancel()" class="inline-flex w-full items-center justify-center rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-colors hover:bg-[var(--color-deep-slate)] sm:w-auto">Cancelar</button>
+        <button type="button" (click)="onConfirm()" class="inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-[13px] font-[650] text-white shadow-sm transition-all hover:brightness-110 sm:w-auto"
+                [ngClass]="{
+                  'bg-red-600': type === 'danger',
+                  'bg-amber-600': type === 'warning',
+                  'bg-[var(--color-cyan-spark)]': type === 'info'
+                }">{{ confirmText }}</button>
+      </div>
     </div>
   </div>
 }
