@@ -14,6 +14,7 @@ export class ConfirmationModal {
   @Input() title = 'Confirmar acción';
   @Input() message = '¿Estás seguro de realizar esta acción?';
   @Input() confirmText = 'Confirmar';
+  @Input() cancelText = 'Cancelar';
   @Input() type: ConfirmType = 'info';
   @Input() isOpen = false;
   @Output() confirm = new EventEmitter<void>();

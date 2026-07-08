@@ -8,8 +8,9 @@ import { Vigencia } from '../../../core/models/vigencia.model';
 import { OrganizationService, Organization } from '../../../core/services/organization.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-unidades-administrativas',
@@ -18,6 +19,7 @@ import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/cus
   templateUrl: './unidades-administrativas.component.html',
 })
 export class UnidadesAdministrativasComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private unidadService = inject(UnidadAdministrativaService);
   private vigenciaService = inject(VigenciaService);
   private orgService = inject(OrganizationService);
@@ -40,19 +42,16 @@ export class UnidadesAdministrativasComponent implements OnInit {
   numeroUnidadAdmTpl = viewChild<TemplateRef<any>>('numeroUnidadAdmTpl');
   organizacionNombreTpl = viewChild<TemplateRef<any>>('organizacionNombreTpl');
   mailTpl = viewChild<TemplateRef<any>>('mailTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
     const numeroUnidadAdm = this.numeroUnidadAdmTpl();
     const organizacionNombre = this.organizacionNombreTpl();
     const mail = this.mailTpl();
-    const acciones = this.accionesTpl();
 
     if (numeroUnidadAdm) templates['numeroUnidadAdm'] = numeroUnidadAdm;
     if (organizacionNombre) templates['organizacionNombre'] = organizacionNombre;
     if (mail) templates['mail'] = mail;
-    if (acciones) templates['acciones'] = acciones;
 
     return templates;
   });
@@ -62,9 +61,13 @@ export class UnidadesAdministrativasComponent implements OnInit {
     { key: 'nombreUnidadAdm', header: 'Nombre / Descripción', sortable: true },
     { key: 'organizacionNombre', header: 'Organización', type: 'custom', sortable: true },
     { key: 'mail', header: 'Email', type: 'custom' },
-    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
 
+
+  actions: TableAction[] = [
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar unidad', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Eliminar unidad', color: 'text-red-400 hover:text-red-300' },
+  ];
   vigenciaOptions = computed<SelectOption[]>(() => this.vigencias().map(v => ({
     label: `Ejercicio ${v.ejercicio}${v.activoEjecucion ? ' (Activo)' : ''}`,
     value: v.idVigencia
@@ -74,6 +77,18 @@ export class UnidadesAdministrativasComponent implements OnInit {
     { label: 'Ninguna / Global', value: undefined },
     ...this.organizaciones().map(org => ({ label: org.nombre, value: org.idOrganizacion }))
   ]);
+
+
+  handleTableAction(event: { action: string; row: any }) {
+    switch (event.action) {
+      case 'edit':
+        this.openEditModal(event.row);
+        break;
+      case 'delete':
+        this.confirmDelete(event.row);
+        break;
+    }
+  }
 
   ngOnInit() { this.loadVigencias(); this.loadOrganizaciones(); }
 
@@ -130,8 +145,8 @@ export class UnidadesAdministrativasComponent implements OnInit {
     });
   }
 
-  confirmDelete(unidad: UnidadAdministrativa) {
-    if (!confirm(`¿Eliminar la unidad ${unidad.nombreUnidadAdm}?`)) return;
+  async confirmDelete(unidad: UnidadAdministrativa) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar unidad administrativa', message: `¿Eliminar la unidad ${unidad.nombreUnidadAdm}?`, confirmText: 'Eliminar', type: 'danger' }))) return;
     this.unidadService.delete(unidad.idUnidadAdm).subscribe({
       next: (res: any) => { if (res.success) { this.showSuccess('Unidad administrativa eliminada correctamente.'); this.loadUnidades(); } },
       error: () => { this.errorMessage.set('Error al eliminar la unidad.'); },

@@ -61,96 +61,14 @@
     </div>
   </ng-template>
 
-  <ng-template #accionesTpl let-item>
-    <div class="flex flex-wrap items-center justify-end gap-1.5">
-      <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verObservaciones(item.fechaLimiteImpugnar)"
-              (click)="accionNoImplementada('Observaciones Proveedor')"
-              class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-neon-lime)]" title="Ingresar Observaciones">
-        <lucide-icon name="message-circle" [size]="18"></lucide-icon>
-      </button>
-
-      <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verSobre2(item.fechaAperturaSobreDos) && item.tipoSobre === 'D'"
-              (click)="accionNoImplementada('Ofertas Proveedor Lic')"
-              class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-cyan-spark)]" title="Ver ofertas Proveedores">
-        <lucide-icon name="circle-dollar-sign" [size]="18"></lucide-icon>
-      </button>
-
-      <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verSobre1(item.fechaAperturaSobreUno) && item.tipoSobre === 'S'"
-              (click)="accionNoImplementada('Ofertas Proveedor Lic')"
-              class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-cyan-spark)]" title="Ver ofertas Proveedores">
-        <lucide-icon name="circle-dollar-sign" [size]="18"></lucide-icon>
-      </button>
-
-      <button *ngIf="(item.verInformeFinal || auth.isSuperAdmin()) && verActaPrelacion(item.fechaFinSubasta || item.fechaFin) && item.idTipoContratacion === TIPO_INVERSA"
-              (click)="abrirActaPrelacion(item)"
-              class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-emerald-400" title="Informe final de subasta">
-        <lucide-icon name="file-badge" [size]="18"></lucide-icon>
-      </button>
-
-      <a *ngIf="item.idTipoContratacion === TIPO_INVERSA"
-         [routerLink]="['/compra-venta/subastas', item.idCotizacion]"
-         class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-porcelain)]" title="Subastar (Inversa)">
-        <lucide-icon name="list" [size]="18"></lucide-icon>
-      </a>
-
-      <a *ngIf="item.idTipoContratacion === TIPO_DIRECTA"
-         [routerLink]="['/compra-venta/subastas', item.idCotizacion]"
-         class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-porcelain)]" title="Subastar (Directa)">
-        <lucide-icon name="list" [size]="18"></lucide-icon>
-      </a>
-
-      <button (click)="abrirModalConsultas(item.idCotizacion)" class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-cyan-spark)]" title="Preguntas y Aclaraciones">
-        <lucide-icon name="help-circle" [size]="18"></lucide-icon>
-      </button>
-
-      <button (click)="openPliegos(item)" class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-cyan-spark)]" title="Pliegos">
-        <lucide-icon name="file-text" [size]="18"></lucide-icon>
-      </button>
-
-      <button *ngIf="item.idEstado === 40"
-              (click)="openCargarDocumentacionItem(item)"
-              class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-neon-lime)]" title="Documentación por ítem/renglón">
-        <lucide-icon name="upload" [size]="18"></lucide-icon>
-      </button>
-
-      <button *ngIf="item.idTipoContratacion === TIPO_CONT_DIRECTA"
-              (click)="accionNoImplementada('Contratación Directa')"
-              class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-aether-blue)]" title="Contratación Directa">
-        <lucide-icon name="briefcase" [size]="18"></lucide-icon>
-      </button>
-
-      <button *ngIf="item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA"
-              (click)="accionNoImplementada('Cargar Licitación')"
-              class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-[var(--color-aether-blue)]" title="Licitación">
-        <lucide-icon name="briefcase" [size]="18"></lucide-icon>
-      </button>
-
-      <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verSobre1(item.fechaAperturaSobreUno)"
-              (click)="accionNoImplementada('Actas Sobre 1')"
-              class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-emerald-400" title="Actas (Sobre 1)">
-        <lucide-icon name="mail" [size]="18"></lucide-icon>
-      </button>
-
-      <button *ngIf="(item.idTipoContratacion === TIPO_LICITACION || item.idTipoContratacion === TIPO_COMPULSA) && verSobre2(item.fechaAperturaSobreDos)"
-              (click)="accionNoImplementada('Actas Sobre 2')"
-              class="rounded-lg p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-graphite)] hover:text-emerald-400" title="Actas (Sobre 2)">
-        <lucide-icon name="mail-open" [size]="18"></lucide-icon>
-      </button>
-
-      <button *ngIf="item.idTipoContratacion === TIPO_LICITACION && item.mostrarBotonMejora"
-              (click)="accionNoImplementada('Mejora Precio')"
-              class="rounded-lg p-1.5 text-amber-400 transition-colors hover:bg-[var(--color-graphite)] hover:text-amber-300" title="Mejora de Precio">
-        <lucide-icon name="trending-down" [size]="18"></lucide-icon>
-      </button>
-    </div>
-  </ng-template>
-
   <app-smart-table
     [columns]="columns"
     [data]="listado()"
     [customTemplates]="customTemplates()"
+    [actions]="actions"
     [loading]="loading()"
-    [pageSize]="20">
+    [pageSize]="20"
+    (onAction)="handleTableAction($event)">
   </app-smart-table>
 </div>
 <app-modal [isOpen]="isConsultasModalOpen()" title="Foro de Aclaraciones" subtitle="Consultas técnicas sobre el pliego y condiciones de la subasta." maxWidthClass="max-w-4xl" (close)="cerrarModalConsultas()">

@@ -8,7 +8,7 @@ import { Role, RoleService } from '../../../../core/services/role.service';
 import { Organization, OrganizationService } from '../../../../core/services/organization.service';
 import { ProviderService, ProviderResponse } from '../../../../core/services/provider.service';
 import { SmartTableComponent } from '../../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../../shared/ui/smart-table/table.models';
 import { CustomSelect, SelectOption } from '../../../../shared/ui/custom-select/custom-select';
 
 
@@ -40,7 +40,14 @@ export class ActiveUsersComponent implements OnInit {
     { key: 'documento', header: 'Documento', type: 'custom', sortable: true },
     { key: 'rol', header: 'Rol del Sistema', type: 'custom' },
     { key: 'tipoUsuario', header: 'Tipo / Entidad', type: 'custom' },
-    { key: 'acciones', header: 'Acciones', type: 'custom' },
+  ];
+
+  actions: TableAction[] = [
+    { action: 'link', icon: 'handshake', tooltip: 'Vincular entidad', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'role', icon: 'users', tooltip: 'Gestionar rol y módulos', color: 'text-[var(--color-aether-blue)] hover:text-[var(--color-aether-blue)]' },
+    { action: 'reset', icon: 'key-round', tooltip: 'Blanquear contraseña', color: 'text-[var(--color-neon-lime)] hover:text-[var(--color-neon-lime)]' },
+    { action: 'audit', icon: 'mouse-pointer-click', tooltip: 'Ver accesos', color: 'text-[var(--color-porcelain)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'unlink', icon: 'user-minus', tooltip: 'Desvincular', color: 'text-red-400 hover:text-red-300' },
   ];
 
   estadoTpl = viewChild<TemplateRef<any>>('estadoTpl');
@@ -48,7 +55,6 @@ export class ActiveUsersComponent implements OnInit {
   documentoTpl = viewChild<TemplateRef<any>>('documentoTpl');
   rolTpl = viewChild<TemplateRef<any>>('rolTpl');
   tipoUsuarioTpl = viewChild<TemplateRef<any>>('tipoUsuarioTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
@@ -57,14 +63,12 @@ export class ActiveUsersComponent implements OnInit {
     const documento = this.documentoTpl();
     const rol = this.rolTpl();
     const tipoUsuario = this.tipoUsuarioTpl();
-    const acciones = this.accionesTpl();
 
     if (estado) templates['estado'] = estado;
     if (nombreCompleto) templates['nombreCompleto'] = nombreCompleto;
     if (documento) templates['documento'] = documento;
     if (rol) templates['rol'] = rol;
     if (tipoUsuario) templates['tipoUsuario'] = tipoUsuario;
-    if (acciones) templates['acciones'] = acciones;
 
     return templates;
   });
@@ -81,6 +85,26 @@ export class ActiveUsersComponent implements OnInit {
 
   sortKey = signal<string>('nombreCompleto');
   sortDirection = signal<'asc' | 'desc'>('asc');
+
+  handleTableAction(event: { action: string; row: ActiveUser }) {
+    switch (event.action) {
+      case 'link':
+        this.linkEntity(event.row);
+        break;
+      case 'role':
+        this.manageRoles(event.row);
+        break;
+      case 'reset':
+        this.openResetModal(event.row);
+        break;
+      case 'audit':
+        this.viewAccessLogs(event.row);
+        break;
+      case 'unlink':
+        this.openUnlinkModal(event.row);
+        break;
+    }
+  }
 
   onSort(event: { key: string; direction: 'asc' | 'desc' }) {
     this.sortKey.set(event.key);

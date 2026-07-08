@@ -1,0 +1,126 @@
+:host {
+  display: block;
+}
+
+.rubro-tree-search-input {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 62%, transparent);
+  background: color-mix(in srgb, var(--color-graphite) 72%, var(--color-pitch-black) 28%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 16px 34px -30px rgba(0, 0, 0, 0.85);
+}
+
+.rubro-tree-search-input:focus {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 38%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-cyan-spark) 10%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.rubro-tree-chip,
+.rubro-tree-view-chip {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 48%, transparent);
+  background: color-mix(in srgb, var(--color-graphite) 58%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.rubro-tree-view-chip {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 28%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 7%, transparent);
+}
+
+.rubro-tree-shell {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 52%, transparent);
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--color-cyan-spark) 5%, transparent), transparent 26rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 74%, transparent), color-mix(in srgb, var(--color-pitch-black) 55%, transparent));
+  box-shadow: 0 24px 70px -52px rgba(0, 0, 0, 0.86), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.rubro-tree-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 42%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-pitch-black) 20%, transparent), transparent);
+}
+
+.rubro-tree-card {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 42%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-deep-slate) 36%, transparent), color-mix(in srgb, var(--color-pitch-black) 16%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.rubro-tree-card:hover {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 22%, var(--color-charcoal-grey) 18%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-deep-slate) 48%, transparent), color-mix(in srgb, var(--color-pitch-black) 12%, transparent));
+  box-shadow: 0 16px 42px -34px color-mix(in srgb, var(--color-cyan-spark) 26%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.rubro-tree-toggle,
+.rubro-tree-node-icon {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 48%, transparent);
+  background: color-mix(in srgb, var(--color-pitch-black) 48%, transparent);
+}
+
+.rubro-tree-toggle:hover {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 42%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 9%, transparent);
+  color: var(--color-cyan-spark);
+}
+
+.rubro-tree-icon-btn {
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--color-pitch-black) 28%, transparent);
+}
+
+.rubro-tree-icon-btn:hover {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 22%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 8%, transparent);
+}
+
+.rubro-tree-danger-btn {
+  border: 1px solid color-mix(in srgb, #ef4444 18%, transparent);
+  background: color-mix(in srgb, #ef4444 7%, transparent);
+}
+
+.rubro-tree-danger-btn:hover {
+  border-color: color-mix(in srgb, #ef4444 36%, transparent);
+  background: color-mix(in srgb, #ef4444 13%, transparent);
+}
+
+.rubro-tree-connector {
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-cyan-spark) 20%, var(--color-charcoal-grey)), transparent);
+}
+
+:host-context(html:not(.dark)) .rubro-tree-search-input {
+  border-color: rgba(23, 59, 114, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 46px -36px rgba(15, 43, 92, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+:host-context(html:not(.dark)) .rubro-tree-chip,
+:host-context(html:not(.dark)) .rubro-tree-view-chip,
+:host-context(html:not(.dark)) .rubro-tree-shell,
+:host-context(html:not(.dark)) .rubro-tree-card {
+  border-color: rgba(23, 59, 114, 0.10);
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 22px 60px -44px rgba(15, 43, 92, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+:host-context(html:not(.dark)) .rubro-tree-header {
+  border-bottom-color: rgba(23, 59, 114, 0.09);
+  background: rgba(248, 251, 255, 0.62);
+}
+
+.rubro-tree-card :where(.rounded-lg.border, .rounded-full.border, .rubro-tree-node-icon) {
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 46%, transparent) !important;
+  background-color: color-mix(in srgb, var(--color-pitch-black) 34%, transparent) !important;
+}
+
+.rubro-tree-card :where([class*="border-[var(--color-cyan-spark)]"]) {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 28%, transparent) !important;
+  background-color: color-mix(in srgb, var(--color-cyan-spark) 7%, transparent) !important;
+}
+
+.rubro-tree-card :where([class*="border-red-500"], .rubro-tree-danger-btn) {
+  border-color: color-mix(in srgb, #ef4444 22%, transparent) !important;
+  background-color: color-mix(in srgb, #ef4444 8%, transparent) !important;
+}
+
+.rubro-tree-card :where(.font-mono.rounded-lg) {
+  border-color: color-mix(in srgb, var(--color-light-steel) 18%, transparent) !important;
+}

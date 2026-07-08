@@ -5,8 +5,9 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ProviderService, RubroBulkUploadResultDto, RubroListDto, RubroTreeDto, CreateRubroDto, UpdateRubroDto } from '../../../core/services/provider.service';
 import { SearchableSelectComponent, SelectOption } from '../../../shared/components/searchable-select';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
 import { Modal } from '../../../shared/ui/modal/modal';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 interface RubroUploadPreviewRow {
   idLegacy: string;
@@ -22,8 +23,10 @@ interface RubroUploadPreviewRow {
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule, SearchableSelectComponent, SmartTableComponent, Modal],
   templateUrl: './rubros-list.component.html',
+  styleUrls: ['./rubros-list.component.css'],
 })
 export class RubrosListComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private providerService = inject(ProviderService);
 
   viewMode = signal<'list' | 'tree'>('list');
@@ -61,8 +64,8 @@ export class RubrosListComponent implements OnInit {
 
   filteredTree = computed(() => {
     const term = this.treeSearchTerm().toLowerCase().trim();
-    if (!term) return this.rubrosTree();
-    return this.filterTree(this.rubrosTree(), term);
+    const nodes = term ? this.filterTree(this.rubrosTree(), term) : this.rubrosTree();
+    return this.sortTreeByHierarchy(nodes);
   });
 
   columns: TableColumn[] = [
@@ -71,7 +74,11 @@ export class RubrosListComponent implements OnInit {
     { key: 'rubroPadre', header: 'Rubro Padre', type: 'custom' },
     { key: 'imputable', header: 'Imputable', type: 'custom' },
     { key: 'activo', header: 'Estado', type: 'custom' },
-    { key: 'acciones', header: 'Acciones', type: 'custom' },
+  ];
+
+  actions: TableAction[] = [
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar rubro', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Eliminar rubro', color: 'text-red-400 hover:text-red-300' },
   ];
 
   codigoTpl = viewChild<TemplateRef<any>>('codigoTpl');
@@ -79,7 +86,6 @@ export class RubrosListComponent implements OnInit {
   rubroPadreTpl = viewChild<TemplateRef<any>>('rubroPadreTpl');
   imputableTpl = viewChild<TemplateRef<any>>('imputableTpl');
   activoTpl = viewChild<TemplateRef<any>>('activoTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
@@ -88,13 +94,11 @@ export class RubrosListComponent implements OnInit {
     const rubroPadre = this.rubroPadreTpl();
     const imputable = this.imputableTpl();
     const activo = this.activoTpl();
-    const acciones = this.accionesTpl();
     if (codigo) templates['codigo'] = codigo;
     if (descripcion) templates['descripcion'] = descripcion;
     if (rubroPadre) templates['rubroPadre'] = rubroPadre;
     if (imputable) templates['imputable'] = imputable;
     if (activo) templates['activo'] = activo;
-    if (acciones) templates['acciones'] = acciones;
     return templates;
   });
 
@@ -139,7 +143,9 @@ export class RubrosListComponent implements OnInit {
     this.treeLoading.set(true);
     this.providerService.getRubroTree().subscribe({
       next: (res) => {
-        this.rubrosTree.set(res.success && res.data ? res.data : []);
+        const tree = res.success && res.data ? res.data : [];
+        this.rubrosTree.set(tree);
+        this.expandedNodes.set(new Set(tree.filter(r => r.hasChildren || (r.children?.length || 0) > 0).slice(0, 8).map(r => r.id)));
         this.treeLoading.set(false);
       },
       error: () => { this.error.set('Error al cargar el árbol de rubros'); this.treeLoading.set(false); }
@@ -161,6 +167,33 @@ export class RubrosListComponent implements OnInit {
         return null;
       })
       .filter((node): node is RubroTreeDto => node !== null);
+  }
+
+  private sortTreeByHierarchy(nodes: RubroTreeDto[]): RubroTreeDto[] {
+    return [...nodes]
+      .map(node => ({ ...node, children: this.sortTreeByHierarchy(node.children || []) }))
+      .sort((a, b) => {
+        const aHasChildren = (a.children?.length || 0) > 0 || a.hasChildren;
+        const bHasChildren = (b.children?.length || 0) > 0 || b.hasChildren;
+        if (aHasChildren !== bHasChildren) return aHasChildren ? -1 : 1;
+
+        const aChildren = a.children?.length || 0;
+        const bChildren = b.children?.length || 0;
+        if (aChildren !== bChildren) return bChildren - aChildren;
+
+        return a.descripcion.localeCompare(b.descripcion, 'es', { numeric: true, sensitivity: 'base' });
+      });
+  }
+
+  handleTableAction(event: { action: string; row: RubroListDto }) {
+    switch (event.action) {
+      case 'edit':
+        this.openEditModal(event.row);
+        break;
+      case 'delete':
+        this.deleteRubro(event.row.id);
+        break;
+    }
   }
 
   toggleNode(rubroId: number, event: Event) {
@@ -218,8 +251,8 @@ export class RubrosListComponent implements OnInit {
     });
   }
 
-  deleteRubro(id: number) {
-    if (!confirm('¿Eliminar el rubro seleccionado?')) return;
+  async deleteRubro(id: number) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar rubro', message: '¿Eliminar el rubro seleccionado?', confirmText: 'Eliminar', type: 'danger' }))) return;
     this.providerService.deleteRubro(id).subscribe({
       next: (res) => {
         if (res.success) { this.success.set('Rubro eliminado'); this.refreshRubros(); }

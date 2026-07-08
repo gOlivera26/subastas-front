@@ -3,7 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { OrganizationService, Organization, OrganizationRequest } from '../../../core/services/organization.service';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-organizaciones',
@@ -12,6 +13,7 @@ import { TableColumn } from '../../../shared/ui/smart-table/table.models';
   templateUrl: './organizaciones.component.html',
 })
 export class OrganizacionesComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private orgService = inject(OrganizationService);
 
   organizaciones = signal<Organization[]>([]);
@@ -27,15 +29,12 @@ export class OrganizacionesComponent implements OnInit {
   form: OrganizationRequest = this.getEmptyForm();
 
   activoTpl = viewChild<TemplateRef<any>>('activoTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
     const activo = this.activoTpl();
-    const acciones = this.accionesTpl();
 
     if (activo) templates['activo'] = activo;
-    if (acciones) templates['acciones'] = acciones;
 
     return templates;
   });
@@ -45,8 +44,24 @@ export class OrganizacionesComponent implements OnInit {
     { key: 'cuit', header: 'CUIT', sortable: true },
     { key: 'abreviatura', header: 'Abreviatura', sortable: true },
     { key: 'activo', header: 'Estado', type: 'custom' },
-    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
+
+
+  actions: TableAction[] = [
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar organización', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Desactivar organización', color: 'text-red-400 hover:text-red-300', visible: (row: any) => !!row.activo },
+  ];
+
+  handleTableAction(event: { action: string; row: any }) {
+    switch (event.action) {
+      case 'edit':
+        this.openEditModal(event.row);
+        break;
+      case 'delete':
+        this.confirmDelete(event.row);
+        break;
+    }
+  }
 
   ngOnInit() { this.loadOrganizaciones(); }
 
@@ -89,8 +104,8 @@ export class OrganizacionesComponent implements OnInit {
     });
   }
 
-  confirmDelete(org: Organization) {
-    if (!confirm(`¿Desactivar (baja lógica) la organización ${org.nombre}?`)) return;
+  async confirmDelete(org: Organization) {
+    if (!(await this.confirmation.confirm({ title: 'Desactivar organización', message: `¿Desactivar (baja lógica) la organización ${org.nombre}?`, confirmText: 'Desactivar', type: 'warning' }))) return;
     this.orgService.delete(org.idOrganizacion).subscribe({
       next: (res: any) => { if (res.success) { this.showSuccess('Organización desactivada correctamente.'); this.loadOrganizaciones(); } },
       error: () => { this.errorMessage.set('Error al desactivar la organización.'); },

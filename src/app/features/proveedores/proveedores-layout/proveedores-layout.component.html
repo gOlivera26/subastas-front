@@ -28,18 +28,18 @@
          [class.hidden]="!isSidebarOpen()">Gestión</p>
       
       <a routerLink="/proveedores/listado" 
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="list" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
               [class.hidden]="!isSidebarOpen()">Listado de Proveedores</span>
       </a>
       <a routerLink="/proveedores/rubros-list" 
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="folder-tree" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"

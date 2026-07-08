@@ -19,6 +19,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { Modal } from '../../../shared/ui/modal/modal';
 import { Moneda } from '../../../core/models/moneda.model';
 import { environment } from '../../../../environments/environment';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -41,6 +42,7 @@ export type ChartOptions = {
   templateUrl: './subasta-detalle.component.html',
 })
 export class SubastaDetalleComponent implements OnInit, OnDestroy {
+  private confirmation = inject(ConfirmationService);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   signalR = inject(SignalRService);
@@ -646,8 +648,8 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     });
   }
 
-  eliminarGarantia(id: number) {
-    if (!confirm('Â¿Eliminar garantÃ­a?')) return;
+  async eliminarGarantia(id: number) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar garantía', message: '¿Eliminar garantía?', confirmText: 'Eliminar', type: 'danger' }))) return;
     this.cotService.eliminarGarantia(id).subscribe({ 
       next: (res: any) => { 
         if (res.success) { 
@@ -666,8 +668,8 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     this.erroresPujaList.set([]);
   }
 
-  desistirDeSubasta() {
-  if (!confirm('Â¿EstÃ¡s seguro de que deseas desistir de esta subasta? Ya no podrÃ¡s enviar ofertas.')) return;
+  async desistirDeSubasta() {
+  if (!(await this.confirmation.confirm({ title: 'Desistir de la subasta', message: '¿Estás seguro de que deseas desistir de esta subasta? Ya no podrás enviar ofertas.', confirmText: 'Desistir', type: 'warning' }))) return;
   
   this.desistiendo.set(true);
   this.cotService.desistirParticipacion(this.idCotizacion()).subscribe({

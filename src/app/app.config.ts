@@ -7,7 +7,7 @@ import {
   ArrowRight, Sparkles, Menu, X, ChevronRight, ShieldCheck, EyeOff, Activity,
   Mail, Lock, LogIn, Loader2, Users, ShoppingBag, Calendar, CheckCircle, AlertCircle,
   Play, Plus, Trash2, Building, Building2, ChevronDown, Info, Sun, Moon, PanelLeft, PanelLeftClose,
-  List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
+  List, FolderTree, ChevronsUpDown, ChevronsDown, ChevronsUp, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
   Banknote, Network, Upload, LayoutDashboard, Clock, Construction, BarChart, RotateCcw, Copy, Send, HelpCircle, SearchX, Inbox,
   FileBadge, History, TrendingDown, MessageSquareDashed, ShieldAlert, MailOpen,Image, PieChart, MessageSquare, Download, FolderOpen,
   FileX, UploadCloud, ClipboardList, Truck, Factory
@@ -32,7 +32,7 @@ export const appConfig: ApplicationConfig = {
         LayoutTemplate, FileText, UserCircle, KeyRound, Pencil, Search, ArrowLeft,
         AlertTriangle, Handshake, MousePointerClick, Unlock, UserMinus, ChevronLeft, Check,
         Calendar, CheckCircle, AlertCircle, Play, Plus, Trash2, Building, Building2, ChevronDown, Info,
-        Sun, Moon, PanelLeft, PanelLeftClose, List, FolderTree, ChevronsUpDown, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
+        Sun, Moon, PanelLeft, PanelLeftClose, List, FolderTree, ChevronsUpDown, ChevronsDown, ChevronsUp, ChevronUp, Folder, FolderPen, FolderPlus, CornerDownRight, Tags, MapPin, Home, Package,
         Banknote, Network, Upload, LayoutDashboard, Clock, Construction, BarChart, RotateCcw, Copy, Send, HelpCircle, SearchX, Inbox,
         FileBadge, History, TrendingDown, MessageSquareDashed, ShieldAlert, MailOpen, MessageSquare, FolderOpen,
         Image, PieChart, Download, FileX, Layers, UploadCloud, ClipboardList, Truck, Factory

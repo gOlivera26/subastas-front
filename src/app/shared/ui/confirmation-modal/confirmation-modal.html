@@ -1,5 +1,5 @@
 @if (isOpen) {
-  <div class="fixed inset-0 z-[60] flex items-end justify-center p-2 sm:items-center sm:p-6" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 z-[160] flex items-end justify-center p-2 sm:items-center sm:p-6" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-slate-950/55 backdrop-blur-sm transition-opacity animate-fade-in" (click)="onCancel()"></div>
 
     <div class="relative flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-5 shadow-2xl animate-scale-in sm:p-6">
@@ -22,12 +22,12 @@
       </div>
 
       <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
-        <button type="button" (click)="onCancel()" class="inline-flex w-full items-center justify-center rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-colors hover:bg-[var(--color-deep-slate)] sm:w-auto">Cancelar</button>
-        <button type="button" (click)="onConfirm()" class="inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-[13px] font-[650] text-white shadow-sm transition-all hover:brightness-110 sm:w-auto"
+        <button type="button" (click)="onCancel()" class="inline-flex w-full items-center justify-center rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all sm:w-auto">{{ cancelText }}</button>
+        <button type="button" (click)="onConfirm()" class="inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-[13px] font-[650] text-white shadow-sm transition-all sm:w-auto"
                 [ngClass]="{
                   'bg-red-600': type === 'danger',
                   'bg-amber-600': type === 'warning',
-                  'bg-[var(--color-cyan-spark)]': type === 'info'
+                  'bg-[var(--color-cyan-spark)] text-black': type === 'info'
                 }">{{ confirmText }}</button>
       </div>
     </div>

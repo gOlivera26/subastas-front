@@ -7,7 +7,7 @@ import { SearchableSelectComponent, SelectOption } from '../../../shared/compone
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
 import { CustomSelect, SelectOption as CustomSelectOption } from '../../../shared/ui/custom-select/custom-select';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableColumn, TableAction } from '../../../shared/ui/smart-table/table.models';
 import { ReservaService } from '../../../core/services/reserva.service';
 import {
   Reserva, ReservaRequest, ReservaDetalle, ReservaDetalleRequest, BienFormState,
@@ -156,6 +156,13 @@ isItemsListOpen = signal(false);
     return this.detalles().reduce((sum, d) => sum + ((d.cantidad || 0) * (d.importe || 0)), 0);
   });
 
+  detalleRows = computed(() =>
+    this.detalles().map(det => ({
+      ...det,
+      total: (det.cantidad || 0) * (det.importe || 0),
+    }))
+  );
+
   monedaOptions = computed<SelectOption[]>(() => {
     return this.monedas().map(m => ({ value: m.idMoneda, label: m.nombre }));
   });
@@ -181,15 +188,12 @@ isItemsListOpen = signal(false);
   ]);
 
   descripcionEstadoTpl = viewChild<TemplateRef<any>>('descripcionEstadoTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
     const descripcionEstado = this.descripcionEstadoTpl();
-    const acciones = this.accionesTpl();
 
     if (descripcionEstado) templates['descripcionEstado'] = descripcionEstado;
-    if (acciones) templates['acciones'] = acciones;
 
     return templates;
   });
@@ -199,8 +203,55 @@ isItemsListOpen = signal(false);
     { key: 'nombreUnidadAdm', header: 'Área', sortable: true },
     { key: 'nombreSubResponsable', header: 'Oficina Solicitante', sortable: true },
     { key: 'descripcionEstado', header: 'Estado', type: 'custom', sortable: true },
-    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
+
+  actions: TableAction[] = [
+    { action: 'items', icon: 'menu', tooltip: 'Gestionar ítems', color: 'text-[#448b54] hover:text-[#5fbf74]', visible: (row: Reserva) => this.esGenerado(row) },
+    { action: 'detail', icon: 'eye', tooltip: 'Ver detalle', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'clone', icon: 'copy', tooltip: 'Clonar', color: 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'authorize', icon: 'check-circle', tooltip: 'Autorizar', color: 'text-[#448b54] hover:text-[#5fbf74]', visible: (row: Reserva) => this.esGenerado(row) },
+  ];
+
+  detalleColumns: TableColumn[] = [
+    { key: 'nombreBien', header: 'Nombre', sortable: true },
+    { key: 'nombreMoneda', header: 'Moneda', sortable: true },
+    { key: 'cantidad', header: 'Cant.', sortable: true },
+    { key: 'importe', header: 'Importe', type: 'currency', sortable: true },
+    { key: 'total', header: 'Total', type: 'currency', sortable: true },
+  ];
+
+  detalleActions: TableAction[] = [
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar ítem', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Eliminar ítem', color: 'text-red-400 hover:text-red-300' },
+  ];
+
+  handleReservaAction(event: { action: string; row: Reserva }) {
+    switch (event.action) {
+      case 'items':
+        this.openItemsList(event.row);
+        break;
+      case 'detail':
+        this.verDetalle(event.row);
+        break;
+      case 'clone':
+        this.openCloneModal(event.row);
+        break;
+      case 'authorize':
+        this.openAuthorizeModal(event.row);
+        break;
+    }
+  }
+
+  handleDetalleAction(event: { action: string; row: ReservaDetalle }) {
+    switch (event.action) {
+      case 'edit':
+        this.editBien(event.row);
+        break;
+      case 'delete':
+        this.deleteBien(event.row);
+        break;
+    }
+  }
 
   esGenerado(row: Reserva): boolean {
     return row.idEstado === 1 || this.normalizarEstado(row.descripcionEstado) === 'GENERADO';

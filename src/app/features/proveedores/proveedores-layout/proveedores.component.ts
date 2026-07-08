@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ProviderService, ProviderListDto, CreateProviderDto, UpdateProviderDto, RubroTreeDto, DomicilioDto, CreateDomicilioDto, UpdateDomicilioDto, TipoDomicilioDto, ProvinciaDto, AfipPersonDataDto } from '../../../core/services/provider.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-proveedores',
@@ -89,7 +89,12 @@ export class ProveedoresComponent implements OnInit {
     { key: 'tipoPersona', header: 'Tipo', type: 'custom' },
     { key: 'rubrosCount', header: 'Rubros', type: 'custom' },
     { key: 'hasConstanciaAfip', header: 'Constancia AFIP', type: 'custom' },
-    { key: 'acciones', header: 'Acciones', type: 'custom' },
+  ];
+
+  actions: TableAction[] = [
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar proveedor', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'rubros', icon: 'tags', tooltip: 'Gestionar rubros', color: 'text-[var(--color-aether-blue)] hover:text-[var(--color-aether-blue)]' },
+    { action: 'domicilios', icon: 'map-pin', tooltip: 'Gestionar domicilios', color: 'text-[var(--color-neon-lime)] hover:text-[var(--color-neon-lime)]' },
   ];
 
   razonSocialTpl = viewChild<TemplateRef<any>>('razonSocialTpl');
@@ -98,7 +103,6 @@ export class ProveedoresComponent implements OnInit {
   tipoPersonaTpl = viewChild<TemplateRef<any>>('tipoPersonaTpl');
   rubrosCountTpl = viewChild<TemplateRef<any>>('rubrosCountTpl');
   hasConstanciaAfipTpl = viewChild<TemplateRef<any>>('hasConstanciaAfipTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
@@ -108,16 +112,12 @@ export class ProveedoresComponent implements OnInit {
     const tipoPersona = this.tipoPersonaTpl();
     const rubrosCount = this.rubrosCountTpl();
     const hasConstanciaAfip = this.hasConstanciaAfipTpl();
-    const acciones = this.accionesTpl();
-
     if (razonSocial) templates['razonSocial'] = razonSocial;
     if (cuit) templates['cuit'] = cuit;
     if (cup) templates['cup'] = cup;
     if (tipoPersona) templates['tipoPersona'] = tipoPersona;
     if (rubrosCount) templates['rubrosCount'] = rubrosCount;
     if (hasConstanciaAfip) templates['hasConstanciaAfip'] = hasConstanciaAfip;
-    if (acciones) templates['acciones'] = acciones;
-
     return templates;
   });
 
@@ -126,7 +126,7 @@ export class ProveedoresComponent implements OnInit {
 
   filteredRubrosTree = computed(() => {
     const search = this.rubroSearch().toLowerCase().trim();
-    if (!search) return this.rubrosTree();
+    if (!search) return this.sortRubrosTree(this.rubrosTree());
     
     const filterNode = (node: RubroTreeDto): RubroTreeDto | null => {
       const matches = node.codigo.toLowerCase().includes(search) || node.descripcion.toLowerCase().includes(search);
@@ -148,8 +148,24 @@ export class ProveedoresComponent implements OnInit {
       return null;
     };
     
-    return this.rubrosTree().map(filterNode).filter((n): n is RubroTreeDto => n !== null);
+    return this.sortRubrosTree(this.rubrosTree().map(filterNode).filter((n): n is RubroTreeDto => n !== null));
   });
+
+  private sortRubrosTree(nodes: RubroTreeDto[]): RubroTreeDto[] {
+    return [...nodes]
+      .map(node => ({ ...node, children: this.sortRubrosTree(node.children || []) }))
+      .sort((a, b) => {
+        const aHasChildren = (a.children?.length || 0) > 0 || a.hasChildren;
+        const bHasChildren = (b.children?.length || 0) > 0 || b.hasChildren;
+        if (aHasChildren !== bHasChildren) return aHasChildren ? -1 : 1;
+
+        const aChildren = a.children?.length || 0;
+        const bChildren = b.children?.length || 0;
+        if (aChildren !== bChildren) return bChildren - aChildren;
+
+        return a.descripcion.localeCompare(b.descripcion, 'es', { numeric: true, sensitivity: 'base' });
+      });
+  }
 
   isRubroExpanded(rubroId: number): boolean {
     return this.expandedRubros().has(rubroId);
@@ -175,6 +191,20 @@ export class ProveedoresComponent implements OnInit {
   onPageChange(page: number) {
     this.currentPage.set(page);
     this.loadProviders();
+  }
+
+  handleTableAction(event: { action: string; row: ProviderListDto }) {
+    switch (event.action) {
+      case 'edit':
+        this.openEditModal(event.row);
+        break;
+      case 'rubros':
+        this.openRubrosModal(event.row);
+        break;
+      case 'domicilios':
+        this.openDomiciliosModal(event.row);
+        break;
+    }
   }
 
   ngOnInit() {
@@ -303,7 +333,11 @@ export class ProveedoresComponent implements OnInit {
     this.rubrosLoading.set(true);
     this.providerService.getRubroTree().subscribe({
       next: (res) => {
-        if (res.success && res.data) this.rubrosTree.set(res.data);
+        if (res.success && res.data) {
+          const tree = this.sortRubrosTree(res.data);
+          this.rubrosTree.set(tree);
+          this.expandedRubros.set(new Set(tree.filter(r => r.hasChildren || (r.children?.length || 0) > 0).slice(0, 8).map(r => r.id)));
+        }
         this.rubrosLoading.set(false);
       },
       error: () => this.rubrosLoading.set(false),

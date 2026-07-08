@@ -30,7 +30,7 @@ interface InformeTipo {
   imports: [CommonModule, FormsModule, LucideAngularModule, CustomSelect, AppCalendar, SmartTableComponent],
   template: `
     <div class="space-y-6">
-      <section class="relative overflow-hidden rounded-3xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-6 shadow-2xl">
+      <section class="relative overflow-hidden informes-soft-hero rounded-3xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-6 shadow-2xl">
         <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_0%,rgba(2,184,204,.18),transparent_38%),radial-gradient(circle_at_80%_20%,rgba(228,242,34,.08),transparent_34%)]"></div>
         <div class="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -60,25 +60,25 @@ interface InformeTipo {
       <section class="grid grid-cols-1 gap-3 xl:grid-cols-4">
         @for (tipo of tiposInforme; track tipo.codigo) {
           <button type="button" (click)="onTipoInformeChange(tipo.codigo)"
-            class="group rounded-2xl border p-4 text-left transition-all"
-            [class.border-[var(--color-cyan-spark)]]="tipoInforme() === tipo.codigo"
-            [class.bg-[var(--color-cyan-spark)]/10]="tipoInforme() === tipo.codigo"
-            [class.border-[var(--color-charcoal-grey)]]="tipoInforme() !== tipo.codigo"
-            [class.bg-[var(--color-graphite)]/50]="tipoInforme() !== tipo.codigo">
+            class="informes-soft-option group rounded-2xl border p-4 text-left transition-all"
+            [class.is-selected]="tipoInforme() === tipo.codigo">
             <div class="flex items-start gap-3">
-              <div class="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-pitch-black)] text-[var(--color-cyan-spark)] ring-1 ring-[var(--color-charcoal-grey)]">
+              <div class="report-option-icon inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--color-charcoal-grey)]/40 bg-[var(--color-pitch-black)] text-[var(--color-cyan-spark)] transition-all">
                 <lucide-icon [name]="tipo.icono" [size]="19"></lucide-icon>
               </div>
               <div class="min-w-0">
                 <p class="text-[13px] font-[750] text-[var(--color-porcelain)]">{{ tipo.titulo }}</p>
                 <p class="mt-1 text-[11px] leading-4 text-[var(--color-storm-cloud)]">{{ tipo.descripcion }}</p>
+                @if (tipoInforme() === tipo.codigo) {
+                  <span class="informes-selected-pill mt-3 inline-flex rounded-full px-2.5 py-1 text-[10px] font-[800] uppercase tracking-[0.14em]">Seleccionado</span>
+                }
               </div>
             </div>
           </button>
         }
       </section>
 
-      <section class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/45 p-5 shadow-xl">
+      <section class="informes-soft-panel rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/45 p-5 shadow-xl">
         <div class="mb-4 flex items-center justify-between gap-3">
           <div>
             <h2 class="text-[15px] font-[700] text-[var(--color-porcelain)]">Filtros del informe</h2>
@@ -116,7 +116,7 @@ interface InformeTipo {
         </div>
       </section>
 
-      <section class="rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/35 p-4 shadow-xl">
+      <section class="informes-soft-panel rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/35 p-4 shadow-xl">
         <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 class="text-[15px] font-[700] text-[var(--color-porcelain)]">Subastas encontradas</h2>

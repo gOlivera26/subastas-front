@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
@@ -6,8 +6,9 @@ import { RoleService, Role, AppPage, ModuloConPaginas, RoleModule } from '../../
 import { UserService, ActiveUser } from '../../../core/services/user.service';
 import { OrganizationService, Organization } from '../../../core/services/organization.service';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-seguridad',
@@ -16,6 +17,7 @@ import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/cus
   templateUrl: './seguridad.component.html',
 })
 export class SeguridadComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private roleService = inject(RoleService);
   private userService = inject(UserService);
   private orgService = inject(OrganizationService);
@@ -43,22 +45,30 @@ export class SeguridadComponent implements OnInit {
   isLinkModalOpen = signal(false);
   linkForm = { idUsuario: '', idOrganizacion: 0, esPrincipal: true };
 
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
-
-  customTemplates = computed(() => {
-    const templates: Record<string, TemplateRef<any>> = {};
-    const acciones = this.accionesTpl();
-
-    if (acciones) templates['acciones'] = acciones;
-
-    return templates;
-  });
-
   columns: TableColumn[] = [
     { key: 'nombre', header: 'Nombre', sortable: true },
     { key: 'descripcion', header: 'Descripción', sortable: true },
-    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
+
+  actions: TableAction[] = [
+    { action: 'pages', icon: 'file-text', tooltip: 'Gestionar páginas', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar rol', color: 'text-[var(--color-aether-blue)] hover:text-[var(--color-aether-blue)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Eliminar rol', color: 'text-red-400 hover:text-red-300' },
+  ];
+
+  handleTableAction(event: { action: string; row: Role }) {
+    switch (event.action) {
+      case 'pages':
+        this.openPagesModal(event.row);
+        break;
+      case 'edit':
+        this.openEditRole(event.row);
+        break;
+      case 'delete':
+        this.deleteRole(event.row);
+        break;
+    }
+  }
 
   linkUserOptions = computed<SelectOption[]>(() => [
     { label: 'Seleccionar usuario...', value: '' },
@@ -100,8 +110,8 @@ export class SeguridadComponent implements OnInit {
     obs.subscribe({ next: (res: any) => { this.isSavingRole.set(false); if (res.success) { this.isRoleModalOpen.set(false); this.showSuccess('Rol guardado.'); this.loadRoles(); } }, error: () => { this.isSavingRole.set(false); this.errorMessage.set('Error al guardar rol.'); } });
   }
 
-  deleteRole(role: Role) {
-    if (!confirm(`¿Eliminar rol "${role.nombre}"?`)) return;
+  async deleteRole(role: Role) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar rol', message: `¿Eliminar rol "${role.nombre}"?`, confirmText: 'Eliminar', type: 'danger' }))) return;
     this.roleService.delete(role.id).subscribe({ next: (res: any) => { if (res.success) { this.showSuccess('Rol eliminado.'); this.loadRoles(); } }, error: () => this.errorMessage.set('Error al eliminar rol.') });
   }
 

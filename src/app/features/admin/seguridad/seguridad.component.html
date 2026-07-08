@@ -31,19 +31,14 @@
         @if (isLoading()) {
           <div class="flex items-center justify-center py-20 text-[13px] text-[var(--color-storm-cloud)]"><lucide-icon name="loader-2" [size]="20" class="animate-spin mr-3"></lucide-icon>Cargando...</div>
         } @else {
-      <ng-template #accionesTpl let-row>
-        <div class="flex justify-end gap-1">
-          <button (click)="openPagesModal(row)" title="Gestionar Páginas" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="file-text" [size]="16"></lucide-icon></button>
-          <button (click)="openEditRole(row)" title="Editar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
-          <button (click)="deleteRole(row)" title="Eliminar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-red-400"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
-        </div>
-      </ng-template>
+
       <app-smart-table
           [columns]="columns"
           [data]="roles()"
-          [customTemplates]="customTemplates()"
+          [actions]="actions"
           [loading]="isLoading()"
           [pageSize]="999"
+          (onAction)="handleTableAction($event)"
           emptyMessage="No hay roles registrados"
           emptySubMessage="Creá el primero para comenzar.">
         </app-smart-table>

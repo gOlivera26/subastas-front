@@ -29,9 +29,9 @@
 
       @if (auth.hasPageAccess('clasificadores.organizaciones')) {
         <a routerLink="/clasificadores/organizaciones"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="building" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -41,10 +41,10 @@
 
       @if (auth.hasPageAccess('clasificadores.vigencias')) {
         <a routerLink="/clasificadores/vigencias"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-neon-lime)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          [routerLinkActiveOptions]="{exact: true}"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="calendar" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -54,9 +54,9 @@
 
       @if (auth.hasPageAccess('clasificadores.unidades-administrativas')) {
         <a routerLink="/clasificadores/unidades-administrativas"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="building-2" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -66,9 +66,9 @@
 
       @if (auth.hasPageAccess('clasificadores.objetos-gasto')) {
         <a routerLink="/clasificadores/objetos-gasto"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="tags" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -78,9 +78,9 @@
 
       @if (auth.hasPageAccess('clasificadores.catalogo-bienes')) {
         <a routerLink="/clasificadores/catalogo-bienes"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="package" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -90,9 +90,9 @@
 
       @if (auth.hasPageAccess('clasificadores.categorias-programaticas')) {
         <a routerLink="/clasificadores/categorias-programaticas"
-           routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+           routerLinkActive="nav-item-active"
            (click)="closeSidebarOnMobile()"
-           class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+           class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
           <lucide-icon name="folder-tree" [size]="18" class="shrink-0"></lucide-icon>
           <span class="truncate transition-opacity duration-300"
                 [class.opacity-0]="!isSidebarOpen()"
@@ -102,9 +102,9 @@
 
       @if (auth.hasPageAccess('clasificadores.monedas')) {
         <a routerLink="/clasificadores/monedas"
-           routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+           routerLinkActive="nav-item-active"
            (click)="closeSidebarOnMobile()"
-           class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+           class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
           <lucide-icon name="banknote" [size]="18" class="shrink-0"></lucide-icon>
           <span class="truncate transition-opacity duration-300"
                 [class.opacity-0]="!isSidebarOpen()"
@@ -114,9 +114,9 @@
 
       @if (auth.hasPageAccess('clasificadores.areas')) {
         <a routerLink="/clasificadores/areas"
-           routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+           routerLinkActive="nav-item-active"
            (click)="closeSidebarOnMobile()"
-           class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+           class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
           <lucide-icon name="network" [size]="18" class="shrink-0"></lucide-icon>
           <span class="truncate transition-opacity duration-300"
                 [class.opacity-0]="!isSidebarOpen()"
@@ -153,8 +153,7 @@
       </ng-container>
     </app-header>
 
-    <main [@routeFade]="routeState()"
-          class="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-pitch-black)]">
+    <main class="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-pitch-black)]">
       @if (showBreadcrumb()) {
         <div class="flex min-w-0 items-center gap-2 overflow-x-auto border-b border-[var(--color-charcoal-grey)] px-3 py-3 sm:px-6 lg:px-8">
           <a routerLink="/clasificadores" class="text-[13px] font-[510] text-[var(--color-storm-cloud)] transition-colors hover:text-[var(--color-porcelain)]">Clasificadores</a>
@@ -171,3 +170,4 @@
     </main>
   </div>
 </div>
+

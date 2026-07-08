@@ -5,7 +5,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { VigenciaService, VigenciaRequest } from '../../../core/services/vigencia.service';
 import { Vigencia } from '../../../core/models/vigencia.model';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-vigencias',
@@ -14,6 +15,7 @@ import { TableColumn } from '../../../shared/ui/smart-table/table.models';
   templateUrl: './vigencias.component.html',
 })
 export class VigenciasComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private vigenciaService = inject(VigenciaService);
 
   vigencias = signal<Vigencia[]>([]);
@@ -30,17 +32,14 @@ export class VigenciasComponent implements OnInit {
 
   activoEjecucionTpl = viewChild<TemplateRef<any>>('activoEjecucionTpl');
   fecIngTpl = viewChild<TemplateRef<any>>('fecIngTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
     const activoEjecucion = this.activoEjecucionTpl();
     const fecIng = this.fecIngTpl();
-    const acciones = this.accionesTpl();
 
     if (activoEjecucion) templates['activoEjecucion'] = activoEjecucion;
     if (fecIng) templates['fecIng'] = fecIng;
-    if (acciones) templates['acciones'] = acciones;
 
     return templates;
   });
@@ -49,8 +48,28 @@ export class VigenciasComponent implements OnInit {
     { key: 'ejercicio', header: 'Ejercicio', sortable: true },
     { key: 'activoEjecucion', header: 'Activo', type: 'custom' },
     { key: 'fecIng', header: 'Creado', type: 'custom', sortable: true },
-    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
+
+
+  actions: TableAction[] = [
+    { action: 'activate', icon: 'play', tooltip: 'Marcar como activa', color: 'text-emerald-400 hover:text-emerald-300', visible: (row: any) => !row.activoEjecucion },
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar vigencia', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Eliminar vigencia', color: 'text-red-400 hover:text-red-300' },
+  ];
+
+  handleTableAction(event: { action: string; row: any }) {
+    switch (event.action) {
+      case 'activate':
+        this.setActiva(event.row);
+        break;
+      case 'edit':
+        this.openEditModal(event.row);
+        break;
+      case 'delete':
+        this.confirmDelete(event.row);
+        break;
+    }
+  }
 
   ngOnInit() { this.loadVigencias(); }
 
@@ -80,8 +99,8 @@ export class VigenciasComponent implements OnInit {
     });
   }
 
-  confirmDelete(vigencia: Vigencia) {
-    if (!confirm(`¿Eliminar la vigencia ${vigencia.ejercicio}?`)) return;
+  async confirmDelete(vigencia: Vigencia) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar vigencia', message: `¿Eliminar la vigencia ${vigencia.ejercicio}?`, confirmText: 'Eliminar', type: 'danger' }))) return;
     this.vigenciaService.delete(vigencia.idVigencia).subscribe({
       next: (res) => { if (res.success) { this.showSuccess('Vigencia eliminada correctamente.'); this.loadVigencias(); } },
       error: () => { this.errorMessage.set('Error al eliminar la vigencia.'); },

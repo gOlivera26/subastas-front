@@ -65,28 +65,16 @@
         <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span>
       </ng-template>
 
-      <ng-template #accionesTpl let-row>
-        <button 
-          (click)="openApproveModal(row.idUsuario, row.nombreCompleto)"
-          [disabled]="processingId() === row.idUsuario"
-          class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-neon-lime)]/10 px-4 py-2 text-[13px] font-[590] text-[var(--color-neon-lime)] hover:bg-[var(--color-neon-lime)] hover:text-[var(--color-pitch-black)] transition-all disabled:opacity-50 border border-[var(--color-neon-lime)]/20">
-          @if (processingId() === row.idUsuario) {
-            <lucide-icon name="loader-2" [size]="16" class="animate-spin"></lucide-icon>
-          } @else {
-            <lucide-icon name="check-circle" [size]="16"></lucide-icon>
-            Aprobar
-          }
-        </button>
-      </ng-template>
-
     <app-smart-table
       [columns]="columns"
       [data]="pendingUsers()"
       [customTemplates]="customTemplates()"
+      [actions]="actions"
       [loading]="isLoading()"
       [pageSize]="999"
       emptyMessage="Todo al día"
-      emptySubMessage="No hay usuarios pendientes de aprobación en este momento.">
+      emptySubMessage="No hay usuarios pendientes de aprobación en este momento."
+      (onAction)="handleTableAction($event)">
     </app-smart-table>
 
   </div>

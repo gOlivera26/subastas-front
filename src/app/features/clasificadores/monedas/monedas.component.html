@@ -30,33 +30,23 @@
       <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-charcoal-grey)]/30 px-2.5 py-0.5 text-[12px] font-[590] text-[var(--color-storm-cloud)]">Inactivo</span>
     }
   </ng-template>
-
-  <ng-template #accionesTpl let-row>
-    <div class="flex items-center justify-end gap-1">
-      <button (click)="openEditModal(row)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]" title="Editar">
-        <lucide-icon name="pencil" [size]="16"></lucide-icon>
-      </button>
-      @if (row.activo) {
-        <button (click)="confirmDelete(row)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-red-500" title="Eliminar">
-          <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-        </button>
-      }
-    </div>
-  </ng-template>
-
-  <app-smart-table
+<app-smart-table
     [columns]="columns"
     [data]="items()"
     [customTemplates]="customTemplates()"
+    
+    [actions]="actions"
     [loading]="isLoading()"
     [pageSize]="999"
+    
+    (onAction)="handleTableAction($event)"
     emptyMessage="No hay monedas registradas"
     emptySubMessage="Creá la primera para comenzar.">
   </app-smart-table>
 </div>
 
 @if (isModalOpen()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+  <div class="fixed inset-0 z-[120] flex items-center justify-center p-4">
     <div class="fixed inset-0 animate-fade-in bg-black/60 backdrop-blur-sm" (click)="closeModal()"></div>
     <div class="relative w-full max-w-lg animate-scale-in rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl">
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4">

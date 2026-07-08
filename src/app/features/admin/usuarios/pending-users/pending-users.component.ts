@@ -4,7 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { UserService, PendingUser } from '../../../../core/services/user.service';
 import { RouterLink } from '@angular/router';
 import { SmartTableComponent } from '../../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../../shared/ui/smart-table/table.models';
 
 @Component({
   selector: 'app-admin-usuarios',
@@ -28,14 +28,16 @@ export class AdminUsuariosComponent implements OnInit {
     { key: 'documento', header: 'Documento', type: 'custom', sortable: true },
     { key: 'tipoUsuario', header: 'Rol / Entidad Representada', type: 'custom' },
     { key: 'fechaRegistro', header: 'Fecha Solicitud', type: 'custom', sortable: true },
-    { key: 'acciones', header: 'Acción', type: 'custom' },
+  ];
+
+  actions: TableAction[] = [
+    { action: 'approve', icon: 'check-circle', tooltip: 'Aprobar usuario', color: 'text-[var(--color-neon-lime)] hover:text-[var(--color-neon-lime)]' },
   ];
 
   nombreCompletoTpl = viewChild<TemplateRef<any>>('nombreCompletoTpl');
   documentoTpl = viewChild<TemplateRef<any>>('documentoTpl');
   tipoUsuarioTpl = viewChild<TemplateRef<any>>('tipoUsuarioTpl');
   fechaRegistroTpl = viewChild<TemplateRef<any>>('fechaRegistroTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
@@ -43,16 +45,20 @@ export class AdminUsuariosComponent implements OnInit {
     const documento = this.documentoTpl();
     const tipoUsuario = this.tipoUsuarioTpl();
     const fechaRegistro = this.fechaRegistroTpl();
-    const acciones = this.accionesTpl();
 
     if (nombreCompleto) templates['nombreCompleto'] = nombreCompleto;
     if (documento) templates['documento'] = documento;
     if (tipoUsuario) templates['tipoUsuario'] = tipoUsuario;
     if (fechaRegistro) templates['fechaRegistro'] = fechaRegistro;
-    if (acciones) templates['acciones'] = acciones;
 
     return templates;
   });
+
+  handleTableAction(event: { action: string; row: PendingUser }) {
+    if (event.action === 'approve' && this.processingId() !== event.row.idUsuario) {
+      this.openApproveModal(event.row.idUsuario, event.row.nombreCompleto);
+    }
+  }
 
   ngOnInit() {
     this.loadPendingUsers();

@@ -478,6 +478,121 @@ export type ChartOptions = {
     }
 
 
+    /* Softer dashboard surfaces */
+    .tablero-hero,
+    .summary-card,
+    .insight-card,
+    .context-strip {
+      border-color: color-mix(in srgb, var(--color-charcoal-grey) 42%, transparent);
+      background:
+        radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--color-cyan-spark) 5%, transparent), transparent 22rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 72%, transparent), color-mix(in srgb, var(--color-pitch-black) 24%, transparent));
+      box-shadow: 0 22px 64px -48px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.026);
+    }
+
+    .summary-card-accent {
+      background:
+        radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--color-cyan-spark) 9%, transparent), transparent 18rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 72%, transparent), color-mix(in srgb, var(--color-cyan-spark) 4%, transparent));
+    }
+
+    .summary-card-positive {
+      background:
+        radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--color-neon-lime) 7%, transparent), transparent 18rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 72%, transparent), color-mix(in srgb, var(--color-neon-lime) 3%, transparent));
+    }
+
+    :host-context(html:not(.dark)) .tablero-hero,
+    :host-context(html:not(.dark)) .summary-card,
+    :host-context(html:not(.dark)) .insight-card,
+    :host-context(html:not(.dark)) .context-strip {
+      border-color: rgba(23, 59, 114, 0.10);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(64, 181, 229, 0.10), transparent 22rem),
+        rgba(255, 255, 255, 0.78);
+      box-shadow: 0 24px 70px -46px rgba(15, 43, 92, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+
+    :host-context(html:not(.dark)) .section-meta,
+    :host-context(html:not(.dark)) .context-chip {
+      border-color: rgba(23, 59, 114, 0.10);
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+
+    /* Final soft pass: remove hard gray strokes */
+    .tablero-hero,
+    .summary-card,
+    .insight-card,
+    .context-strip {
+      border-color: color-mix(in srgb, var(--color-cyan-spark) 10%, transparent) !important;
+      background:
+        radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--color-cyan-spark) 7%, transparent), transparent 24rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 58%, transparent), color-mix(in srgb, var(--color-pitch-black) 18%, transparent)) !important;
+      box-shadow: 0 24px 72px -56px rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(255, 255, 255, 0.022) !important;
+    }
+
+    .section-head {
+      border-bottom-color: color-mix(in srgb, var(--color-cyan-spark) 8%, transparent) !important;
+    }
+
+    .context-separator {
+      background: color-mix(in srgb, var(--color-cyan-spark) 12%, transparent) !important;
+    }
+
+    .section-meta,
+    .context-chip {
+      border-color: color-mix(in srgb, var(--color-cyan-spark) 10%, transparent) !important;
+      background: color-mix(in srgb, var(--color-pitch-black) 22%, transparent) !important;
+    }
+
+    :host-context(html:not(.dark)) .tablero-hero,
+    :host-context(html:not(.dark)) .summary-card,
+    :host-context(html:not(.dark)) .insight-card,
+    :host-context(html:not(.dark)) .context-strip {
+      border-color: rgba(64, 181, 229, 0.12) !important;
+      background:
+        radial-gradient(circle at 14% 0%, rgba(64, 181, 229, 0.12), transparent 22rem),
+        rgba(255,255,255,0.78) !important;
+      box-shadow: 0 24px 70px -50px rgba(15, 43, 92, 0.35), inset 0 1px 0 rgba(255,255,255,0.88) !important;
+    }
+
+    :host-context(html:not(.dark)) .section-head {
+      border-bottom-color: rgba(64, 181, 229, 0.10) !important;
+    }
+
+    :host-context(html:not(.dark)) .context-separator {
+      background: rgba(64, 181, 229, 0.12) !important;
+    }
+
+    :host ::ng-deep .apexcharts-gridline,
+    :host ::ng-deep .apexcharts-xaxis-tick,
+    :host ::ng-deep .apexcharts-yaxis line,
+    :host ::ng-deep .apexcharts-xaxis line {
+      stroke-opacity: 0.42 !important;
+    }
+
+    :host-context(html:not(.dark)) ::ng-deep .apexcharts-gridline,
+    :host-context(html:not(.dark)) ::ng-deep .apexcharts-xaxis-tick,
+    :host-context(html:not(.dark)) ::ng-deep .apexcharts-yaxis line,
+    :host-context(html:not(.dark)) ::ng-deep .apexcharts-xaxis line {
+      stroke: rgba(23, 59, 114, 0.10) !important;
+      stroke-opacity: 1 !important;
+    }
+
+    :host-context(html:not(.dark)) ::ng-deep .apexcharts-text,
+    :host-context(html:not(.dark)) ::ng-deep .apexcharts-legend-text {
+      fill: #274060 !important;
+      color: #274060 !important;
+    }
+
+    :host-context(html:not(.dark)) ::ng-deep .apexcharts-tooltip {
+      border-color: rgba(23, 59, 114, 0.12) !important;
+      background: rgba(255, 255, 255, 0.96) !important;
+      box-shadow: 0 18px 50px -34px rgba(15, 43, 92, 0.46) !important;
+    }
+
+
     @media (max-width: 1180px) {
       .summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -691,6 +806,9 @@ export class TableroComponent implements OnInit {
     const lime = this.getCssVar('--color-neon-lime', '#e4f222');
     const charcoal = this.getCssVar('--color-charcoal-grey', '#23252a');
     const isDark = document.documentElement.classList.contains('dark');
+    const axisLabelColor = isDark ? fog : '#274060';
+    const legendLabelColor = isDark ? porcelain : '#274060';
+    const gridLineColor = isDark ? charcoal : 'rgba(23, 59, 114, 0.12)';
 
     const chartHeight = Math.min(620, Math.max(260, top.length * 42));
 

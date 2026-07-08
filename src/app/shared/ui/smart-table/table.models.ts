@@ -11,4 +11,5 @@ export interface TableAction {
   icon: string;
   color?: string;
   tooltip?: string;
+  visible?: (row: any) => boolean;
 }

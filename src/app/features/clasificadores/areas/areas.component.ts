@@ -7,8 +7,9 @@ import { AuthService } from '../../../core/services/auth.service';
 import { SubResponsable } from '../../../core/models/sub-responsable.model';
 import { UnidadAdministrativa } from '../../../core/models/unidad-administrativa.model';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 interface BulkRow { codigo: string; nombre: string; nombreUA: string; }
 
@@ -18,6 +19,7 @@ interface BulkRow { codigo: string; nombre: string; nombreUA: string; }
   templateUrl: './areas.component.html',
 })
 export class AreasComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private service = inject(SubResponsableService);
   private uaService = inject(UnidadAdministrativaService);
   auth = inject(AuthService);
@@ -37,15 +39,12 @@ export class AreasComponent implements OnInit {
   isUploading = signal(false);
 
   vigenteTpl = viewChild<TemplateRef<any>>('vigenteTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
     const vigente = this.vigenteTpl();
-    const acciones = this.accionesTpl();
 
     if (vigente) templates['vigente'] = vigente;
-    if (acciones) templates['acciones'] = acciones;
 
     return templates;
   });
@@ -55,9 +54,19 @@ export class AreasComponent implements OnInit {
     { key: 'nombre', header: 'Nombre', sortable: true },
     { key: 'unidadAdmNombre', header: 'UA', sortable: true },
     { key: 'vigente', header: 'Estado', type: 'custom' },
-    { key: 'acciones', header: 'Acciones', type: 'custom' },
   ];
 
+
+  actions: TableAction[] = [
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar área', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Eliminar área', color: 'text-red-400 hover:text-red-300' },
+  ];
+
+  uploadColumns: TableColumn[] = [
+    { key: 'codigo', header: 'Código', sortable: true },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'nombreUA', header: 'UA (nombre)', sortable: true },
+  ];
   uaOptions = computed<SelectOption[]>(() => [
     { label: 'Todas las UA', value: null },
     ...this.unidadesAdm().map(ua => ({ label: ua.nombreUnidadAdm, value: ua.idUnidadAdm }))
@@ -73,6 +82,18 @@ export class AreasComponent implements OnInit {
     ...this.unidadesAdm().map(ua => ({ label: ua.nombreUnidadAdm, value: ua.idUnidadAdm }))
   ]);
 
+
+  handleTableAction(event: { action: string; row: any }) {
+    switch (event.action) {
+      case 'edit':
+        this.openEditModal(event.row);
+        break;
+      case 'delete':
+        this.confirmDelete(event.row);
+        break;
+    }
+  }
+
   ngOnInit() { this.loadUAs(); this.loadItems(); }
 
   loadUAs() { this.uaService.getAll().subscribe({ next: (r: any) => { if (r.success && r.data) this.unidadesAdm.set(r.data); } }); }
@@ -85,7 +106,7 @@ export class AreasComponent implements OnInit {
 
   save() { if (!this.form.nombre || !this.form.codigo) return; this.isSaving.set(true); const o = this.isEditing() && this.editingId() != null ? this.service.update(this.editingId()!, this.form) : this.service.create(this.form); o.subscribe({ next: (r: any) => { this.isSaving.set(false); if (r.success) { this.closeModal(); this.showSuccess('Guardado.'); this.loadItems(); } }, error: (e: any) => { this.isSaving.set(false); this.errorMessage.set(e.error?.message || 'Error.'); } }); }
 
-  confirmDelete(item: SubResponsable) { if (!confirm(`¿Eliminar "${item.nombre}"?`)) return; this.service.delete(item.idSubResponsable).subscribe({ next: (r: any) => { if (r.success) { this.showSuccess('Eliminado.'); this.loadItems(); } }, error: () => this.errorMessage.set('Error.') }); }
+  async confirmDelete(item: SubResponsable) { if (!(await this.confirmation.confirm({ title: 'Eliminar área/oficina', message: `¿Eliminar "${item.nombre}"?`, confirmText: 'Eliminar', type: 'danger' }))) return; this.service.delete(item.idSubResponsable).subscribe({ next: (r: any) => { if (r.success) { this.showSuccess('Eliminado.'); this.loadItems(); } }, error: () => this.errorMessage.set('Error.') }); }
 
   openUpload() { this.uploadRows.set([]); this.isUploadOpen.set(true); }
 
