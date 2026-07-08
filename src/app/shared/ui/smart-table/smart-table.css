@@ -58,7 +58,196 @@
   align-items: flex-end;
 }
 
+
 .smart-table-action-menu {
-  max-width: min(220px, calc(100vw - 48px));
+  position: fixed;
+  inset: unset;
+  z-index: 55;
+  width: min(240px, calc(100vw - 24px));
+  max-height: min(420px, calc(100vh - 32px));
+  overflow-y: auto;
+  color: var(--color-storm-cloud);
+  scrollbar-gutter: stable;
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 72%, transparent) !important;
+  background: color-mix(in srgb, var(--color-pitch-black) 90%, var(--color-graphite)) !important;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+}
+
+.smart-table-action-menu::backdrop {
+  background: transparent;
+}
+
+.smart-table-action-menu button[title] {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+  border-radius: 0.65rem;
+  padding: 0.62rem 0.75rem;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.15;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.smart-table-action-menu button[title]::after {
+  content: attr(title);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.smart-table-action-menu button[title]:hover,
+.smart-table-action-menu button[title]:focus-visible {
+  background: color-mix(in srgb, var(--color-cyan-spark) 9%, var(--color-deep-slate));
+  color: var(--color-cyan-spark);
+  outline: none;
+}
+
+.smart-table-actions-trigger {
+  width: 2rem !important;
+  height: 2rem !important;
+  min-width: 2rem !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 0.75rem !important;
+  background: color-mix(in srgb, var(--color-deep-slate) 52%, transparent) !important;
+  color: var(--color-light-steel) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 6%, transparent) !important;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, color 120ms ease, box-shadow 120ms ease !important;
+}
+
+.smart-table-actions-trigger:hover,
+.smart-table-actions-trigger:focus-visible,
+.smart-table-actions-trigger[aria-expanded='true'] {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 32%, transparent) !important;
+  background: color-mix(in srgb, var(--color-cyan-spark) 10%, var(--color-deep-slate)) !important;
+  color: var(--color-cyan-spark) !important;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--color-cyan-spark) 10%, transparent), inset 0 1px 0 color-mix(in srgb, white 8%, transparent) !important;
+  outline: none;
+}
+
+.smart-table-actions-trigger:active {
+  transform: scale(0.96);
+}
+
+.smart-table-actions-desktop {
+  display: none;
+}
+
+.smart-table-action-button {
+  position: relative;
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 68%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--color-pitch-black) 76%, transparent), color-mix(in srgb, var(--color-deep-slate) 58%, transparent));
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.smart-table-action-button:hover,
+.smart-table-action-button:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 72%, var(--color-charcoal-grey));
+  background: color-mix(in srgb, var(--color-deep-slate) 78%, var(--color-cyan-spark) 10%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22), 0 0 0 2px color-mix(in srgb, var(--color-cyan-spark) 14%, transparent);
+  outline: none;
+}
+
+.smart-table-action-button[title]::after {
+  content: attr(title);
+  position: absolute;
+  right: 50%;
+  bottom: calc(100% + 0.55rem);
+  z-index: 60;
+  width: max-content;
+  max-width: 14rem;
+  transform: translateX(50%) translateY(3px);
+  border: 1px solid color-mix(in srgb, var(--color-cyan-spark) 40%, var(--color-charcoal-grey));
+  border-radius: 0.75rem;
+  background: #05070c;
+  color: #f7fbff;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.42);
+  padding: 0.48rem 0.62rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  pointer-events: none;
+  white-space: normal;
+  text-align: center;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.smart-table-action-button:hover::after,
+.smart-table-action-button:focus-visible::after {
+  opacity: 1;
+  transform: translateX(50%) translateY(0);
+}
+
+@media (min-width: 1024px) {
+  .smart-table-actions-desktop {
+    display: grid;
+    grid-template-columns: repeat(4, 2rem);
+    gap: 0.38rem;
+    justify-content: end;
+    max-width: 9.2rem;
+  }
+
+  .smart-table-action-menu-wrap {
+    display: none;
+  }
+}
+
+:host-context(html:not(.dark)) .smart-table-actions-trigger {
+  background: rgba(255, 255, 255, 0.78) !important;
+  color: var(--color-storm-cloud) !important;
+  box-shadow: 0 10px 24px -18px rgba(15, 43, 92, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+:host-context(html:not(.dark)) .smart-table-actions-trigger:hover,
+:host-context(html:not(.dark)) .smart-table-actions-trigger:focus-visible,
+:host-context(html:not(.dark)) .smart-table-actions-trigger[aria-expanded='true'] {
+  border-color: rgba(18, 104, 196, 0.22) !important;
+  background: rgba(18, 104, 196, 0.08) !important;
+  color: var(--color-cyan-spark) !important;
+}
+
+:host-context(html:not(.dark)) .smart-table-action-menu {
+  background: #ffffff !important;
+  border-color: rgba(23, 59, 114, 0.12) !important;
+  box-shadow: 0 24px 70px -38px rgba(15, 43, 92, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+:host-context(html:not(.dark)) .smart-table-action-menu button[title]:hover,
+:host-context(html:not(.dark)) .smart-table-action-menu button[title]:focus-visible {
+  background: rgba(18, 104, 196, 0.08) !important;
+  color: var(--color-cyan-spark) !important;
+}
+
+:host-context(html:not(.dark)) .smart-table-action-button {
+  border-color: rgba(131, 155, 184, 0.36);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(232, 241, 251, 0.86));
+  box-shadow: 0 8px 18px rgba(47, 80, 120, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+:host-context(html:not(.dark)) .smart-table-action-button:hover,
+:host-context(html:not(.dark)) .smart-table-action-button:focus-visible {
+  border-color: rgba(0, 162, 203, 0.54);
+  background: linear-gradient(145deg, #ffffff, #eaf6fb);
+  box-shadow: 0 12px 26px rgba(47, 80, 120, 0.16), 0 0 0 2px rgba(0, 183, 216, 0.12);
+}
+
+:host-context(html:not(.dark)) .smart-table-action-button[title]::after {
+  background: #071426;
+  color: #f7fbff;
+  border-color: rgba(0, 162, 203, 0.44);
+  box-shadow: 0 16px 34px rgba(47, 80, 120, 0.28);
 }
 

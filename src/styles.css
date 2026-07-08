@@ -6,18 +6,18 @@
   /* MODO CLARO - BANDERA ARGENTINA — OWEN CRIPPA */
   :root {
     /* Fondos: blancos con alma celeste */
-    --color-pitch-black: #F7FAFE;
+    --color-pitch-black: #F8FBFF;
     --color-graphite: #FFFFFF;
-    --color-deep-slate: #EAF2FC;
-    --color-charcoal-grey: #B8CCE4;
-    --color-muted-ash: #8EA9CA;
-    --color-gunmetal: #4E6E96;
+    --color-deep-slate: #EEF5FC;
+    --color-charcoal-grey: #D8E5F2;
+    --color-muted-ash: #A9BED7;
+    --color-gunmetal: #6A86AA;
 
     /* Tipografía: azul naval argentino */
     --color-porcelain: #0B172A;
     --color-light-steel: #18365F;
-    --color-storm-cloud: #355A8A;
-    --color-fog-grey: #5A769D;
+    --color-storm-cloud: #3E638F;
+    --color-fog-grey: #6F87A7;
     --color-alabaster: #0A1C38;
 
     /* Acentos: símbolos patrios  */
@@ -31,9 +31,9 @@
     --font-inter-variable: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --radius-pill: 9999px;
     --radius-buttons: 6px;
-    --shadow-subtle-2: rgba(15, 43, 92, 0.07) 0px 4px 18px 0px;
-    --shadow-md: rgba(15, 43, 92, 0.04) 0px 2px 4px 0px;
-    --shadow-sm: rgba(15, 43, 92, 0.03) 0px 1px 3px 0px;
+    --shadow-subtle-2: rgba(15, 43, 92, 0.10) 0px 18px 50px -28px;
+    --shadow-md: rgba(15, 43, 92, 0.08) 0px 10px 28px -18px;
+    --shadow-sm: rgba(15, 43, 92, 0.06) 0px 6px 18px -14px;
   }
 
   /* MODO OSCURO - DISEÑO ORIGINAL */
@@ -94,6 +94,46 @@
 
   :where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
     min-width: 0;
+  }
+  /* Global button hover feedback: subtle, consistent and safe for light/dark themes. */
+  :where(button, a[role='button'], .btn-primary, .btn-secondary, .btn-accent) {
+    --app-button-hover-bg: color-mix(in srgb, var(--color-cyan-spark) 8%, var(--color-deep-slate));
+    --app-button-hover-border: color-mix(in srgb, var(--color-cyan-spark) 34%, transparent);
+    --app-button-hover-shadow: 0 12px 28px -24px color-mix(in srgb, var(--color-cyan-spark) 45%, black);
+    transition-property: transform, filter, background, background-color, border-color, color, box-shadow, opacity;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+  }
+
+  :where(button, a[role='button'], .btn-primary, .btn-secondary, .btn-accent):where(:not(:disabled):not([aria-disabled='true'])):hover {
+    border-color: var(--app-button-hover-border);
+    background-color: var(--app-button-hover-bg);
+    box-shadow: var(--app-button-hover-shadow);
+    filter: brightness(1.06) saturate(1.04);
+    transform: translateY(-1px);
+  }
+
+  :where(button, a[role='button'], .btn-primary, .btn-secondary, .btn-accent):where(:not(:disabled):not([aria-disabled='true'])):active {
+    transform: translateY(0) scale(0.985);
+    filter: brightness(0.98);
+  }
+
+  :where(button, a[role='button'], .btn-primary, .btn-secondary, .btn-accent):focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-cyan-spark) 56%, transparent);
+    outline-offset: 2px;
+  }
+
+  html:not(.dark) :where(button, a[role='button'], .btn-primary, .btn-secondary, .btn-accent) {
+    --app-button-hover-bg: color-mix(in srgb, var(--color-cyan-spark) 8%, white);
+    --app-button-hover-border: color-mix(in srgb, var(--color-cyan-spark) 38%, rgba(23, 59, 114, 0.16));
+    --app-button-hover-shadow: 0 14px 32px -24px rgba(15, 43, 92, 0.52);
+  }
+
+  :where(button, a[role='button'], .btn-primary, .btn-secondary, .btn-accent):where(:disabled, [aria-disabled='true']) {
+    cursor: not-allowed;
+    transform: none !important;
+    filter: none !important;
+    box-shadow: none !important;
   }
 
   :where(.flex > *, .grid > *) {
@@ -164,7 +204,6 @@
 
   .app-shell-content {
     position: relative;
-    z-index: 10;
     width: 100%;
     min-width: 0;
     padding: 1rem 0.75rem;
@@ -399,31 +438,59 @@ app-home .reveal-on-scroll {
   justify-content: flex-end;
 }
 
+.subasta-actions-trigger {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-deep-slate) 52%, transparent);
+  color: var(--color-light-steel);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+
+.subasta-actions-trigger:hover,
+.subasta-actions-trigger[aria-expanded='true'] {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 32%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 10%, var(--color-deep-slate));
+  color: var(--color-cyan-spark);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--color-cyan-spark) 10%, transparent), inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+}
+
+.subasta-actions-trigger:active {
+  transform: scale(0.96);
+}
+
 .action-menu-icon {
   display: inline-flex;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   align-items: center;
   justify-content: center;
   gap: 3px;
 }
 
 .action-menu-icon > span {
-  width: 3.5px;
-  height: 3.5px;
+  width: 3px;
+  height: 3px;
   border-radius: 999px;
   background: currentColor;
-  box-shadow: 0 0 8px rgba(2, 184, 204, 0.18);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-cyan-spark) 18%, transparent);
 }
 
 .subasta-actions-menu-list {
   position: fixed;
   inset: unset;
-  z-index: 9999;
+  z-index: 55;
   width: min(240px, calc(100vw - 24px));
   max-height: min(420px, calc(100vh - 32px));
   overflow-y: auto;
   color: var(--color-storm-cloud);
+  scrollbar-gutter: stable;
 }
 
 .subasta-actions-menu-list::backdrop {
@@ -435,11 +502,13 @@ app-home .reveal-on-scroll {
   width: 100%;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.55rem;
-  border-radius: 0.55rem;
-  padding: 0.55rem 0.75rem;
+  gap: 0.65rem;
+  border-radius: 0.65rem;
+  padding: 0.62rem 0.75rem;
   text-align: left;
   font-size: 12px;
+  line-height: 1.15;
+  transition: background 120ms ease, color 120ms ease;
 }
 
 .subasta-actions-menu-list button[title]::after {
@@ -448,6 +517,125 @@ app-home .reveal-on-scroll {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+html:not(.dark) .subasta-actions-trigger {
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--color-storm-cloud);
+  box-shadow: 0 10px 24px -18px rgba(15, 43, 92, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+html:not(.dark) .subasta-actions-trigger:hover,
+html:not(.dark) .subasta-actions-trigger[aria-expanded='true'] {
+  border-color: rgba(18, 104, 196, 0.22);
+  background: rgba(18, 104, 196, 0.08);
+  color: var(--color-cyan-spark);
+}
+
+html:not(.dark) .subasta-actions-menu-list {
+  background: #ffffff !important;
+  border-color: rgba(23, 59, 114, 0.12) !important;
+  box-shadow: 0 24px 70px -38px rgba(15, 43, 92, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+@media (min-width: 1024px) {
+  .subasta-actions-menu-wrap {
+    display: flex;
+    justify-content: flex-start;
+    min-width: 8.5rem;
+  }
+
+  .subasta-actions-trigger {
+    display: none !important;
+  }
+
+  .subasta-actions-menu-list {
+    position: static !important;
+    inset: auto !important;
+    display: grid !important;
+    width: max-content !important;
+    max-width: 9.25rem !important;
+    max-height: none !important;
+    grid-template-columns: repeat(4, 1.9rem);
+    gap: 0.35rem;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    color: var(--color-storm-cloud);
+  }
+
+  .subasta-actions-menu-list button[title] {
+    position: relative;
+    display: inline-flex;
+    width: 1.9rem;
+    height: 1.9rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 0.6rem;
+    padding: 0;
+    background: color-mix(in srgb, var(--color-deep-slate) 42%, transparent);
+    color: var(--color-storm-cloud);
+  }
+
+  .subasta-actions-menu-list button[title]:hover {
+    z-index: 10;
+    border-color: color-mix(in srgb, var(--color-cyan-spark) 26%, transparent);
+    background: color-mix(in srgb, var(--color-cyan-spark) 9%, var(--color-deep-slate));
+    color: var(--color-cyan-spark);
+  }
+
+  .subasta-actions-menu-list button[title]::after {
+    position: absolute;
+    right: 50%;
+    bottom: calc(100% + 0.65rem);
+    z-index: 1000;
+    width: max-content;
+    max-width: 14rem;
+    transform: translateX(50%) translateY(0.25rem);
+    border: 1px solid color-mix(in srgb, var(--color-cyan-spark) 34%, var(--color-charcoal-grey));
+    border-radius: 0.7rem;
+    background: #05070c;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.52), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    color: var(--color-porcelain);
+    content: attr(title);
+    font-size: 11.5px;
+    font-weight: 720;
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    opacity: 0;
+    padding: 0.52rem 0.68rem;
+    pointer-events: none;
+    text-align: center;
+    transition: opacity 120ms ease, transform 120ms ease;
+    white-space: normal;
+  }
+
+  .subasta-actions-menu-list button[title]:hover::after,
+  .subasta-actions-menu-list button[title]:focus-visible::after {
+    opacity: 1;
+    transform: translateX(50%) translateY(0);
+  }
+
+  html:not(.dark) .subasta-actions-menu-list button[title] {
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--color-storm-cloud);
+    box-shadow: 0 8px 20px -16px rgba(15, 43, 92, 0.48);
+  }
+
+  html:not(.dark) .subasta-actions-menu-list button[title]:hover {
+    border-color: rgba(18, 104, 196, 0.24);
+    background: rgba(18, 104, 196, 0.08);
+    color: var(--color-cyan-spark);
+  }
+
+  html:not(.dark) .subasta-actions-menu-list button[title]::after {
+    background: #071426;
+    border-color: rgba(18, 104, 196, 0.38);
+    color: #ffffff;
+  }
 }
 
 /* Light theme fixes for pivot table */
@@ -524,4 +712,553 @@ html:not(.dark) app-pivot-table .value-pill select,
 html:not(.dark) app-pivot-table select option {
   color: var(--color-storm-cloud) !important;
   background: #fff !important;
+}
+
+/* Global light theme coherence
+   The app is mostly designed with OWEN dark tokens, so light mode needs a
+   soft surface layer to avoid dark-looking grey cards and harsh borders. */
+html:not(.dark) body {
+  background:
+    radial-gradient(circle at 14% -8%, rgba(18, 104, 196, 0.12) 0, transparent 26rem),
+    radial-gradient(circle at 92% 2%, rgba(218, 162, 0, 0.08) 0, transparent 22rem),
+    linear-gradient(180deg, #fbfdff 0%, #f4f8fd 48%, #eef5fc 100%) !important;
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: rgba(23, 59, 114, 0.18);
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: rgba(23, 59, 114, 0.28);
+}
+
+html:not(.dark) .surface-card,
+html:not(.dark) :where(
+  .bg-\[var\(--color-graphite\)\],
+  .bg-\[var\(--color-graphite\)\]\/50,
+  .bg-\[var\(--color-graphite\)\]\/60,
+  .bg-\[var\(--color-graphite\)\]\/70,
+  .bg-\[var\(--color-deep-slate\)\],
+  .bg-\[var\(--color-deep-slate\)\]\/30,
+  .bg-\[var\(--color-deep-slate\)\]\/40,
+  .bg-\[var\(--color-deep-slate\)\]\/50
+) {
+  border-color: rgba(23, 59, 114, 0.10) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 255, 0.90)) !important;
+  box-shadow: 0 18px 50px -34px rgba(15, 43, 92, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.90) !important;
+}
+
+html:not(.dark) :where(
+  .bg-\[var\(--color-pitch-black\)\],
+  .bg-\[var\(--color-pitch-black\)\]\/45,
+  .bg-\[var\(--color-pitch-black\)\]\/55,
+  .bg-\[var\(--color-pitch-black\)\]\/80,
+  .bg-\[var\(--color-pitch-black\)\]\/95
+) {
+  background-color: #f8fbff !important;
+}
+
+html:not(.dark) :where(
+  .border-\[var\(--color-charcoal-grey\)\],
+  .border-\[var\(--color-charcoal-grey\)\]\/50,
+  .border-\[var\(--color-charcoal-grey\)\]\/60,
+  .border-\[var\(--color-charcoal-grey\)\]\/80
+) {
+  border-color: rgba(23, 59, 114, 0.11) !important;
+}
+
+html:not(.dark) :where(.ring-\[var\(--color-charcoal-grey\)\]) {
+  --tw-ring-color: rgba(23, 59, 114, 0.10) !important;
+}
+
+html:not(.dark) :where(input, textarea, select) {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(23, 59, 114, 0.14) !important;
+  color: var(--color-porcelain) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 10px 28px -24px rgba(15, 43, 92, 0.35);
+}
+
+html:not(.dark) :where(input, textarea, select)::placeholder {
+  color: rgba(62, 99, 143, 0.66) !important;
+}
+
+html:not(.dark) :where(table) {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+html:not(.dark) :where(thead, thead tr, thead th) {
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0.98), rgba(239, 245, 252, 0.96)) !important;
+}
+
+html:not(.dark) :where(tbody tr:hover) {
+  background: rgba(18, 104, 196, 0.055) !important;
+}
+
+html:not(.dark) .fixed.inset-0.bg-\[var\(--color-pitch-black\)\]\/80 {
+  background: rgba(11, 23, 42, 0.30) !important;
+}
+
+html:not(.dark) header {
+  color: var(--color-porcelain);
+}
+
+html:not(.dark) header[class*="fixed"][class*="top-0"] {
+  background: rgba(248, 251, 255, 0.82) !important;
+  border-color: rgba(23, 59, 114, 0.10) !important;
+  box-shadow: 0 18px 45px -30px rgba(15, 43, 92, 0.55) !important;
+}
+
+html:not(.dark) header svg {
+  color: #0b172a !important;
+}
+
+html:not(.dark) header .bg-\[linear-gradient\(145deg\,rgb\(12\,17\,26\)\,rgb\(6\,9\,15\)\)\] {
+  background: linear-gradient(180deg, #ffffff, #f4f8fd) !important;
+  border-color: rgba(23, 59, 114, 0.10) !important;
+  box-shadow: 0 24px 70px -38px rgba(15, 43, 92, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+html:not(.dark) app-home section {
+  color: var(--color-porcelain);
+}
+
+html:not(.dark) app-home .bg-\[radial-gradient\(circle_at_16\%_0\%\,rgba\(116\,172\,223\,0\.10\)\,transparent_38\%\)\2c linear-gradient\(135deg\,rgba\(20\,26\,36\,0\.52\)\,rgba\(7\,10\,17\,0\.18\)\)\],
+html:not(.dark) app-home .bg-\[radial-gradient\(circle_at_16\%_0\%\,rgba\(2\,184\,204\,0\.10\)\,transparent_38\%\)\2c linear-gradient\(135deg\,rgba\(20\,26\,36\,0\.52\)\,rgba\(7\,10\,17\,0\.18\)\)\],
+html:not(.dark) app-home .bg-\[radial-gradient\(circle_at_16\%_0\%\,rgba\(228\,242\,34\,0\.09\)\,transparent_38\%\)\2c linear-gradient\(135deg\,rgba\(20\,26\,36\,0\.52\)\,rgba\(7\,10\,17\,0\.18\)\)\] {
+  border-color: rgba(23, 59, 114, 0.09) !important;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(18, 104, 196, 0.11), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 246, 253, 0.92)) !important;
+  box-shadow: 0 24px 70px -42px rgba(15, 43, 92, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+html:not(.dark) app-home :where(.from-\[var\(--color-graphite\)\], .to-\[var\(--color-pitch-black\)\]) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(243, 248, 254, 0.90)) !important;
+}
+
+html:not(.dark) app-home :where(.from-\[var\(--color-pitch-black\)\], .to-transparent) {
+  --tw-gradient-from: rgba(248, 251, 255, 1) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(248, 251, 255, 0) var(--tw-gradient-to-position) !important;
+}
+
+html:not(.dark) app-home .text-\[var\(--color-deep-slate\)\] {
+  color: rgba(23, 59, 114, 0.10) !important;
+}
+
+html:not(.dark) :where(.shadow-2xl, .shadow-xl, .shadow-lg) {
+  box-shadow: 0 24px 70px -42px rgba(15, 43, 92, 0.42) !important;
+}
+
+html:not(.dark) :where(.backdrop-blur-xl, .backdrop-blur-2xl, .backdrop-blur-3xl) {
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+
+
+
+/* Shared soft hierarchy tree surfaces (clasificadores/proveedores-style trees). */
+.hierarchy-tree-search-input {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 52%, transparent);
+  background: color-mix(in srgb, var(--color-graphite) 72%, var(--color-pitch-black) 28%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 16px 34px -30px rgba(0, 0, 0, 0.85);
+}
+
+.hierarchy-tree-search-input:focus {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 38%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-cyan-spark) 10%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.hierarchy-tree-chip,
+.hierarchy-tree-view-chip {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 42%, transparent);
+  background: color-mix(in srgb, var(--color-graphite) 54%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.hierarchy-tree-view-chip {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 28%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 7%, transparent);
+}
+
+.hierarchy-tree-shell {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 42%, transparent);
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--color-cyan-spark) 5%, transparent), transparent 26rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 72%, transparent), color-mix(in srgb, var(--color-pitch-black) 50%, transparent));
+  box-shadow: 0 24px 70px -52px rgba(0, 0, 0, 0.86), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.hierarchy-tree-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 36%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-pitch-black) 18%, transparent), transparent);
+}
+
+.hierarchy-tree-card {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 36%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-deep-slate) 34%, transparent), color-mix(in srgb, var(--color-pitch-black) 12%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.hierarchy-tree-card:hover {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 22%, var(--color-charcoal-grey) 18%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-deep-slate) 46%, transparent), color-mix(in srgb, var(--color-pitch-black) 10%, transparent));
+  box-shadow: 0 16px 42px -34px color-mix(in srgb, var(--color-cyan-spark) 26%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.hierarchy-tree-toggle,
+.hierarchy-tree-node-icon {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 42%, transparent);
+  background: color-mix(in srgb, var(--color-pitch-black) 42%, transparent);
+}
+
+.hierarchy-tree-toggle:hover {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 42%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 9%, transparent);
+  color: var(--color-cyan-spark);
+}
+
+.hierarchy-tree-icon-btn {
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--color-pitch-black) 24%, transparent);
+}
+
+.hierarchy-tree-icon-btn:hover {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 22%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 8%, transparent);
+}
+
+.hierarchy-tree-danger-btn {
+  border: 1px solid color-mix(in srgb, #ef4444 18%, transparent);
+  background: color-mix(in srgb, #ef4444 7%, transparent);
+}
+
+.hierarchy-tree-danger-btn:hover {
+  border-color: color-mix(in srgb, #ef4444 36%, transparent);
+  background: color-mix(in srgb, #ef4444 13%, transparent);
+}
+
+.hierarchy-tree-connector {
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-cyan-spark) 20%, var(--color-charcoal-grey)), transparent);
+}
+
+html:not(.dark) .hierarchy-tree-search-input {
+  border-color: rgba(23, 59, 114, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 46px -36px rgba(15, 43, 92, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+html:not(.dark) :where(.hierarchy-tree-chip, .hierarchy-tree-view-chip, .hierarchy-tree-shell, .hierarchy-tree-card) {
+  border-color: rgba(23, 59, 114, 0.10);
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 22px 60px -44px rgba(15, 43, 92, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+html:not(.dark) .hierarchy-tree-header {
+  border-bottom-color: rgba(23, 59, 114, 0.09);
+  background: rgba(248, 251, 255, 0.62);
+}
+
+.hierarchy-tree-card :where(.rounded-lg.border, .rounded-full.border, .hierarchy-tree-node-icon) {
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 42%, transparent) !important;
+  background-color: color-mix(in srgb, var(--color-pitch-black) 30%, transparent) !important;
+}
+
+.hierarchy-tree-card :where([class*="border-[var(--color-cyan-spark)]"]) {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 28%, transparent) !important;
+  background-color: color-mix(in srgb, var(--color-cyan-spark) 7%, transparent) !important;
+}
+
+.hierarchy-tree-card :where([class*="border-red-500"], .hierarchy-tree-danger-btn) {
+  border-color: color-mix(in srgb, #ef4444 22%, transparent) !important;
+  background-color: color-mix(in srgb, #ef4444 8%, transparent) !important;
+}
+
+/* Informes soft panels */
+.informes-soft-hero,
+.informes-soft-panel,
+.informes-soft-option {
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 42%, transparent) !important;
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--color-cyan-spark) 6%, transparent), transparent 24rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 70%, transparent), color-mix(in srgb, var(--color-pitch-black) 26%, transparent)) !important;
+  box-shadow: 0 22px 64px -48px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.026) !important;
+}
+
+.informes-soft-option {
+  background: color-mix(in srgb, var(--color-graphite) 58%, transparent) !important;
+}
+
+.informes-soft-option:hover {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 28%, var(--color-charcoal-grey)) !important;
+  background: color-mix(in srgb, var(--color-cyan-spark) 7%, var(--color-graphite)) !important;
+}
+
+html:not(.dark) :where(.informes-soft-hero, .informes-soft-panel, .informes-soft-option) {
+  border-color: rgba(23, 59, 114, 0.10) !important;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(64, 181, 229, 0.10), transparent 22rem),
+    rgba(255, 255, 255, 0.78) !important;
+  box-shadow: 0 24px 70px -46px rgba(15, 43, 92, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+
+/* Soft active navigation and report/dashboard refinements */
+.licitacion-nav-link {
+  position: relative;
+  isolation: isolate;
+}
+
+.licitacion-nav-link.nav-item-active {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 22%, transparent) !important;
+  background:
+    radial-gradient(circle at 0% 50%, color-mix(in srgb, var(--color-cyan-spark) 16%, transparent), transparent 62%),
+    color-mix(in srgb, var(--color-deep-slate) 58%, transparent) !important;
+  color: var(--color-cyan-spark) !important;
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--color-cyan-spark) 82%, transparent), 0 14px 30px -26px color-mix(in srgb, var(--color-cyan-spark) 55%, black) !important;
+}
+
+.licitacion-nav-link.nav-item-active::after {
+  content: '';
+  position: absolute;
+  right: 0.7rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: var(--color-cyan-spark);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-cyan-spark) 70%, transparent);
+}
+
+html:not(.dark) .licitacion-nav-link.nav-item-active {
+  border-color: rgba(0, 162, 203, 0.18) !important;
+  background:
+    radial-gradient(circle at 0% 50%, rgba(64, 181, 229, 0.16), transparent 62%),
+    rgba(255, 255, 255, 0.72) !important;
+  box-shadow: inset 3px 0 0 rgba(0, 162, 203, 0.78), 0 16px 34px -28px rgba(15, 43, 92, 0.46) !important;
+}
+
+.informes-soft-hero,
+.informes-soft-panel,
+.informes-soft-option {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 11%, transparent) !important;
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--color-cyan-spark) 7%, transparent), transparent 22rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 62%, transparent), color-mix(in srgb, var(--color-pitch-black) 20%, transparent)) !important;
+  box-shadow: 0 24px 70px -54px rgba(0, 0, 0, 0.86), inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+
+.informes-soft-option {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 8%, transparent) !important;
+  background: color-mix(in srgb, var(--color-graphite) 52%, transparent) !important;
+}
+
+.informes-soft-option.is-selected {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 58%, transparent) !important;
+  background:
+    radial-gradient(circle at 0% 50%, color-mix(in srgb, var(--color-cyan-spark) 18%, transparent), transparent 60%),
+    color-mix(in srgb, var(--color-cyan-spark) 9%, var(--color-graphite)) !important;
+  box-shadow: 0 22px 56px -44px color-mix(in srgb, var(--color-cyan-spark) 55%, black), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.informes-soft-option.is-selected .report-option-icon {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 40%, transparent) !important;
+  background: color-mix(in srgb, var(--color-cyan-spark) 12%, transparent) !important;
+  box-shadow: 0 0 28px -18px color-mix(in srgb, var(--color-cyan-spark) 85%, transparent);
+}
+
+.informes-selected-pill {
+  border: 1px solid color-mix(in srgb, var(--color-cyan-spark) 28%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 10%, transparent);
+  color: var(--color-cyan-spark);
+}
+
+html:not(.dark) :where(.informes-soft-hero, .informes-soft-panel, .informes-soft-option) {
+  border-color: rgba(64, 181, 229, 0.12) !important;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(64, 181, 229, 0.11), transparent 20rem),
+    rgba(255, 255, 255, 0.76) !important;
+  box-shadow: 0 24px 70px -48px rgba(15, 43, 92, 0.36), inset 0 1px 0 rgba(255,255,255,.9) !important;
+}
+
+html:not(.dark) .informes-soft-option.is-selected {
+  border-color: rgba(0, 162, 203, 0.38) !important;
+  background:
+    radial-gradient(circle at 0% 50%, rgba(64, 181, 229, 0.18), transparent 62%),
+    rgba(255, 255, 255, 0.90) !important;
+}
+
+/* Final unified soft sidebar selected + report cards */
+.app-nav-link,
+.licitacion-nav-link {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.app-nav-link.nav-item-active,
+.licitacion-nav-link.nav-item-active {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 22%, transparent) !important;
+  background:
+    radial-gradient(circle at 0% 50%, color-mix(in srgb, var(--color-cyan-spark) 15%, transparent), transparent 62%),
+    color-mix(in srgb, var(--color-deep-slate) 54%, transparent) !important;
+  color: var(--color-cyan-spark) !important;
+  box-shadow:
+    inset 3px 0 0 color-mix(in srgb, var(--color-cyan-spark) 82%, transparent),
+    0 14px 30px -26px color-mix(in srgb, var(--color-cyan-spark) 55%, black) !important;
+}
+
+.app-nav-link.nav-item-active::after,
+.licitacion-nav-link.nav-item-active::after {
+  content: '';
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  width: 0.38rem;
+  height: 0.38rem;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: var(--color-cyan-spark);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-cyan-spark) 70%, transparent);
+}
+
+html:not(.dark) .app-nav-link.nav-item-active,
+html:not(.dark) .licitacion-nav-link.nav-item-active {
+  border-color: rgba(0, 162, 203, 0.18) !important;
+  background:
+    radial-gradient(circle at 0% 50%, rgba(64, 181, 229, 0.16), transparent 62%),
+    rgba(255, 255, 255, 0.72) !important;
+  color: #006c8e !important;
+  box-shadow:
+    inset 3px 0 0 rgba(0, 162, 203, 0.78),
+    0 16px 34px -28px rgba(15, 43, 92, 0.46) !important;
+}
+
+.informes-soft-hero,
+.informes-soft-panel {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 7%, transparent) !important;
+  background:
+    radial-gradient(circle at 16% 0%, color-mix(in srgb, var(--color-cyan-spark) 6%, transparent), transparent 24rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 56%, transparent), color-mix(in srgb, var(--color-pitch-black) 18%, transparent)) !important;
+  box-shadow: 0 24px 72px -58px rgba(0, 0, 0, 0.90), inset 0 1px 0 rgba(255, 255, 255, 0.018) !important;
+}
+
+.informes-soft-option {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 7%, transparent) !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 48%, transparent), color-mix(in srgb, var(--color-pitch-black) 16%, transparent)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.014), 0 18px 50px -44px rgba(0, 0, 0, 0.82) !important;
+}
+
+.informes-soft-option:hover {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 20%, transparent) !important;
+  background:
+    radial-gradient(circle at 0% 50%, color-mix(in srgb, var(--color-cyan-spark) 8%, transparent), transparent 60%),
+    color-mix(in srgb, var(--color-graphite) 52%, transparent) !important;
+}
+
+.informes-soft-option.is-selected {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 36%, transparent) !important;
+  background:
+    radial-gradient(circle at 0% 50%, color-mix(in srgb, var(--color-cyan-spark) 15%, transparent), transparent 62%),
+    color-mix(in srgb, var(--color-cyan-spark) 7%, var(--color-graphite)) !important;
+  box-shadow: 0 22px 56px -46px color-mix(in srgb, var(--color-cyan-spark) 44%, black), inset 0 1px 0 rgba(255, 255, 255, 0.026) !important;
+}
+
+.informes-soft-option .report-option-icon {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 12%, transparent) !important;
+  background: color-mix(in srgb, var(--color-pitch-black) 34%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.018) !important;
+}
+
+.informes-soft-option.is-selected .report-option-icon {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 26%, transparent) !important;
+  background: color-mix(in srgb, var(--color-cyan-spark) 10%, transparent) !important;
+  box-shadow: 0 0 24px -18px color-mix(in srgb, var(--color-cyan-spark) 80%, transparent) !important;
+}
+
+.informes-selected-pill {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 22%, transparent) !important;
+  background: color-mix(in srgb, var(--color-cyan-spark) 8%, transparent) !important;
+  box-shadow: none !important;
+}
+
+html:not(.dark) :where(.informes-soft-hero, .informes-soft-panel) {
+  border-color: rgba(64, 181, 229, 0.10) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(64, 181, 229, 0.10), transparent 22rem),
+    rgba(255, 255, 255, 0.78) !important;
+  box-shadow: 0 24px 70px -52px rgba(15, 43, 92, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+html:not(.dark) .informes-soft-option {
+  border-color: rgba(64, 181, 229, 0.11) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  box-shadow: 0 20px 58px -50px rgba(15, 43, 92, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+}
+
+html:not(.dark) .informes-soft-option.is-selected {
+  border-color: rgba(0, 162, 203, 0.28) !important;
+  background:
+    radial-gradient(circle at 0% 50%, rgba(64, 181, 229, 0.15), transparent 64%),
+    rgba(255, 255, 255, 0.90) !important;
+}
+
+html:not(.dark) .informes-soft-option .report-option-icon {
+  border-color: rgba(0, 162, 203, 0.16) !important;
+  background: rgba(255, 255, 255, 0.70) !important;
+}
+
+/* Classifier hierarchy table polish */
+.classifier-hierarchy-cell {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.classifier-hierarchy-cell:hover,
+.classifier-hierarchy-cell:focus-visible {
+  background:
+    radial-gradient(circle at 0% 50%, color-mix(in srgb, var(--color-cyan-spark) 7%, transparent), transparent 68%),
+    color-mix(in srgb, var(--color-deep-slate) 26%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-cyan-spark) 10%, transparent) !important;
+  outline: none;
+}
+
+.classifier-level-pill,
+.classifier-count-pill,
+.classifier-code-pill,
+.classifier-org-pill {
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.classifier-level-pill {
+  min-width: 4.5rem;
+}
+
+.classifier-count-pill {
+  min-width: 2.5rem;
+}
+
+.classifier-code-pill {
+  min-width: 4rem;
+  justify-content: center;
+}
+
+.classifier-org-pill {
+  max-width: 10rem;
+}
+
+html:not(.dark) .classifier-hierarchy-cell:hover,
+html:not(.dark) .classifier-hierarchy-cell:focus-visible {
+  background:
+    radial-gradient(circle at 0% 50%, rgba(64, 181, 229, 0.12), transparent 68%),
+    rgba(255, 255, 255, 0.58) !important;
+  box-shadow: inset 0 0 0 1px rgba(0, 162, 203, 0.10) !important;
+}
+
+html:not(.dark) :where(.classifier-level-pill, .classifier-count-pill, .classifier-org-pill) {
+  border-color: rgba(23, 59, 114, 0.12) !important;
+  background: rgba(255, 255, 255, 0.70) !important;
 }

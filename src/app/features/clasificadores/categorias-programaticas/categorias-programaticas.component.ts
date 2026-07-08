@@ -12,7 +12,8 @@ import { UnidadAdministrativa } from '../../../core/models/unidad-administrativa
 import { AuthService } from '../../../core/services/auth.service';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-categorias-programaticas', standalone: true,
@@ -20,6 +21,7 @@ import { TableColumn } from '../../../shared/ui/smart-table/table.models';
   templateUrl: './categorias-programaticas.component.html',
 })
 export class CategoriasProgramaticasComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private service = inject(CategoriaProgramaticaService);
   private vigenciaService = inject(VigenciaService);
   private orgService = inject(OrganizationService);
@@ -31,29 +33,40 @@ export class CategoriasProgramaticasComponent implements OnInit {
   unidadesAdm = signal<UnidadAdministrativa[]>([]);
   selectedVigenciaId = signal<number | null>(null);
   parentList = signal<CategoriaProgramatica[]>([]);
+  viewMode = signal<'list' | 'tree'>('list');
+  treeSearchTerm = signal('');
 
   treeNodes = signal<CategoriaTreeItem[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
   success = signal<string | null>(null);
   expandedNodes = signal<Set<number>>(new Set());
-  searchTerm = signal('');
   jerarquiaTpl = viewChild<TemplateRef<any>>('jerarquiaTpl');
   codigoTpl = viewChild<TemplateRef<any>>('codigoTpl');
   unidadTpl = viewChild<TemplateRef<any>>('unidadTpl');
   nivelTpl = viewChild<TemplateRef<any>>('nivelTpl');
   hijosTpl = viewChild<TemplateRef<any>>('hijosTpl');
   naturalezaTpl = viewChild<TemplateRef<any>>('naturalezaTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   columns: TableColumn[] = [
-    { header: 'Jerarqu?a', key: 'jerarquia', type: 'custom', sortable: true, searchFields: ['nombre', 'codigo', 'unidadAdmNombre', 'naturaleza', 'tipoJerarquia'] },
+    { header: 'Jerarquía', key: 'jerarquia', type: 'custom', sortable: true, searchFields: ['nombre', 'codigo', 'unidadAdmNombre', 'naturaleza', 'tipoJerarquia'] },
     { header: 'Nivel', key: 'nivelOrden', type: 'custom', sortable: true },
     { header: 'Hijos', key: 'descendientes', type: 'custom', sortable: true },
-    { header: 'C?digo', key: 'codigo', type: 'custom', sortable: true },
+    { header: 'Código', key: 'codigo', type: 'custom', sortable: true },
     { header: 'UA', key: 'unidadAdmNombre', type: 'custom', sortable: true },
     { header: 'Nat.', key: 'naturaleza', type: 'custom', sortable: true },
-    { header: 'Acciones', key: 'acciones', type: 'custom' },
+  ];
+
+  actions: TableAction[] = [
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar categoría', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Eliminar categoría', color: 'text-red-400 hover:text-red-300' },
+  ];
+
+  uploadColumns: TableColumn[] = [
+    { key: 'codigo', header: 'Código', sortable: true },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'naturaleza', header: 'Nat.', sortable: true },
+    { key: 'nombreUA', header: 'UA (nombre)', sortable: true },
   ];
 
 
@@ -69,9 +82,9 @@ export class CategoriasProgramaticasComponent implements OnInit {
   form: CategoriaProgramaticaRequest = this.getEmptyForm();
 
   filteredTree = computed(() => {
-    const term = this.searchTerm().toLowerCase().trim();
-    if (!term) return this.treeNodes();
-    return this.filterNodes(this.treeNodes(), term);
+    const term = this.treeSearchTerm().toLowerCase().trim();
+    const nodes = term ? this.filterNodes(this.treeNodes(), term) : this.treeNodes();
+    return this.sortTreeByHierarchy(nodes);
   });
 
   visibleRows = computed(() => this.flattenTree(this.filteredTree()));
@@ -84,14 +97,14 @@ export class CategoriasProgramaticasComponent implements OnInit {
     const naturaleza = this.naturalezaTpl();
     const nivel = this.nivelTpl();
     const hijos = this.hijosTpl();
-    const acciones = this.accionesTpl();
+
     if (jerarquia) templates['jerarquia'] = jerarquia;
     if (codigo) templates['codigo'] = codigo;
     if (unidad) templates['unidadAdmNombre'] = unidad;
     if (naturaleza) templates['naturaleza'] = naturaleza;
     if (nivel) templates['nivelOrden'] = nivel;
     if (hijos) templates['descendientes'] = hijos;
-    if (acciones) templates['acciones'] = acciones;
+
     return templates;
   });
 
@@ -124,6 +137,22 @@ export class CategoriasProgramaticasComponent implements OnInit {
     { label: 'OB', value: 'OB' },
     { label: 'IN', value: 'IN' },
   ];
+
+
+  setViewMode(mode: 'list' | 'tree') {
+    this.viewMode.set(mode);
+  }
+
+  handleTableAction(event: { action: string; row: any }) {
+    switch (event.action) {
+      case 'edit':
+        this.openEditModal(event.row);
+        break;
+      case 'delete':
+        this.confirmDelete(event.row);
+        break;
+    }
+  }
 
   ngOnInit() { this.loadVigencias(); this.loadOrganizaciones(); }
   getEmptyForm(): CategoriaProgramaticaRequest { return { idVigencia: this.selectedVigenciaId() || 0, codigo: 0, nombre: '', idCatProgRel: undefined, idOrganizacion: undefined, idUnidadAdm: undefined, naturaleza: '' }; }
@@ -167,6 +196,24 @@ export class CategoriasProgramaticasComponent implements OnInit {
 
   countDescendants(node: CategoriaTreeItem): number {
     return (node.children || []).reduce((total, child) => total + 1 + this.countDescendants(child), 0);
+  }
+
+  private sortTreeByHierarchy(nodes: CategoriaTreeItem[]): CategoriaTreeItem[] {
+    return [...nodes]
+      .map(node => ({ ...node, children: this.sortTreeByHierarchy(node.children || []) }))
+      .sort((a, b) => {
+        const aDesc = this.countDescendants(a);
+        const bDesc = this.countDescendants(b);
+        const aHasChildren = aDesc > 0 || a.hasChildren;
+        const bHasChildren = bDesc > 0 || b.hasChildren;
+        if (aHasChildren !== bHasChildren) return aHasChildren ? -1 : 1;
+        if (aDesc !== bDesc) return bDesc - aDesc;
+        return (a.nombre || '').localeCompare(b.nombre || '', 'es', { numeric: true, sensitivity: 'base' });
+      });
+  }
+
+  treeIndent(level: number): number {
+    return Math.min(Math.max(Number(level) || 0, 0), 6) * 14;
   }
 
   expandAll() {
@@ -215,7 +262,7 @@ export class CategoriasProgramaticasComponent implements OnInit {
   onVigenciaChange(value: any) {
     this.selectedVigenciaId.set(Number(value));
     this.expandedNodes.set(new Set());
-    this.searchTerm.set('');
+    this.treeSearchTerm.set('');
     this.loadItems();
     this.loadUnidades();
   }
@@ -228,7 +275,9 @@ export class CategoriasProgramaticasComponent implements OnInit {
         this.loading.set(false);
         if (res.success && res.data) {
           this.parentList.set(res.data);
-          this.treeNodes.set(this.buildTree(res.data));
+          const tree = this.buildTree(res.data);
+          this.treeNodes.set(tree);
+          this.expandedNodes.set(new Set(tree.filter(n => n.hasChildren || (n.children?.length || 0) > 0).slice(0, 8).map(n => n.idCatProg)));
         } else { this.treeNodes.set([]); }
       },
       error: () => { this.loading.set(false); this.treeNodes.set([]); this.error.set('Error al cargar.'); }
@@ -263,8 +312,8 @@ export class CategoriasProgramaticasComponent implements OnInit {
     });
   }
 
-  confirmDelete(item: CategoriaProgramatica) {
-    if (!confirm(`¿Eliminar "${item.nombre}"?`)) return;
+  async confirmDelete(item: CategoriaProgramatica) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar categoría programática', message: `¿Eliminar "${item.nombre}"?`, confirmText: 'Eliminar', type: 'danger' }))) return;
     this.service.delete(item.idCatProg).subscribe({
       next: (res: any) => { if (res.success) { this.showSuccess('Eliminado.'); this.loadItems(); } },
       error: () => this.error.set('Error al eliminar.')

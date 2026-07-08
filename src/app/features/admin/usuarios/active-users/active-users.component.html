@@ -50,35 +50,11 @@
         </p>
       </ng-template>
 
-      <ng-template #accionesTpl let-row>
-        <div class="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-          
-          <button (click)="linkEntity(row)" title="Vincular a Entidad (Proveedor/Org)" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
-            <lucide-icon name="handshake" [size]="16"></lucide-icon>
-          </button>
-
-          <button (click)="manageRoles(row)" title="Gestionar Rol y Módulos" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-aether-blue)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
-            <lucide-icon name="users" [size]="16"></lucide-icon>
-          </button>
-
-          <button (click)="openResetModal(row)" title="Blanquear Clave" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-neon-lime)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
-            <lucide-icon name="key-round" [size]="16"></lucide-icon>
-          </button>
-
-          <button (click)="viewAccessLogs(row)" title="Ver Accesos" class="p-1.5 rounded-md bg-[var(--color-deep-slate)] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-charcoal-grey)] transition-colors">
-            <lucide-icon name="mouse-pointer-click" [size]="16"></lucide-icon>
-          </button>
-
-          <button (click)="openUnlinkModal(row)" title="Desvincular" class="p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-[var(--color-pitch-black)] transition-colors border border-red-500/20">
-            <lucide-icon name="user-minus" [size]="16"></lucide-icon>
-          </button>
-        </div>
-      </ng-template>
-
     <app-smart-table
       [columns]="columns"
       [data]="activeUsers()"
       [customTemplates]="customTemplates()"
+      [actions]="actions"
       [loading]="isLoading()"
       [serverSide]="true"
       [totalServerItems]="totalRows()"
@@ -86,6 +62,7 @@
       searchPlaceholder="Buscar por DNI, nombre o email..."
       (sortChange)="onSort($event)"
       (pageChange)="onPageChange($event)"
+      (onAction)="handleTableAction($event)"
       (searchChange)="onSearch($event)">
     </app-smart-table>
   </div>

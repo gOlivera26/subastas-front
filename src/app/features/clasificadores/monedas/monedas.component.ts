@@ -4,7 +4,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MonedaService, MonedaRequest } from '../../../core/services/moneda.service';
 import { Moneda } from '../../../core/models/moneda.model';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-monedas',
@@ -13,6 +14,7 @@ import { TableColumn } from '../../../shared/ui/smart-table/table.models';
   templateUrl: './monedas.component.html',
 })
 export class MonedasComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private service = inject(MonedaService);
   items = signal<Moneda[]>([]);
   isLoading = signal(true);
@@ -25,15 +27,12 @@ export class MonedasComponent implements OnInit {
   form: MonedaRequest = { simbolo: '', nombre: '', descripcion: '' };
 
   activoTpl = viewChild<TemplateRef<any>>('activoTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
     const activo = this.activoTpl();
-    const acciones = this.accionesTpl();
 
     if (activo) templates['activo'] = activo;
-    if (acciones) templates['acciones'] = acciones;
 
     return templates;
   });
@@ -42,9 +41,25 @@ export class MonedasComponent implements OnInit {
     { key: 'simbolo', header: 'Símbolo', sortable: true },
     { key: 'nombre', header: 'Nombre', sortable: true },
     { key: 'descripcion', header: 'Descripción' },
-    { key: 'activo', header: 'Estado', type: 'custom' },
-    { key: 'acciones', header: 'Acciones', type: 'custom' }
+    { key: 'activo', header: 'Estado', type: 'custom' }
   ];
+
+
+  actions: TableAction[] = [
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar moneda', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Eliminar moneda', color: 'text-red-400 hover:text-red-300', visible: (row: any) => !!row.activo },
+  ];
+
+  handleTableAction(event: { action: string; row: any }) {
+    switch (event.action) {
+      case 'edit':
+        this.openEditModal(event.row);
+        break;
+      case 'delete':
+        this.confirmDelete(event.row);
+        break;
+    }
+  }
 
   ngOnInit() { this.loadItems(); }
 
@@ -102,8 +117,8 @@ export class MonedasComponent implements OnInit {
     });
   }
 
-  confirmDelete(item: Moneda) {
-    if (!confirm('¿Eliminar "' + item.nombre + '"?')) return;
+  async confirmDelete(item: Moneda) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar moneda', message: `¿Eliminar "${item.nombre}"?`, confirmText: 'Eliminar', type: 'danger' }))) return;
     this.service.delete(item.idMoneda).subscribe({
       next: (res: any) => {
         if (res.success) {

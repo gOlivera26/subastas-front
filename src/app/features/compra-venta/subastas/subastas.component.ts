@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { CotizacionService, SubastaDashboard } from '../../../core/services/cotizacion.service';
 import { VigenciaService } from '../../../core/services/vigencia.service';
@@ -16,16 +16,18 @@ import { Modal } from '../../../shared/ui/modal/modal';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmationModal } from '../../../shared/ui/confirmation-modal/confirmation-modal';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-subastas',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, Modal, LoadingSpinnerComponent, ConfirmationModal, SmartTableComponent, CustomSelect],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, LoadingSpinnerComponent, ConfirmationModal, SmartTableComponent, CustomSelect],
   templateUrl: './subastas.component.html',
 })
 export class SubastasComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private cotizacionService = inject(CotizacionService);
   private vigenciaService = inject(VigenciaService);
   private router = inject(Router);
@@ -53,20 +55,15 @@ export class SubastasComponent implements OnInit {
   objetoTpl = viewChild<TemplateRef<any>>('objetoTpl');
   criterioTpl = viewChild<TemplateRef<any>>('criterioTpl');
   fechasTpl = viewChild<TemplateRef<any>>('fechasTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   customTemplates = computed(() => {
     const templates: Record<string, TemplateRef<any>> = {};
     const objeto = this.objetoTpl();
     const criterio = this.criterioTpl();
     const fechas = this.fechasTpl();
-    const acciones = this.accionesTpl();
-
     if (objeto) templates['objeto'] = objeto;
     if (criterio) templates['criterioAdjudicacion'] = criterio;
     if (fechas) templates['fechas'] = fechas;
-    if (acciones) templates['acciones'] = acciones;
-
     return templates;
   });
 
@@ -76,8 +73,78 @@ export class SubastasComponent implements OnInit {
     { header: 'Objeto Contratación', key: 'objeto', type: 'custom', searchFields: ['objetoContratacion', 'titulo'] },
     { header: 'Tipo', key: 'tipoContratacion', sortable: true },
     { header: 'Adjudicación', key: 'criterioAdjudicacion', type: 'custom' },
-    { header: 'Fechas', key: 'fechas', type: 'custom' },
-    { header: 'Acciones', key: 'acciones', type: 'custom' }
+    { header: 'Fechas', key: 'fechas', type: 'custom' }
+  ];
+
+  actions: TableAction[] = [
+    {
+      action: 'observaciones',
+      icon: 'message-square',
+      tooltip: 'Ingresar Observaciones',
+      visible: (item) => (item.idTipoContratacion === this.TIPO_LICITACION || item.idTipoContratacion === this.TIPO_COMPULSA) && this.verObservaciones(item.fechaLimiteImpugnar),
+    },
+    {
+      action: 'ofertas-proveedor',
+      icon: 'banknote',
+      tooltip: 'Ver ofertas Proveedores',
+      visible: (item) => (item.idTipoContratacion === this.TIPO_LICITACION || item.idTipoContratacion === this.TIPO_COMPULSA)
+        && ((this.verSobre2(item.fechaAperturaSobreDos) && item.tipoSobre === 'D') || (this.verSobre1(item.fechaAperturaSobreUno) && item.tipoSobre === 'S')),
+    },
+    {
+      action: 'informe-final',
+      icon: 'file-badge',
+      tooltip: 'Informe final de subasta',
+      color: 'text-emerald-400 hover:text-emerald-300',
+      visible: (item) => (item.verInformeFinal || this.auth.isSuperAdmin()) && this.verActaPrelacion(item.fechaFinSubasta || item.fechaFin) && item.idTipoContratacion === this.TIPO_INVERSA,
+    },
+    {
+      action: 'subastar',
+      icon: 'list',
+      tooltip: 'Subastar',
+      visible: (item) => item.idTipoContratacion === this.TIPO_INVERSA || item.idTipoContratacion === this.TIPO_DIRECTA,
+    },
+    { action: 'preguntas', icon: 'help-circle', tooltip: 'Preguntas y Aclaraciones' },
+    { action: 'pliegos', icon: 'file-text', tooltip: 'Pliegos' },
+    {
+      action: 'documentacion-item',
+      icon: 'upload',
+      tooltip: 'Documentación por ítem/renglón',
+      color: 'text-[var(--color-neon-lime)] hover:text-[var(--color-neon-lime)]',
+      visible: (item) => item.idEstado === 40,
+    },
+    {
+      action: 'contratacion-directa',
+      icon: 'building',
+      tooltip: 'Contratación Directa',
+      visible: (item) => item.idTipoContratacion === this.TIPO_CONT_DIRECTA,
+    },
+    {
+      action: 'cargar-licitacion',
+      icon: 'file-text',
+      tooltip: 'Licitación',
+      visible: (item) => item.idTipoContratacion === this.TIPO_LICITACION || item.idTipoContratacion === this.TIPO_COMPULSA,
+    },
+    {
+      action: 'actas-sobre-1',
+      icon: 'mail',
+      tooltip: 'Actas (Sobre 1)',
+      color: 'text-emerald-400 hover:text-emerald-300',
+      visible: (item) => (item.idTipoContratacion === this.TIPO_LICITACION || item.idTipoContratacion === this.TIPO_COMPULSA) && this.verSobre1(item.fechaAperturaSobreUno),
+    },
+    {
+      action: 'actas-sobre-2',
+      icon: 'mail-open',
+      tooltip: 'Actas (Sobre 2)',
+      color: 'text-emerald-400 hover:text-emerald-300',
+      visible: (item) => (item.idTipoContratacion === this.TIPO_LICITACION || item.idTipoContratacion === this.TIPO_COMPULSA) && this.verSobre2(item.fechaAperturaSobreDos),
+    },
+    {
+      action: 'mejora-precio',
+      icon: 'trending-down',
+      tooltip: 'Mejora de Precio',
+      color: 'text-amber-400 hover:text-amber-300',
+      visible: (item) => item.idTipoContratacion === this.TIPO_LICITACION && item.mostrarBotonMejora,
+    },
   ];
 
   vigenciaOptions = computed<SelectOption[]>(() => [
@@ -231,6 +298,48 @@ export class SubastasComponent implements OnInit {
   verActaPrelacion(fechaFinSubasta?: string): boolean {
     if (!fechaFinSubasta) return false;
     return new Date(fechaFinSubasta).getTime() < this.ahora();
+  }
+
+  handleTableAction(event: { action: string; row: SubastaDashboard }) {
+    const item = event.row;
+    switch (event.action) {
+      case 'observaciones':
+        this.accionNoImplementada('Observaciones Proveedor');
+        break;
+      case 'ofertas-proveedor':
+        this.accionNoImplementada('Ofertas Proveedor Lic');
+        break;
+      case 'informe-final':
+        this.abrirActaPrelacion(item);
+        break;
+      case 'subastar':
+        this.router.navigate(['/compra-venta/subastas', item.idCotizacion]);
+        break;
+      case 'preguntas':
+        this.abrirModalConsultas(item.idCotizacion);
+        break;
+      case 'pliegos':
+        this.openPliegos(item);
+        break;
+      case 'documentacion-item':
+        this.openCargarDocumentacionItem(item);
+        break;
+      case 'contratacion-directa':
+        this.accionNoImplementada('Contratación Directa');
+        break;
+      case 'cargar-licitacion':
+        this.accionNoImplementada('Cargar Licitación');
+        break;
+      case 'actas-sobre-1':
+        this.accionNoImplementada('Actas Sobre 1');
+        break;
+      case 'actas-sobre-2':
+        this.accionNoImplementada('Actas Sobre 2');
+        break;
+      case 'mejora-precio':
+        this.accionNoImplementada('Mejora Precio');
+        break;
+    }
   }
 
   accionNoImplementada(nombre: string) {
@@ -405,8 +514,8 @@ export class SubastasComponent implements OnInit {
     });
   }
 
-  eliminarDictamen(idDocumento: number) {
-    if (!confirm('¿Estás seguro de que deseas eliminar este documento? Esta acción no se puede deshacer.')) return;
+  async eliminarDictamen(idDocumento: number) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar documento', message: '¿Estás seguro de que deseas eliminar este documento? Esta acción no se puede deshacer.', confirmText: 'Eliminar', type: 'danger' }))) return;
     
     this.cotizacionService.eliminarDocumento(this.dictamenItem().idCotizacion, idDocumento).subscribe({
       next: (res: any) => {

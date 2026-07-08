@@ -23,26 +23,26 @@
          [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Mercado</p>
 
       <a routerLink="/compra-venta"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-neon-lime)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          [routerLinkActiveOptions]="{exact: true}"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="layout-dashboard" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Dashboard</span>
       </a>
 
       <a routerLink="/compra-venta/subastas"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="gavel" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Subastas</span>
       </a>
 
       <a routerLink="/compra-venta/mis-ofertas"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="handshake" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Mis Ofertas</span>
       </a>

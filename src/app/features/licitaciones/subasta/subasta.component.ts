@@ -22,6 +22,7 @@ import { TimeService } from '../../../core/services/time.service';
 import { forkJoin } from 'rxjs';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { ConfirmationModal } from '../../../shared/ui/confirmation-modal/confirmation-modal';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 
 interface RenglonItem { id: number; nombre: string; itemIds: number[]; }
@@ -45,6 +46,7 @@ export interface DonutChartOptions {
   templateUrl: './subasta.component.html',
 })
 export class SubastaComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private cotService = inject(CotizacionService);
   private vigService = inject(VigenciaService);
   private uaService = inject(UnidadAdministrativaService);
@@ -219,23 +221,64 @@ export class SubastaComponent implements OnInit {
       const menuWidth = 240;
       const preferredHeight = 420;
       const minUsableHeight = 180;
+      const visibleActions = popover?.querySelectorAll('button[title]').length ?? 0;
+      const estimatedItemHeight = 36;
+      const menuChrome = 14;
+      const estimatedMenuHeight = Math.max(54, Math.min(preferredHeight, (visibleActions * estimatedItemHeight) + menuChrome));
       const availableBelow = Math.max(0, window.innerHeight - rect.bottom - gap - margin);
       const availableAbove = Math.max(0, rect.top - gap - margin);
-      const openUp = availableBelow < minUsableHeight && availableAbove > availableBelow;
+      const openUp = availableBelow < Math.min(minUsableHeight, estimatedMenuHeight) && availableAbove > availableBelow;
+      const availableSpace = openUp ? availableAbove : availableBelow;
       const maxHeight = Math.max(
         140,
-        Math.min(preferredHeight, openUp ? availableAbove : availableBelow)
+        Math.min(preferredHeight, estimatedMenuHeight, availableSpace || estimatedMenuHeight)
       );
+      const measuredHeight = popover?.scrollHeight
+        ? Math.ceil(popover.scrollHeight)
+        : estimatedMenuHeight;
+      const menuHeight = Math.min(maxHeight, measuredHeight);
       const left = Math.max(margin, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - margin));
       const top = openUp
-        ? Math.max(margin, rect.top - gap - maxHeight)
-        : Math.max(margin, Math.min(rect.bottom + gap, window.innerHeight - maxHeight - margin));
+        ? Math.max(margin, rect.top - gap - menuHeight)
+        : Math.max(margin, Math.min(rect.bottom + gap, window.innerHeight - menuHeight - margin));
 
       this.subastaActionsMenuPosition.set({ top, left, maxHeight });
     }
 
     this.openSubastaActions.set(key);
-    setTimeout(() => popover?.showPopover?.());
+    setTimeout(() => {
+      popover?.showPopover?.();
+      if (!target || !popover) return;
+
+      requestAnimationFrame(() => {
+        const rect = target.getBoundingClientRect();
+        const margin = 12;
+        const gap = 8;
+        const menuWidth = 240;
+        const preferredHeight = 420;
+        const minUsableHeight = 180;
+        const visibleActions = popover.querySelectorAll('button[title]').length;
+        const estimatedItemHeight = 36;
+        const menuChrome = 14;
+        const estimatedMenuHeight = Math.max(54, Math.min(preferredHeight, (visibleActions * estimatedItemHeight) + menuChrome));
+        const availableBelow = Math.max(0, window.innerHeight - rect.bottom - gap - margin);
+        const availableAbove = Math.max(0, rect.top - gap - margin);
+        const openUp = availableBelow < Math.min(minUsableHeight, estimatedMenuHeight) && availableAbove > availableBelow;
+        const availableSpace = openUp ? availableAbove : availableBelow;
+        const maxHeight = Math.max(
+          140,
+          Math.min(preferredHeight, estimatedMenuHeight, availableSpace || estimatedMenuHeight)
+        );
+        const renderedHeight = Math.ceil(popover.getBoundingClientRect().height || popover.scrollHeight || estimatedMenuHeight);
+        const menuHeight = Math.min(maxHeight, renderedHeight);
+        const left = Math.max(margin, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - margin));
+        const top = openUp
+          ? Math.max(margin, rect.top - gap - menuHeight)
+          : Math.max(margin, Math.min(rect.bottom + gap, window.innerHeight - menuHeight - margin));
+
+        this.subastaActionsMenuPosition.set({ top, left, maxHeight });
+      });
+    });
   }
 
   closeSubastaActions() {
@@ -1093,8 +1136,8 @@ getRenglonOfItem(itemId: number): string {
     });
   }
 
-  eliminarDictamen(idDocumento: number) {
-    if (!confirm('¿Estás seguro de que deseas eliminar este documento? Esta acción no se puede deshacer.')) return;
+  async eliminarDictamen(idDocumento: number) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar documento', message: '¿Estás seguro de que deseas eliminar este documento? Esta acción no se puede deshacer.', confirmText: 'Eliminar', type: 'danger' }))) return;
     this.cotService.eliminarDocumento(this.dictamenItem().idCotizacion, idDocumento).subscribe({
       next: (res: any) => {
         if (res.success) {
@@ -1198,8 +1241,8 @@ getRenglonOfItem(itemId: number): string {
     }, 1000);
   }
 
-  eliminarImagen(id: number) {
-    if (!confirm('¿Eliminar esta imagen del lote?')) return;
+  async eliminarImagen(id: number) {
+    if (!(await this.confirmation.confirm({ title: 'Eliminar imagen', message: '¿Eliminar esta imagen del lote?', confirmText: 'Eliminar', type: 'danger' }))) return;
     this.imagenesSubidas.update(arr => arr.filter(img => img.id !== id));
     this.notify.showSuccess('Imagen eliminada.');
   }
@@ -1340,8 +1383,8 @@ public chartOptionsAhorro: Partial<DonutChartOptions> = {
     this.docProvItem.set(null);
   }
 
-  desautorizarItem(item: any) {
-    if (!confirm(`¿Estás seguro de que deseas rechazar y quitar el ítem "${item.nItem}" de esta Nota de Pedido?`)) return;
+  async desautorizarItem(item: any) {
+    if (!(await this.confirmation.confirm({ title: 'Rechazar ítem', message: `¿Estás seguro de que deseas rechazar y quitar el ítem "${item.nItem}" de esta Nota de Pedido?`, confirmText: 'Rechazar', type: 'warning' }))) return;
     this.http.post<any>(`${this.api}/ReservaDetalle/${item.id}/desautorizar`, {}).subscribe({
       next: (r) => {
         if (r.success) {

@@ -1,34 +1,82 @@
 <div class="page-container max-w-[1400px]">
-  <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <div><h1 class="text-[24px] sm:text-[28px] font-[590] tracking-tight text-[var(--color-porcelain)]">Categorías Programáticas</h1><p class="text-[14px] text-[var(--color-storm-cloud)]">Hacé clic en el chevrón para expandir o colapsar la jerarquía.</p></div>
-    <div class="flex items-center gap-3 flex-wrap">
-      <div class="w-full sm:w-56"><app-custom-select placeholder="Ejercicio" [options]="vigenciaOptions()" [value]="selectedVigenciaId()" (valueChange)="onVigenciaChange($event)"></app-custom-select></div>
-      <button (click)="openCreateModal()" [disabled]="!selectedVigenciaId()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] disabled:opacity-50"><lucide-icon name="plus" [size]="16"></lucide-icon><span class="hidden sm:inline">Nuevo</span></button>
-      <button (click)="openUpload()" [disabled]="!selectedVigenciaId()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)] disabled:opacity-50"><lucide-icon name="upload" [size]="16"></lucide-icon><span class="hidden sm:inline">Importar CSV</span></button>
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h1 class="text-[24px] font-[590] tracking-tight text-[var(--color-porcelain)] sm:text-[28px]">Categorías Programáticas</h1>
+      <p class="text-[14px] text-[var(--color-storm-cloud)]">Administración de la jerarquía programática por vigencia.</p>
     </div>
-    <div class="flex flex-wrap justify-end gap-2">
-      <button type="button" (click)="expandAll()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[12px] font-[650] text-[var(--color-light-steel)] transition-all hover:border-[var(--color-cyan-spark)]/50 hover:text-[var(--color-porcelain)]"><lucide-icon name="chevrons-down" [size]="15"></lucide-icon>Expandir todo</button>
-      <button type="button" (click)="collapseAll()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[12px] font-[650] text-[var(--color-light-steel)] transition-all hover:border-[var(--color-cyan-spark)]/50 hover:text-[var(--color-porcelain)]"><lucide-icon name="chevrons-up" [size]="15"></lucide-icon>Colapsar</button>
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="w-full sm:w-56"><app-custom-select placeholder="Ejercicio" [options]="vigenciaOptions()" [value]="selectedVigenciaId()" (valueChange)="onVigenciaChange($event)"></app-custom-select></div>
+      <button (click)="openCreateModal()" [disabled]="!selectedVigenciaId()" class="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all disabled:opacity-50 sm:px-4"><lucide-icon name="plus" [size]="16"></lucide-icon><span>Nueva</span></button>
+      <button (click)="openUpload()" [disabled]="!selectedVigenciaId()" class="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-3 py-2.5 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all disabled:opacity-50 sm:px-4"><lucide-icon name="upload" [size]="16"></lucide-icon><span>Importar CSV</span></button>
+    </div>
+  </div>
+
+  <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div class="inline-flex w-fit rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-1">
+      <button (click)="setViewMode('list')" class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-[590] transition-all" [ngClass]="viewMode() === 'list' ? 'bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"><lucide-icon name="list" [size]="16"></lucide-icon>Lista</button>
+      <button (click)="setViewMode('tree')" class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-[590] transition-all" [ngClass]="viewMode() === 'tree' ? 'bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'"><lucide-icon name="folder-tree" [size]="16"></lucide-icon>Árbol</button>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" (click)="expandAll()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[12px] font-[650] text-[var(--color-light-steel)] transition-all"><lucide-icon name="chevrons-down" [size]="15"></lucide-icon>Expandir todo</button>
+      <button type="button" (click)="collapseAll()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[12px] font-[650] text-[var(--color-light-steel)] transition-all"><lucide-icon name="chevrons-up" [size]="15"></lucide-icon>Colapsar</button>
     </div>
   </div>
 
   @if (success()) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-[13px] text-emerald-400 animate-slide-up"><lucide-icon name="check-circle" [size]="18"></lucide-icon>{{ success() }}</div>}
   @if (error()) {<div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] text-red-400 animate-slide-up"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ error() }}</div>}
 
-  <app-smart-table
-    [columns]="columns"
-    [data]="visibleRows()"
-    [customTemplates]="customTemplates()"
-    [loading]="loading()"
-    [pageSize]="20"
-    searchPlaceholder="Buscar por nombre, c?digo, naturaleza o UA..."
-    emptyMessage="No hay categor?as en esta vigencia"
-    emptySubMessage="Cre? una nueva categor?a o import? un CSV.">
-  </app-smart-table>
+  @if (viewMode() === 'list') {
+    <app-smart-table
+      [columns]="columns"
+      [data]="visibleRows()"
+      [customTemplates]="customTemplates()"
+      [actions]="actions"
+      [loading]="loading()"
+      [pageSize]="20"
+      (onAction)="handleTableAction($event)"
+      searchPlaceholder="Buscar por nombre, código, naturaleza o UA..."
+      emptyMessage="No hay categorías en esta vigencia"
+      emptySubMessage="Creá una nueva categoría o importá un CSV.">
+    </app-smart-table>
+  } @else {
+    <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div class="relative w-full lg:max-w-md">
+        <lucide-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
+        <input [ngModel]="treeSearchTerm()" (ngModelChange)="treeSearchTerm.set($event)" type="text" placeholder="Buscar en el árbol..." class="hierarchy-tree-search-input w-full rounded-2xl py-3 pl-10 pr-4 text-[14px] text-[var(--color-porcelain)] outline-none transition-all">
+      </div>
+      <div class="flex flex-wrap items-center gap-2 text-[11px] font-[700] uppercase tracking-[0.16em] text-[var(--color-storm-cloud)]">
+        <span class="hierarchy-tree-chip inline-flex items-center gap-2 rounded-full px-3 py-2"><lucide-icon name="folder-tree" [size]="14" class="text-[var(--color-cyan-spark)]"></lucide-icon>Jerarquía primero</span>
+        <span class="hierarchy-tree-chip inline-flex items-center gap-2 rounded-full px-3 py-2">{{ filteredTree().length }} raíces visibles</span>
+      </div>
+    </div>
+
+    <div class="hierarchy-tree-shell overflow-hidden rounded-[1.75rem]">
+      @if (loading()) {
+        <div class="flex items-center justify-center py-16 text-[var(--color-storm-cloud)]"><lucide-icon name="loader-2" [size]="24" class="mr-3 animate-spin"></lucide-icon>Cargando árbol...</div>
+      } @else {
+        <div class="hierarchy-tree-header px-5 py-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p class="text-[11px] font-[740] uppercase tracking-[0.22em] text-[var(--color-storm-cloud)]">Árbol de categorías</p>
+              <p class="mt-1 text-[13px] text-[var(--color-fog-grey)]">Los nodos con hijos y nietos aparecen primero.</p>
+            </div>
+            <div class="hierarchy-tree-view-chip inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-[720] uppercase tracking-[0.14em] text-[var(--color-cyan-spark)]"><lucide-icon name="sparkles" [size]="13"></lucide-icon>Vista jerárquica</div>
+          </div>
+        </div>
+        <div class="space-y-2 p-3 sm:p-4">
+          @for (item of filteredTree(); track trackByFn($index, item)) {
+            <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: item, level: 0 }"></ng-container>
+          } @empty {
+            <div class="px-6 py-16 text-center text-[var(--color-storm-cloud)]">No hay categorías para mostrar.</div>
+          }
+        </div>
+      }
+    </div>
+  }
 </div>
 
 <ng-template #jerarquiaTpl let-item>
-  <button type="button" class="flex max-w-[36rem] items-center gap-2 text-left" (click)="openEditModal(item)">
+  <div role="button" tabindex="0" class="classifier-hierarchy-cell flex max-w-[36rem] cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 text-left transition-colors" (click)="openEditModal(item)" (keydown.enter)="openEditModal(item)" (keydown.space)="openEditModal(item); $event.preventDefault()">
     <span class="inline-flex" [style.width.px]="item.level * 28"></span>
     @if (item.level > 0) {<lucide-icon name="corner-down-right" [size]="16" class="shrink-0 text-[var(--color-storm-cloud)]"></lucide-icon>}
     <button type="button" (click)="toggleNode(item.idCatProg, $event)" [class.invisible]="!item.hasChildren" class="flex size-6 shrink-0 items-center justify-center rounded-lg text-[var(--color-light-steel)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
@@ -39,14 +87,14 @@
     </span>
     <span class="min-w-0">
       <span class="block truncate text-[13px] font-[700] text-[var(--color-porcelain)]" [title]="item.nombre">{{ item.nombre }}</span>
-      <span class="block truncate text-[11px] text-[var(--color-storm-cloud)]">{{ item.hasChildren ? 'Categor?a agrupadora' : 'Categor?a imputable' }}</span>
+      <span class="block truncate text-[11px] text-[var(--color-storm-cloud)]">{{ item.hasChildren ? 'Categoría agrupadora' : 'Categoría imputable' }}</span>
       <span class="mt-1 inline-flex rounded-md bg-[var(--color-deep-slate)] px-2 py-0.5 text-[10px] font-[700] uppercase tracking-wider text-[var(--color-storm-cloud)]">{{ item.tipoJerarquia }}</span>
     </span>
-  </button>
+  </div>
 </ng-template>
 
 <ng-template #codigoTpl let-item>
-  <span class="rounded-lg border border-[var(--color-cyan-spark)]/20 bg-[var(--color-cyan-spark)]/10 px-2.5 py-1 font-mono text-[12px] font-[700] text-[var(--color-cyan-spark)]">{{ item.codigo }}</span>
+  <span class="classifier-code-pill inline-flex whitespace-nowrap rounded-lg border border-[var(--color-cyan-spark)]/20 bg-[var(--color-cyan-spark)]/10 px-2.5 py-1 font-mono text-[12px] font-[700] leading-none text-[var(--color-cyan-spark)]">{{ item.codigo }}</span>
 </ng-template>
 
 <ng-template #unidadTpl let-item>
@@ -61,14 +109,56 @@
   }
 </ng-template>
 
-<ng-template #accionesTpl let-item>
-  <div class="flex items-center justify-end gap-1.5">
-    <button (click)="openEditModal(item)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-cyan-spark)]" title="Editar"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
-    <button (click)="confirmDelete(item)" class="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition-colors hover:bg-red-500 hover:text-black" title="Eliminar"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
-  </div>
+<ng-template #nivelTpl let-item>
+  <span class="classifier-level-pill inline-flex min-w-[4.5rem] justify-center whitespace-nowrap rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2.5 py-1 text-[11px] font-[650] leading-none text-[var(--color-storm-cloud)]">Nivel {{ item.level + 1 }}</span>
 </ng-template>
 
-@if (isModalOpen()) {<div class="fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div><div class="relative w-full max-w-lg rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in"><div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar' : 'Nueva' }} Categoría</h3><button (click)="closeModal()" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>
+<ng-template #hijosTpl let-item>
+  <span class="classifier-count-pill inline-flex min-w-[2.5rem] justify-center whitespace-nowrap rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2.5 py-1 text-[11px] font-[650] leading-none text-[var(--color-storm-cloud)]">{{ item.descendientes || 0 }}</span>
+</ng-template>
+
+<ng-template #treeRow let-item let-level="level">
+  <div class="relative">
+    @if (level > 0) { <div class="hierarchy-tree-connector absolute bottom-0 top-0 w-px" [style.left.px]="treeIndent(level) + 20"></div> }
+    <div class="hierarchy-tree-card group relative overflow-hidden rounded-2xl px-3 py-3 transition-all sm:px-4" [class.mt-1]="level > 0">
+      <div class="flex min-w-0 items-start gap-2.5" [style.padding-left.px]="treeIndent(level)">
+        <button type="button" (click)="toggleNode(item.idCatProg, $event)" [class.opacity-0]="!item.hasChildren" [class.pointer-events-none]="!item.hasChildren" class="hierarchy-tree-toggle mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl text-[var(--color-light-steel)] transition-all" [attr.aria-label]="isExpanded(item.idCatProg) ? 'Contraer categoría' : 'Expandir categoría'">
+          <lucide-icon [name]="isExpanded(item.idCatProg) ? 'chevron-down' : 'chevron-right'" [size]="16"></lucide-icon>
+        </button>
+        <div [ngClass]="item.hasChildren ? 'border-[var(--color-cyan-spark)]/25 bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]' : 'border-[var(--color-charcoal-grey)]/65 bg-[var(--color-pitch-black)]/50 text-[var(--color-storm-cloud)]'" class="hierarchy-tree-node-icon mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl transition-colors">
+          <lucide-icon [name]="item.hasChildren ? 'folder-tree' : 'file-text'" [size]="16"></lucide-icon>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex min-w-0 flex-wrap items-center gap-2">
+            <p class="min-w-0 max-w-full truncate text-[14px] font-[680] leading-5 text-[var(--color-porcelain)] sm:text-[15px]" [title]="item.nombre">{{ item.nombre }}</p>
+            @if (item.hasChildren) {
+              <span class="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-cyan-spark)]/20 bg-[var(--color-cyan-spark)]/10 px-2 py-0.5 text-[10px] font-[740] uppercase tracking-wider text-[var(--color-cyan-spark)]"><lucide-icon name="folder-tree" [size]="12"></lucide-icon>{{ item.children?.length || 0 }} hijos</span>
+            } @else {
+              <span class="inline-flex shrink-0 items-center rounded-full border border-[var(--color-charcoal-grey)]/60 bg-[var(--color-pitch-black)]/45 px-2 py-0.5 text-[10px] font-[700] uppercase tracking-wider text-[var(--color-fog-grey)]">Sin hijos</span>
+            }
+          </div>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <span class="rounded-lg border border-[var(--color-charcoal-grey)]/65 bg-[var(--color-pitch-black)]/65 px-2 py-1 font-mono text-[11px] text-[var(--color-fog-grey)]">{{ item.codigo }}</span>
+            @if (item.naturaleza) { <span class="rounded-lg border border-[var(--color-neon-lime)]/30 bg-[var(--color-neon-lime)]/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-neon-lime)]">{{ item.naturaleza }}</span> }
+            @if (item.unidadAdmNombre) { <span class="max-w-[16rem] truncate rounded-lg border border-[var(--color-charcoal-grey)]/45 bg-[var(--color-deep-slate)]/40 px-2 py-1 text-[10px] font-[650] uppercase tracking-wider text-[var(--color-storm-cloud)]" [title]="item.unidadAdmNombre">{{ item.unidadAdmNombre }}</span> }
+            @if (level > 0) { <span class="rounded-lg border border-[var(--color-charcoal-grey)]/45 bg-[var(--color-deep-slate)]/40 px-2 py-1 text-[10px] font-[650] uppercase tracking-wider text-[var(--color-storm-cloud)]">Nivel {{ level + 1 }}</span> }
+          </div>
+        </div>
+        <div class="flex shrink-0 items-center gap-1 opacity-80 transition-opacity group-hover:opacity-100">
+          <button (click)="openEditModal(item)" title="Editar categoría" class="hierarchy-tree-icon-btn rounded-xl p-2 text-[var(--color-storm-cloud)] transition-all hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
+          <button (click)="confirmDelete(item)" title="Eliminar categoría" class="hierarchy-tree-danger-btn rounded-xl p-2 text-red-400 transition-all hover:text-red-300"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  @if (item.hasChildren && isExpanded(item.idCatProg)) {
+    <div class="mt-2 space-y-2">
+      @for (child of item.children; track trackByFn($index, child)) { <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: child, level: level + 1 }"></ng-container> }
+    </div>
+  }
+</ng-template>
+
+@if (isModalOpen()) {<div class="fixed inset-0 z-[120] flex items-center justify-center p-4"><div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div><div class="relative w-full max-w-lg rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in"><div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar' : 'Nueva' }} Categoría</h3><button (click)="closeModal()" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>
 <div class="space-y-4 px-6 py-6"><div class="grid grid-cols-2 gap-4">
   <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Código <span class="text-red-400">*</span></label><input type="number" [(ngModel)]="form.codigo" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-4 py-2.5 text-[14px] text-[var(--color-porcelain)]"/></div>
   <div><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Categoría Padre</label><app-custom-select placeholder="Ninguno (raíz)" [options]="parentOptions()" [(value)]="form.idCatProgRel"></app-custom-select></div>
@@ -81,7 +171,7 @@
 </div></div>
 <div class="flex justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4"><button (click)="closeModal()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button><button (click)="save()" [disabled]="isSaving()" class="rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black disabled:opacity-50">@if (isSaving()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Guardar</button></div></div></div>}
 
-@if (isUploadOpen()) {<div class="fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isUploadOpen.set(false)"></div><div class="relative w-full max-w-3xl rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[85vh]"><div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4 shrink-0"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">Importar Categorías desde CSV</h3><button (click)="isUploadOpen.set(false)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>
+@if (isUploadOpen()) {<div class="fixed inset-0 z-[120] flex items-center justify-center p-4"><div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isUploadOpen.set(false)"></div><div class="relative w-full max-w-3xl rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[85vh]"><div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4 shrink-0"><h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">Importar Categorías desde CSV</h3><button (click)="isUploadOpen.set(false)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button></div>
 <div class="p-6 space-y-4">
   @if (uploadRows().length === 0) {
     <div class="rounded-xl border-2 border-dashed border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 p-10 text-center cursor-pointer" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="$event.preventDefault(); fileInput.files=$event.dataTransfer?.files||null; onUploadFileSelected($event)">
@@ -94,21 +184,13 @@
   } @else {
     @if (auth.isSuperAdmin()) {<div class="w-64"><label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Organización</label><app-custom-select placeholder="Global" [options]="organizacionOptions()" [(value)]="uploadOrgId"></app-custom-select></div>}
     <p class="text-[12px] text-[var(--color-storm-cloud)]">{{ uploadRows().length }} registros. La UA se busca automáticamente por nombre, vigencia activa por defecto.</p>
-    <div class="overflow-y-auto max-h-[50vh] rounded-xl border border-[var(--color-charcoal-grey)]">
-      <table class="w-full text-left text-[14px]">
-        <thead class="sticky top-0 bg-[var(--color-deep-slate)] border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)]"><tr><th class="px-4 py-3 w-20">Código</th><th class="px-4 py-3">Nombre</th><th class="px-4 py-3 w-16">Nat.</th><th class="px-4 py-3">UA (nombre)</th></tr></thead>
-        <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
-          @for (row of uploadRows(); track $index) {
-            <tr class="hover:bg-[var(--color-deep-slate)]/30">
-              <td class="px-4 py-2.5 font-mono text-[13px] text-[var(--color-fog-grey)]">{{ row.codigo }}</td>
-              <td class="px-4 py-2.5 text-[var(--color-porcelain)]">{{ row.nombre }}</td>
-              <td class="px-4 py-2.5"><span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">{{ row.naturaleza || '-' }}</span></td>
-              <td class="px-4 py-2.5 text-[13px]" [class.text-[var(--color-storm-cloud)]]="row.nombreUA" [class.text-red-400]="!row.nombreUA">{{ row.nombreUA || 'Sin UA' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <app-smart-table
+      [columns]="uploadColumns"
+      [data]="uploadRows()"
+      [showSearch]="false"
+      [pageSize]="50"
+      emptyMessage="No hay filas para previsualizar">
+    </app-smart-table>
     <div class="flex justify-end gap-3"><button (click)="isUploadOpen.set(false)" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button><button (click)="uploadCsv()" [disabled]="isUploading()" class="rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black disabled:opacity-50">@if (isUploading()) {<lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon>}Importar {{ uploadRows().length }} categorías</button></div>
   }
 </div></div></div>}

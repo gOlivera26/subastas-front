@@ -33,39 +33,55 @@
   </div>
 </section>
 
-<div class="w-full overflow-hidden py-10 relative z-20 flex opacity-60 hover:opacity-100 transition-opacity duration-700">
-  
-  <div class="absolute inset-y-0 left-0 w-24 md:w-48 bg-gradient-to-r from-[var(--color-pitch-black)] to-transparent z-10 pointer-events-none"></div>
-  <div class="absolute inset-y-0 right-0 w-24 md:w-48 bg-gradient-to-l from-[var(--color-pitch-black)] to-transparent z-10 pointer-events-none"></div>
+<div class="w-full relative z-20 py-6 sm:py-10">
+  <div class="mx-auto grid max-w-5xl grid-cols-1 gap-3 px-4 sm:hidden">
+    <div class="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-gradient-to-r from-[var(--color-graphite)]/45 to-transparent px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_14px_38px_rgba(0,0,0,0.16)]">
+      <lucide-icon name="zap" [size]="16" class="shrink-0 text-[var(--color-neon-lime)]"></lucide-icon>
+      <span class="text-[11px] font-[590] uppercase tracking-[0.18em] text-[var(--color-storm-cloud)]">Ejecución Táctica en Milisegundos</span>
+    </div>
+    <div class="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-gradient-to-r from-[var(--color-graphite)]/45 to-transparent px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_14px_38px_rgba(0,0,0,0.16)]">
+      <lucide-icon name="shield-check" [size]="16" class="shrink-0 text-[var(--color-cyan-spark)]"></lucide-icon>
+      <span class="text-[11px] font-[590] uppercase tracking-[0.18em] text-[var(--color-storm-cloud)]">Infraestructura 100% Blindada</span>
+    </div>
+    <div class="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-gradient-to-r from-[var(--color-graphite)]/45 to-transparent px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_14px_38px_rgba(0,0,0,0.16)]">
+      <lucide-icon name="activity" [size]="16" class="shrink-0 text-[var(--color-porcelain)]"></lucide-icon>
+      <span class="text-[11px] font-[590] uppercase tracking-[0.18em] text-[var(--color-storm-cloud)]">Auditoría y Trazabilidad de Vuelo</span>
+    </div>
+    <div class="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-gradient-to-r from-[var(--color-graphite)]/45 to-transparent px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_14px_38px_rgba(0,0,0,0.16)]">
+      <lucide-icon name="eye-off" [size]="16" class="shrink-0 text-[var(--color-storm-cloud)]"></lucide-icon>
+      <span class="text-[11px] font-[590] uppercase tracking-[0.18em] text-[var(--color-storm-cloud)]">Cero Comisiones Ocultas</span>
+    </div>
+  </div>
 
-  <div class="flex w-max animate-marquee hover:[animation-play-state:paused] cursor-default items-center">
-    
-    @for (i of [1,2,3,4]; track $index) {
-      <div class="flex items-center justify-center whitespace-nowrap">
-        
-        <div class="flex items-center gap-3 px-8">
-          <lucide-icon name="zap" [size]="16" class="text-[var(--color-neon-lime)] animate-pulse"></lucide-icon>
-          <span class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Ejecución Táctica en Milisegundos</span>
+  <div class="relative hidden w-full overflow-hidden opacity-60 transition-opacity duration-700 hover:opacity-100 sm:flex">
+    <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[var(--color-pitch-black)] to-transparent md:w-48"></div>
+    <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[var(--color-pitch-black)] to-transparent md:w-48"></div>
+
+    <div class="flex w-max min-w-max animate-marquee cursor-default items-center hover:[animation-play-state:paused]">
+      @for (i of [1,2,3,4]; track $index) {
+        <div class="flex shrink-0 items-center justify-center whitespace-nowrap">
+          <div class="flex shrink-0 items-center gap-3 px-8">
+            <lucide-icon name="zap" [size]="16" class="text-[var(--color-neon-lime)] animate-pulse"></lucide-icon>
+            <span class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Ejecución Táctica en Milisegundos</span>
+          </div>
+
+          <div class="flex shrink-0 items-center gap-3 px-8">
+            <lucide-icon name="shield-check" [size]="16" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+            <span class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Infraestructura 100% Blindada</span>
+          </div>
+
+          <div class="flex shrink-0 items-center gap-3 px-8">
+            <lucide-icon name="activity" [size]="16" class="text-[var(--color-porcelain)]"></lucide-icon>
+            <span class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Auditoría y Trazabilidad de Vuelo</span>
+          </div>
+
+          <div class="flex shrink-0 items-center gap-3 px-8">
+            <lucide-icon name="eye-off" [size]="16" class="text-[var(--color-storm-cloud)]"></lucide-icon>
+            <span class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Cero Comisiones Ocultas</span>
+          </div>
         </div>
-        
-        <div class="flex items-center gap-3 px-8">
-          <lucide-icon name="shield-check" [size]="16" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-          <span class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Infraestructura 100% Blindada</span>
-        </div>
-        
-        <div class="flex items-center gap-3 px-8">
-          <lucide-icon name="activity" [size]="16" class="text-[var(--color-porcelain)]"></lucide-icon>
-          <span class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Auditoría y Trazabilidad de Vuelo</span>
-        </div>
-        
-        <div class="flex items-center gap-3 px-8">
-          <lucide-icon name="eye-off" [size]="16" class="text-[var(--color-storm-cloud)]"></lucide-icon>
-          <span class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Cero Comisiones Ocultas</span>
-        </div>
-        
-      </div>
-    }
-    
+      }
+    </div>
   </div>
 </div>
 
@@ -162,7 +178,7 @@
 
     <div class="lg:col-span-2 space-y-6">
       
-      <div class="flex flex-col sm:flex-row gap-6 p-8 rounded-[2rem] bg-[var(--color-graphite)]/30 border border-[var(--color-charcoal-grey)]/50 hover:bg-gradient-to-r hover:from-[var(--color-graphite)] hover:to-transparent transition-all duration-500 group hover:-translate-y-1 reveal-on-scroll opacity-0 translate-y-12 ease-out delay-100">
+      <div class="relative overflow-hidden flex flex-col sm:flex-row gap-6 p-8 rounded-[2rem] border border-white/[0.055] bg-[radial-gradient(circle_at_16%_0%,rgba(116,172,223,0.10),transparent_38%),linear-gradient(135deg,rgba(20,26,36,0.52),rgba(7,10,17,0.18))] hover:border-[rgba(116,172,223,0.20)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_28px_90px_rgba(116,172,223,0.09)] shadow-[inset_0_1px_0_rgba(255,255,255,0.035),0_20px_70px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-all duration-500 group hover:-translate-y-1 reveal-on-scroll opacity-0 translate-y-12 ease-out delay-100">
         <div class="text-[40px] font-black text-[var(--color-deep-slate)] group-hover:text-[var(--color-aether-blue)] transition-colors duration-500 leading-none">01</div>
         <div>
           <h3 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Verificación de Cuenta</h3>
@@ -170,7 +186,7 @@
         </div>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-6 p-8 rounded-[2rem] bg-[var(--color-graphite)]/30 border border-[var(--color-charcoal-grey)]/50 hover:bg-gradient-to-r hover:from-[var(--color-graphite)] hover:to-transparent transition-all duration-500 group hover:-translate-y-1 reveal-on-scroll opacity-0 translate-y-12 ease-out delay-200">
+      <div class="relative overflow-hidden flex flex-col sm:flex-row gap-6 p-8 rounded-[2rem] border border-white/[0.055] bg-[radial-gradient(circle_at_16%_0%,rgba(2,184,204,0.10),transparent_38%),linear-gradient(135deg,rgba(20,26,36,0.52),rgba(7,10,17,0.18))] hover:border-[rgba(2,184,204,0.20)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_28px_90px_rgba(2,184,204,0.09)] shadow-[inset_0_1px_0_rgba(255,255,255,0.035),0_20px_70px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-all duration-500 group hover:-translate-y-1 reveal-on-scroll opacity-0 translate-y-12 ease-out delay-200">
         <div class="text-[40px] font-black text-[var(--color-deep-slate)] group-hover:text-[var(--color-cyan-spark)] transition-colors duration-500 leading-none">02</div>
         <div>
           <h3 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Sala de Subastas</h3>
@@ -178,7 +194,7 @@
         </div>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-6 p-8 rounded-[2rem] bg-[var(--color-graphite)]/30 border border-[var(--color-charcoal-grey)]/50 hover:bg-gradient-to-r hover:from-[var(--color-graphite)] hover:to-transparent transition-all duration-500 group hover:-translate-y-1 reveal-on-scroll opacity-0 translate-y-12 ease-out delay-300">
+      <div class="relative overflow-hidden flex flex-col sm:flex-row gap-6 p-8 rounded-[2rem] border border-white/[0.055] bg-[radial-gradient(circle_at_16%_0%,rgba(228,242,34,0.09),transparent_38%),linear-gradient(135deg,rgba(20,26,36,0.52),rgba(7,10,17,0.18))] hover:border-[rgba(228,242,34,0.18)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_28px_90px_rgba(228,242,34,0.07)] shadow-[inset_0_1px_0_rgba(255,255,255,0.035),0_20px_70px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-all duration-500 group hover:-translate-y-1 reveal-on-scroll opacity-0 translate-y-12 ease-out delay-300">
         <div class="text-[40px] font-black text-[var(--color-deep-slate)] group-hover:text-[var(--color-neon-lime)] transition-colors duration-500 leading-none">03</div>
         <div>
           <h3 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Puja y Adjudicación</h3>

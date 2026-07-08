@@ -1,4 +1,4 @@
-﻿import { Component, EventEmitter, Output, TemplateRef, computed, input, signal, effect } from '@angular/core';
+import { Component, EventEmitter, Output, TemplateRef, computed, input, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
@@ -40,6 +40,7 @@ export class SmartTableComponent {
 
   currentPage = signal(1);
   openActionsMenu = signal<string | null>(null);
+  actionsMenuPosition = signal<{ top: number; left: number; maxHeight: number } | null>(null);
   private searchTimeout: any;
   private readonly collator = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
 
@@ -210,28 +211,139 @@ export class SmartTableComponent {
     }
   }
 
+  private readonly actionsPopoverPrefix = 'smart-table-actions-' + Math.random().toString(36).slice(2, 9);
+
+  private hasUsableRowIdentity(value: any): boolean {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'number') return Number.isFinite(value) && value > 0;
+    if (typeof value === 'string') return value.trim().length > 0 && value.trim() !== '0';
+    return true;
+  }
+
   rowActionKey(row: any, index: number): string {
-    return `${this.currentPage()}-${row?.id ?? index}`;
+    const identityKeys = [
+      'idObjetoGasto',
+      'idItem',
+      'idCatProg',
+      'idCategoriaProgramatica',
+      'idMoneda',
+      'idUnidadAdm',
+      'idSubResponsable',
+      'idSubResponsables',
+      'idReserva',
+      'idReservaDet',
+      'idCotizacion',
+      'idCotizacionDetalle',
+      'idRenglon',
+      'idUsuario',
+      'idRol',
+      'idProveedor',
+      'idRubro',
+      'idPersona',
+      'idMensaje',
+      'idModulo',
+      'idPagina',
+      'idOrganizacion',
+      'idVigencia',
+      'id',
+      'numeroObjeto',
+      'codigo',
+      'nroReserva',
+      'nroCotizacion'
+    ];
+
+    for (const key of identityKeys) {
+      const value = row?.[key];
+      if (this.hasUsableRowIdentity(value)) return `${key}-${value}-page-${this.currentPage()}-row-${index}`;
+    }
+
+    return `page-${this.currentPage()}-row-${index}`;
+  }
+
+  actionsPopoverId(row: any, index: number): string {
+    return this.actionsPopoverPrefix + '-' + this.rowActionKey(row, index).replace(/[^a-zA-Z0-9_-]/g, '-');
   }
 
   isActionsMenuOpen(key: string): boolean {
     return this.openActionsMenu() === key;
   }
 
-  toggleActionsMenu(key: string, event?: Event) {
+  toggleActionsMenu(row: any, index: number, event?: Event) {
     event?.stopPropagation();
-    this.openActionsMenu.set(this.openActionsMenu() === key ? null : key);
+    const key = this.rowActionKey(row, index);
+    const popoverId = this.actionsPopoverId(row, index);
+    const popover = document.getElementById(popoverId) as HTMLElement & { showPopover?: () => void; hidePopover?: () => void } | null;
+
+    if (this.openActionsMenu() === key) {
+      popover?.hidePopover?.();
+      this.closeActionsMenu();
+      return;
+    }
+
+    this.closeActionsMenu();
+
+    const target = event?.currentTarget as HTMLElement | null;
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      const margin = 12;
+      const gap = 8;
+      const menuWidth = 240;
+      const preferredHeight = 420;
+      const minUsableHeight = 180;
+      const visibleActions = this.actions().filter(action => this.isActionVisible(action, row)).length;
+      const estimatedItemHeight = 40;
+      const menuChrome = 12;
+      const estimatedMenuHeight = Math.max(52, Math.min(preferredHeight, (visibleActions * estimatedItemHeight) + menuChrome));
+      const availableBelow = Math.max(0, window.innerHeight - rect.bottom - gap - margin);
+      const availableAbove = Math.max(0, rect.top - gap - margin);
+      const openUp = availableBelow < Math.min(minUsableHeight, estimatedMenuHeight) && availableAbove > availableBelow;
+      const availableSpace = openUp ? availableAbove : availableBelow;
+      const maxHeight = Math.max(140, Math.min(preferredHeight, estimatedMenuHeight, availableSpace || estimatedMenuHeight));
+      const menuHeight = Math.min(maxHeight, estimatedMenuHeight);
+      const left = Math.max(margin, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - margin));
+      const top = openUp
+        ? Math.max(margin, rect.top - gap - menuHeight)
+        : Math.max(margin, Math.min(rect.bottom + gap, window.innerHeight - menuHeight - margin));
+
+      this.actionsMenuPosition.set({ top, left, maxHeight });
+    }
+
+    this.openActionsMenu.set(key);
+    setTimeout(() => popover?.showPopover?.());
+  }
+
+  closeActionsMenu() {
+    if (this.openActionsMenu()) {
+      const id = this.actionsPopoverPrefix + '-' + this.openActionsMenu()!.replace(/[^a-zA-Z0-9_-]/g, '-');
+      const current = document.getElementById(id) as HTMLElement & { hidePopover?: () => void } | null;
+      current?.hidePopover?.();
+    }
+    this.openActionsMenu.set(null);
+    this.actionsMenuPosition.set(null);
+  }
+
+  onActionsPopoverToggle(key: string, event: any) {
+    if (event?.newState === 'closed' && this.openActionsMenu() === key) {
+      this.openActionsMenu.set(null);
+      this.actionsMenuPosition.set(null);
+    }
+  }
+
+  isActionVisible(action: TableAction, row: any): boolean {
+    return action.visible ? action.visible(row) : true;
   }
 
   handleActionFromMenu(action: string, row: any, event?: Event) {
     event?.stopPropagation();
-    this.openActionsMenu.set(null);
+    this.closeActionsMenu();
     this.handleAction(action, row);
   }
+
   handleAction(action: string, row: any) {
-    this.openActionsMenu.set(null);
+    this.closeActionsMenu();
     this.onAction.emit({ action, row });
   }
+
 }
 
 

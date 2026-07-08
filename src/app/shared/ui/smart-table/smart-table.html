@@ -1,4 +1,4 @@
-﻿<div class="animate-fade-in">
+<div class="animate-fade-in">
   @if (showSearch()) {
   <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div class="relative w-full sm:max-w-sm">
@@ -84,38 +84,52 @@
               @if (actions().length > 0) {
                 <td class="px-3 py-3 text-right align-middle sm:px-4 md:px-6 md:py-4">
                   <div class="flex justify-end">
-                    @if (actions().length === 1) {
+                    <div class="smart-table-actions-desktop" aria-label="Acciones de fila">
                       @for (act of actions(); track act.action) {
-                        <button (click)="handleAction(act.action, row)" [title]="act.tooltip" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-charcoal-grey)]/70 bg-[var(--color-pitch-black)]/45 p-1.5 transition-colors hover:bg-[var(--color-deep-slate)] {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
-                          <lucide-icon [name]="act.icon" [size]="16"></lucide-icon>
-                        </button>
-                      }
-                    } @else {
-                      <div class="smart-table-action-menu-wrap">
-                        <button
+                        @if (isActionVisible(act, row)) {
+                          <button
                           type="button"
-                          (click)="toggleActionsMenu(rowActionKey(row, $index), $event)"
-                          class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[var(--color-charcoal-grey)]/80 bg-[var(--color-pitch-black)]/60 px-2 text-[var(--color-porcelain)] transition-colors hover:border-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]"
-                          [attr.aria-expanded]="isActionsMenuOpen(rowActionKey(row, $index))"
-                          aria-label="Abrir acciones">
-                          <span class="action-menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
-                        </button>
+                          (click)="handleAction(act.action, row)"
+                          [title]="act.tooltip || act.action"
+                          class="smart-table-action-button {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
+                          <lucide-icon [name]="act.icon" [size]="16"></lucide-icon>
+                          </button>
+                        }
+                      }
+                    </div>
 
-                        @if (isActionsMenuOpen(rowActionKey(row, $index))) {
-                          <div class="smart-table-action-menu mt-2 min-w-40 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] p-1.5 text-left shadow-lg">
-                            @for (act of actions(); track act.action) {
-                              <button
-                                type="button"
-                                (click)="handleActionFromMenu(act.action, row, $event)"
-                                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[12px] transition-colors hover:bg-[var(--color-deep-slate)] {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
-                                <lucide-icon [name]="act.icon" [size]="15"></lucide-icon>
-                                <span class="truncate">{{ act.tooltip || act.action }}</span>
-                              </button>
-                            }
-                          </div>
+                    <div class="smart-table-action-menu-wrap">
+                      <button
+                        type="button"
+                        (click)="toggleActionsMenu(row, $index, $event)"
+                        class="smart-table-actions-trigger"
+                        [attr.aria-expanded]="isActionsMenuOpen(rowActionKey(row, $index))"
+                        aria-label="Abrir acciones">
+                        <span class="action-menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+                      </button>
+
+                      <div
+                        [id]="actionsPopoverId(row, $index)"
+                        [attr.popover]="'auto'"
+                        (toggle)="onActionsPopoverToggle(rowActionKey(row, $index), $event)"
+                        (click)="closeActionsMenu()"
+                        class="smart-table-action-menu rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] p-1.5 text-left shadow-2xl"
+                        [style.top.px]="actionsMenuPosition()?.top"
+                        [style.left.px]="actionsMenuPosition()?.left"
+                        [style.max-height.px]="actionsMenuPosition()?.maxHeight">
+                        @for (act of actions(); track act.action) {
+                          @if (isActionVisible(act, row)) {
+                            <button
+                              type="button"
+                              (click)="handleActionFromMenu(act.action, row, $event)"
+                              [title]="act.tooltip || act.action"
+                              class="{{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
+                              <lucide-icon [name]="act.icon" [size]="15"></lucide-icon>
+                            </button>
+                          }
                         }
                       </div>
-                    }
+                    </div>
                   </div>
                 </td>
               }

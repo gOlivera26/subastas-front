@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-7xl">
+﻿<div class="mx-auto max-w-7xl">
   <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Nota de Pedido</h1>
@@ -62,35 +62,17 @@
     }
   </ng-template>
 
-  <ng-template #accionesTpl let-row>
-    <div class="flex items-center justify-end gap-1">
-      @if (esGenerado(row)) {
-        <button (click)="openItemsList(row)" title="Gestionar Ítems" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
-          <lucide-icon name="menu" [size]="16"></lucide-icon>
-        </button>
-      }
-      <button (click)="verDetalle(row)" title="Ver detalle" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
-        <lucide-icon name="eye" [size]="16"></lucide-icon>
-      </button>
-      <button (click)="openCloneModal(row)" title="Clonar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
-        <lucide-icon name="copy" [size]="16"></lucide-icon>
-      </button>
-      @if (esGenerado(row)) {
-        <button (click)="openAuthorizeModal(row)" title="Autorizar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[#448b54]">
-          <lucide-icon name="check-circle" [size]="16"></lucide-icon>
-        </button>
-      }
-    </div>
-  </ng-template>
 
   <app-smart-table
     [columns]="columns"
     [data]="reservas()"
+    [actions]="actions"
     [customTemplates]="customTemplates()"
     [loading]="isLoading()"
     [pageSize]="999"
-    [showSearch]="false"
+    searchPlaceholder="Buscar por número, área, oficina o estado..."
     (sortChange)="onSort($event)"
+    (onAction)="handleReservaAction($event)"
     emptyMessage="No hay notas de pedido registradas"
     emptySubMessage="Creá la primera para comenzar.">
   </app-smart-table>
@@ -119,56 +101,22 @@
           </button>
         </div>
 
-        @if (isLoadingDetalles()) {
-          <div class="flex items-center justify-center py-12 text-[var(--color-storm-cloud)]">
-            <lucide-icon name="loader-2" [size]="24" class="animate-spin mr-3"></lucide-icon>Cargando detalles...
+        <app-smart-table
+          [columns]="detalleColumns"
+          [data]="detalleRows()"
+          [actions]="detalleActions"
+          [loading]="isLoadingDetalles()"
+          [pageSize]="999"
+          searchPlaceholder="Buscar bien, moneda, cantidad o importe..."
+          (onAction)="handleDetalleAction($event)"
+          emptyMessage="No hay ítems registrados en esta nota de pedido.">
+        </app-smart-table>
+
+        @if (detalles().length > 0) {
+          <div class="mt-4 flex items-center justify-end rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-6 py-4 shadow-sm">
+            <span class="text-[12px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)] mr-4">Total General de la Nota de Pedido:</span>
+            <span class="text-[20px] font-[700] text-[#448b54]">${{ totalGeneral() | number:'1.2-2' }}</span>
           </div>
-        } @else if (detalles().length === 0) {
-          <div class="text-center py-8 text-[var(--color-storm-cloud)]">
-            <p class="text-[14px]">No hay ítems registrados en esta nota de pedido.</p>
-          </div>
-        } @else {
-          <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-pitch-black)] shadow-sm">
-            <table class="w-full text-left text-[13px]">
-              <thead class="bg-[#448b54] text-white text-[11px] font-[600] uppercase tracking-widest">
-                <tr>
-                  <th class="px-4 py-3 border-r border-[#367043]/30">NOMBRE</th>
-                  <th class="px-4 py-3 border-r border-[#367043]/30">MONEDA</th>
-                  <th class="px-4 py-3 text-center border-r border-[#367043]/30 w-24">CANT.</th>
-                  <th class="px-4 py-3 text-right border-r border-[#367043]/30 w-32">IMPORTE</th>
-                  <th class="px-4 py-3 text-right border-r border-[#367043]/30 w-32">TOTAL</th>
-                  <th class="px-4 py-3 text-center w-28">ACCIONES</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
-                @for (det of detalles(); track det.idReservaDet) {
-                  <tr class="hover:bg-[var(--color-deep-slate)]/50 transition-colors">
-                    <td class="px-4 py-4 text-[var(--color-porcelain)] border-r border-[var(--color-charcoal-grey)]">{{ det.nombreBien }}</td>
-                    <td class="px-4 py-4 text-[var(--color-light-steel)] border-r border-[var(--color-charcoal-grey)]">{{ det.nombreMoneda || '-' }}</td>
-                    <td class="px-4 py-4 text-center text-[var(--color-porcelain)] border-r border-[var(--color-charcoal-grey)]">{{ det.cantidad }}</td>
-                    <td class="px-4 py-4 text-right text-[var(--color-porcelain)] border-r border-[var(--color-charcoal-grey)]">${{ det.importe | number:'1.2-2' }}</td>
-                    <td class="px-4 py-4 text-right font-[600] text-[var(--color-cyan-spark)] border-r border-[var(--color-charcoal-grey)]">${{ (det.cantidad || 0) * (det.importe || 0) | number:'1.2-2' }}</td>
-                    <td class="px-4 py-4">
-                      <div class="flex items-center justify-center gap-2">
-                        <button (click)="editBien(det)" class="rounded-lg p-2 border border-[var(--color-charcoal-grey)] text-[var(--color-cyan-spark)] bg-[var(--color-pitch-black)] hover:bg-[var(--color-deep-slate)] transition-colors shadow-sm">
-                          <lucide-icon name="pencil" [size]="14"></lucide-icon>
-                        </button>
-                        <button (click)="deleteBien(det)" class="rounded-lg p-2 border border-[var(--color-charcoal-grey)] text-red-400 bg-[var(--color-pitch-black)] hover:bg-[var(--color-deep-slate)] transition-colors shadow-sm">
-                          <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-          @if (detalles().length > 0) {
-            <div class="mt-4 flex items-center justify-end rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-6 py-4 shadow-sm">
-              <span class="text-[12px] font-[600] uppercase tracking-widest text-[var(--color-storm-cloud)] mr-4">Total General de la Nota de Pedido:</span>
-              <span class="text-[20px] font-[700] text-[#448b54]">${{ totalGeneral() | number:'1.2-2' }}</span>
-            </div>
-          }
         }
       </div>
     </div>
@@ -271,8 +219,8 @@
 @if (bienToDelete()) {
   <app-confirmation-modal
     [isOpen]="true"
-    [title]="'Eliminar ítem'"
-    [message]="'¿Eliminar el ítem \'' + (bienToDelete()?.nombreBien || 'seleccionado') + '\'? Esta acción no se puede deshacer.'"
+    [title]="'Eliminar Ã­tem'"
+    [message]="'Â¿Eliminar el Ã­tem \'' + (bienToDelete()?.nombreBien || 'seleccionado') + '\'? Esta acción no se puede deshacer.'"
     [type]="'danger'"
     [confirmText]="'Eliminar'"
     (confirm)="confirmDelete()"
@@ -362,7 +310,7 @@
       
       <div class="flex items-center justify-between px-6 py-5 shrink-0 bg-[var(--color-graphite)] border-b border-[var(--color-charcoal-grey)] rounded-t-xl">
         <h3 class="text-[18px] font-[700] text-[#448b54] uppercase tracking-wide">
-          CATÁLOGO BIENES O SERVICIOS
+          CATÃLOGO BIENES O SERVICIOS
         </h3>
         <button (click)="isSelectBienModalOpen.set(false)" class="rounded-xl p-2 text-[var(--color-storm-cloud)] hover:text-red-400 hover:bg-[var(--color-deep-slate)] transition-colors">
           <lucide-icon name="x" [size]="20"></lucide-icon>
@@ -371,10 +319,10 @@
 
       <div class="p-6 shrink-0 bg-[var(--color-pitch-black)]/30 border-b border-[var(--color-charcoal-grey)]">
          <div class="mb-1">
-            <label class="block text-[11px] font-[600] uppercase text-[var(--color-storm-cloud)] mb-2">NOMBRE DEL ÍTEM</label>
+            <label class="block text-[11px] font-[600] uppercase text-[var(--color-storm-cloud)] mb-2">NOMBRE DEL ÃTEM</label>
             <div class="relative">
                <lucide-icon name="search" [size]="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
-               <input [(ngModel)]="bienSearch" placeholder="Buscar por código o nombre del ítem..." class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] outline-none transition-all shadow-inner">
+               <input [(ngModel)]="bienSearch" placeholder="Buscar por código o nombre del Ã­tem..." class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] outline-none transition-all shadow-inner">
             </div>
          </div>
       </div>
@@ -421,7 +369,7 @@
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-t-[2rem]">
         <div>
           <h3 class="text-[18px] font-[590] text-[var(--color-porcelain)]">NUEVA NOTA DE PEDIDO</h3>
-          <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Completá los campos obligatorios (*) para habilitar el guardado.</p>
+          <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">CompletÃ¡ los campos obligatorios (*) para habilitar el guardado.</p>
         </div>
         <button (click)="closeModal()" class="rounded-xl p-2.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
           <lucide-icon name="x" [size]="20"></lucide-icon>
@@ -520,7 +468,7 @@
               <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
                 <tr>
                   <th class="px-4 py-3">Nombre</th>
-                  <th class="px-4 py-3">Categoría Programática</th>
+                  <th class="px-4 py-3">CategorÃ­a ProgramÃ¡tica</th>
                   <th class="px-4 py-3">Moneda</th>
                   <th class="px-4 py-3 text-right">Cant.</th>
                   <th class="px-4 py-3 text-right">Importe</th>
@@ -570,11 +518,11 @@
             <lucide-icon name="copy" [size]="28"></lucide-icon>
           </div>
           <h3 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Clonar Nota de Pedido</h3>
-          <p class="text-[14px] text-[var(--color-storm-cloud)]">¿Estás seguro de que deseas clonar la nota de pedido <strong class="text-[var(--color-porcelain)]">{{ reservaToClone()?.nroReserva }}</strong>?<br/>Se generará una nueva nota en estado Generado con los mismos ítems.</p>
+          <p class="text-[14px] text-[var(--color-storm-cloud)]">Â¿EstÃ¡s seguro de que deseas clonar la nota de pedido <strong class="text-[var(--color-porcelain)]">{{ reservaToClone()?.nroReserva }}</strong>?<br/>Se generarÃ¡ una nueva nota en estado Generado con los mismos ítems.</p>
         </div>
         <div class="flex gap-3 px-6 py-5 bg-[var(--color-pitch-black)]/30 border-t border-[var(--color-charcoal-grey)]">
           <button (click)="closeCloneModal()" class="w-1/2 rounded-xl border border-[var(--color-charcoal-grey)] bg-transparent py-3 text-[14px] font-[590] text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">Cancelar</button>
-          <button (click)="confirmClone()" class="w-1/2 rounded-xl bg-[var(--color-cyan-spark)] py-3 text-[14px] font-[590] text-[#0B0E14] transition-all hover:brightness-110">Sí, Clonar</button>
+          <button (click)="confirmClone()" class="w-1/2 rounded-xl bg-[var(--color-cyan-spark)] py-3 text-[14px] font-[590] text-[#0B0E14] transition-all hover:brightness-110">SÃ­, Clonar</button>
         </div>
       }
     </div>
@@ -595,17 +543,17 @@
             <lucide-icon name="check-circle" [size]="28"></lucide-icon>
           </div>
           <h3 class="text-[20px] font-[590] text-[var(--color-porcelain)] mb-2">Autorizar Nota de Pedido</h3>
-          <p class="text-[14px] text-[var(--color-storm-cloud)] mb-6">Estás a punto de autorizar la nota de pedido <strong class="text-[var(--color-porcelain)]">{{ reservaToAuthorize()?.nroReserva }}</strong>.<br/>Esta acción no se puede deshacer.</p>
+          <p class="text-[14px] text-[var(--color-storm-cloud)] mb-6">EstÃ¡s a punto de autorizar la nota de pedido <strong class="text-[var(--color-porcelain)]">{{ reservaToAuthorize()?.nroReserva }}</strong>.<br/>Esta acción no se puede deshacer.</p>
           
           <div class="text-left w-full">
-            <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">¿Por qué se autoriza? <span class="text-red-500">*</span></label>
+            <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">Â¿Por qué se autoriza? <span class="text-red-500">*</span></label>
             <textarea [(ngModel)]="autorizarMotivo" rows="3" placeholder="Ingresa una justificación formal para la autorización..."
               class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] focus:border-[#448b54] outline-none transition-colors resize-none"></textarea>
           </div>
         </div>
         <div class="flex gap-3 px-6 py-5 bg-[var(--color-pitch-black)]/30 border-t border-[var(--color-charcoal-grey)]">
           <button (click)="closeAuthorizeModal()" class="w-1/2 rounded-xl border border-[var(--color-charcoal-grey)] bg-transparent py-3 text-[14px] font-[590] text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">Cancelar</button>
-          <button (click)="confirmAuthorize()" [disabled]="!autorizarMotivo().trim()" class="w-1/2 rounded-xl bg-[#448b54] py-3 text-[14px] font-[590] text-white transition-all hover:bg-[#367043] disabled:opacity-50 disabled:cursor-not-allowed">Sí, Autorizar</button>
+          <button (click)="confirmAuthorize()" [disabled]="!autorizarMotivo().trim()" class="w-1/2 rounded-xl bg-[#448b54] py-3 text-[14px] font-[590] text-white transition-all hover:bg-[#367043] disabled:opacity-50 disabled:cursor-not-allowed">SÃ­, Autorizar</button>
         </div>
       }
     </div>

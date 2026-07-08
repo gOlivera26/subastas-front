@@ -183,26 +183,26 @@
   </div>
 
   <div 
-    class="fixed inset-x-0 top-0 h-dvh max-h-dvh min-w-0 bg-[var(--color-pitch-black)]/98 backdrop-blur-3xl border-b border-[var(--color-charcoal-grey)] transition-all duration-300 md:hidden overflow-y-auto overscroll-contain flex flex-col shadow-2xl"
+    class="absolute left-3 right-3 top-[calc(100%+0.5rem)] z-[10000] h-[calc(100dvh-5.5rem)] min-w-0 overflow-hidden rounded-[1.75rem] border border-white/[0.07] bg-[linear-gradient(145deg,rgb(12,17,26),rgb(6,9,15))] shadow-[0_28px_90px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-2xl transition-all duration-300 md:hidden"
     [ngClass]="isMobileMenuOpen() ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
   >
-    <div class="flex flex-col gap-3 px-6 pt-24 pb-8">
+    <div class="flex max-h-full flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-3 sm:px-4 sm:py-4">
       
-      <button (click)="toggleTheme()" class="flex items-center gap-3 w-full rounded-2xl bg-[var(--color-deep-slate)]/40 border border-[var(--color-charcoal-grey)]/60 p-4 transition-all active:bg-[var(--color-deep-slate)]">
-        <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]">
+      <button (click)="toggleTheme()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all active:bg-white/[0.06]">
+        <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]">
           <lucide-icon [name]="isDarkMode() ? 'sun' : 'moon'" [size]="20"></lucide-icon>
         </div>
-        <span class="text-[15px] font-[590] text-[var(--color-porcelain)]">
+        <span class="text-[14px] font-[650] text-[var(--color-porcelain)]">
           {{ isDarkMode() ? 'Modo Claro' : 'Modo Oscuro' }}
         </span>
       </button>
       
-      <a routerLink="/subastas-activas" (click)="closeMenu()" class="flex items-center gap-3 w-full rounded-2xl bg-[var(--color-deep-slate)]/40 border border-[var(--color-charcoal-grey)]/60 p-4 transition-all hover:bg-[var(--color-deep-slate)] active:scale-[0.98]">
-        <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+      <a routerLink="/subastas-activas" (click)="closeMenu()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all hover:bg-white/[0.055] active:scale-[0.98]">
+        <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
           <lucide-icon name="sparkles" [size]="20"></lucide-icon>
         </div>
         <div class="flex flex-col text-left">
-          <span class="text-[15px] font-[590] text-[var(--color-porcelain)] leading-none mb-1">Subastas Activas</span>
+          <span class="text-[14px] font-[650] text-[var(--color-porcelain)] leading-none mb-1">Subastas Activas</span>
           <span class="text-[12px] text-[var(--color-storm-cloud)] leading-none">Explora el catálogo en vivo</span>
         </div>
         <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
@@ -218,27 +218,27 @@
           </div>
         </div>
 
-        <a routerLink="/modulos" (click)="closeMenu()" class="flex items-center gap-3 w-full rounded-2xl bg-[var(--color-deep-slate)]/40 border border-[var(--color-charcoal-grey)]/60 p-4 transition-all active:bg-[var(--color-deep-slate)]">
-          <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-light-steel)]/10 text-[var(--color-porcelain)]">
+        <a routerLink="/modulos" (click)="closeMenu()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all active:bg-white/[0.06]">
+          <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-light-steel)]/10 text-[var(--color-porcelain)]">
             <lucide-icon name="layout-template" [size]="20"></lucide-icon>
           </div>
-          <span class="text-[15px] font-[590] text-[var(--color-porcelain)]">Mi Panel</span>
+          <span class="text-[14px] font-[650] text-[var(--color-porcelain)]">Mi Panel</span>
           <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
         </a>
 
-        <button (click)="openProfile()" class="flex items-center gap-3 w-full rounded-2xl bg-[var(--color-deep-slate)]/40 border border-[var(--color-charcoal-grey)]/60 p-4 transition-all active:bg-[var(--color-deep-slate)]">
-          <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-aether-blue)]/10 text-[var(--color-aether-blue)]">
+        <button (click)="openProfile()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all active:bg-white/[0.06]">
+          <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-aether-blue)]/10 text-[var(--color-aether-blue)]">
             <lucide-icon name="user-circle" [size]="20"></lucide-icon>
           </div>
-          <span class="text-[15px] font-[590] text-[var(--color-porcelain)]">Mi Perfil</span>
+          <span class="text-[14px] font-[650] text-[var(--color-porcelain)]">Mi Perfil</span>
           <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
         </button>
 
-        <button (click)="openPassword()" class="flex items-center gap-3 w-full rounded-2xl bg-[var(--color-deep-slate)]/40 border border-[var(--color-charcoal-grey)]/60 p-4 transition-all active:bg-[var(--color-deep-slate)]">
-          <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <button (click)="openPassword()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all active:bg-white/[0.06]">
+          <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
             <lucide-icon name="key-round" [size]="20"></lucide-icon>
           </div>
-          <span class="text-[15px] font-[590] text-[var(--color-porcelain)]">Cambiar Contraseña</span>
+          <span class="text-[14px] font-[650] text-[var(--color-porcelain)]">Cambiar Contraseña</span>
           <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
         </button>
 

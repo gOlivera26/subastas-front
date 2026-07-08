@@ -40,7 +40,7 @@
       <button
         type="button"
         (click)="toggleSubastaActions(row, $event)"
-        class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[var(--color-charcoal-grey)]/80 bg-[var(--color-pitch-black)]/60 px-2 text-[var(--color-porcelain)] transition-colors hover:border-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]"
+        class="subasta-actions-trigger"
         [attr.aria-expanded]="isSubastaActionsOpen(rowActionKey(row))"
         aria-label="Abrir acciones">
         <span class="action-menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
@@ -49,6 +49,7 @@
       <div
         [id]="subastaActionsPopoverId(row)"
         [attr.popover]="'auto'"
+        (click)="closeSubastaActions()"
         class="subasta-actions-menu-list rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] p-1.5 text-left shadow-2xl"
         [style.top.px]="subastaActionsMenuPosition()?.top"
         [style.left.px]="subastaActionsMenuPosition()?.left"

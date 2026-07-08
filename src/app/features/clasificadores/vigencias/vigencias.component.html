@@ -17,29 +17,23 @@
   <ng-template #fecIngTpl let-row>
     <span class="text-[13px] text-[var(--color-storm-cloud)]">{{ row.fecIng | date:'dd/MM/yyyy' }}</span>
   </ng-template>
-  <ng-template #accionesTpl let-row>
-    <div class="flex items-center justify-end gap-1">
-      @if (!row.activoEjecucion) {
-        <button (click)="setActiva(row)" title="Marcar como activa" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-emerald-400"><lucide-icon name="play" [size]="16"></lucide-icon></button>
-      }
-      <button (click)="openEditModal(row)" title="Editar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-cyan-spark)]"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
-      <button (click)="confirmDelete(row)" title="Eliminar" class="rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-red-400"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
-    </div>
-  </ng-template>
-
-  <app-smart-table
+<app-smart-table
     [columns]="columns"
     [data]="vigenciaOrdenada()"
     [customTemplates]="customTemplates()"
+    
+    [actions]="actions"
     [loading]="isLoading()"
     [pageSize]="999"
+    
+    (onAction)="handleTableAction($event)"
     emptyMessage="No hay vigencias registradas"
     emptySubMessage="Creá la primera para comenzar.">
   </app-smart-table>
 </div>
 
 @if (isModalOpen()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
     <div class="relative w-full max-w-lg rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in">
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4">

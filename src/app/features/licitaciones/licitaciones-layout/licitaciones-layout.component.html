@@ -29,10 +29,10 @@
 
       @if (auth.hasPageAccess('licitaciones.inicio')) {
         <a routerLink="/licitaciones"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          [routerLinkActiveOptions]="{exact: true}"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="home" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -42,9 +42,9 @@
 
       @if (auth.hasPageAccess('licitaciones.nota-pedido')) {
         <a routerLink="/licitaciones/nota-pedido"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-neon-lime)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="file-text" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -54,9 +54,9 @@
 
       @if (auth.hasPageAccess('licitaciones.subasta')) {
         <a routerLink="/licitaciones/subasta"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="gavel" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -66,9 +66,9 @@
 
       @if (auth.hasPageAccess('licitaciones.informes')) {
         <a routerLink="/licitaciones/informes"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="bar-chart" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -78,9 +78,9 @@
 
       @if (auth.hasPageAccess('licitaciones.tablero')) {
         <a routerLink="/licitaciones/tablero"
-         routerLinkActive="bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)] border-[var(--color-charcoal-grey)] shadow-sm"
+         routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
         <lucide-icon name="layout-dashboard" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"

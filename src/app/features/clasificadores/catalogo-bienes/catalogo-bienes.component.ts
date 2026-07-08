@@ -12,7 +12,8 @@ import { OrganizationService, Organization } from '../../../core/services/organi
 import { AuthService } from '../../../core/services/auth.service';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
-import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-catalogo-bienes',
@@ -21,6 +22,7 @@ import { TableColumn } from '../../../shared/ui/smart-table/table.models';
   templateUrl: './catalogo-bienes.component.html',
 })
 export class CatalogoBienesComponent implements OnInit {
+  private confirmation = inject(ConfirmationService);
   private service = inject(CatalogoBienService);
   private objetoGastoService = inject(ObjetoGastoService);
   private vigenciaService = inject(VigenciaService);
@@ -31,29 +33,41 @@ export class CatalogoBienesComponent implements OnInit {
   organizaciones = signal<Organization[]>([]);
   objetosGasto = signal<ObjetoGasto[]>([]);
   selectedVigenciaId = signal<number | null>(null);
+  viewMode = signal<'list' | 'tree'>('list');
+  treeSearchTerm = signal('');
   treeNodes = signal<CatalogoBienTreeItem[]>([]);
   parentList = signal<CatalogoBien[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
   success = signal<string | null>(null);
   expandedNodes = signal<Set<number>>(new Set());
-  searchTerm = signal('');
   jerarquiaTpl = viewChild<TemplateRef<any>>('jerarquiaTpl');
   codigoTpl = viewChild<TemplateRef<any>>('codigoTpl');
   objetoGastoTpl = viewChild<TemplateRef<any>>('objetoGastoTpl');
   nivelTpl = viewChild<TemplateRef<any>>('nivelTpl');
   hijosTpl = viewChild<TemplateRef<any>>('hijosTpl');
   organizacionTpl = viewChild<TemplateRef<any>>('organizacionTpl');
-  accionesTpl = viewChild<TemplateRef<any>>('accionesTpl');
 
   columns: TableColumn[] = [
-    { header: 'Jerarqu?a', key: 'jerarquia', type: 'custom', sortable: true, searchFields: ['nItem', 'codigo', 'objetoGastoNombre', 'organizacionNombre', 'tipoJerarquia'] },
+    { header: 'Jerarquía', key: 'jerarquia', type: 'custom', sortable: true, searchFields: ['nItem', 'codigo', 'objetoGastoNombre', 'organizacionNombre', 'tipoJerarquia'] },
     { header: 'Nivel', key: 'nivelOrden', type: 'custom', sortable: true },
     { header: 'Hijos', key: 'descendientes', type: 'custom', sortable: true },
-    { header: 'C?digo', key: 'codigo', type: 'custom', sortable: true },
+    { header: 'Código', key: 'codigo', type: 'custom', sortable: true },
     { header: 'Objeto Gasto', key: 'objetoGastoNombre', type: 'custom', sortable: true },
     { header: 'Org.', key: 'organizacionNombre', type: 'custom', sortable: true },
-    { header: 'Acciones', key: 'acciones', type: 'custom' },
+  ];
+
+  actions: TableAction[] = [
+    { action: 'edit', icon: 'pencil', tooltip: 'Editar bien', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-cyan-spark)]' },
+    { action: 'delete', icon: 'trash-2', tooltip: 'Eliminar bien', color: 'text-red-400 hover:text-red-300' },
+  ];
+
+  uploadColumns: TableColumn[] = [
+    { key: 'idItem', header: 'ID', sortable: true },
+    { key: 'idItemRel', header: 'Padre', sortable: true },
+    { key: 'codigo', header: 'Código', sortable: true },
+    { key: 'nItem', header: 'Nombre', sortable: true },
+    { key: 'numeroObjeto', header: 'Obj. Gasto', sortable: true },
   ];
 
 
@@ -69,9 +83,9 @@ export class CatalogoBienesComponent implements OnInit {
   isUploading = signal(false);
 
   filteredTree = computed(() => {
-    const term = this.searchTerm().toLowerCase().trim();
-    if (!term) return this.treeNodes();
-    return this.filterNodes(this.treeNodes(), term);
+    const term = this.treeSearchTerm().toLowerCase().trim();
+    const nodes = term ? this.filterNodes(this.treeNodes(), term) : this.treeNodes();
+    return this.sortTreeByHierarchy(nodes);
   });
 
   visibleRows = computed(() => this.flattenTree(this.filteredTree()));
@@ -84,14 +98,14 @@ export class CatalogoBienesComponent implements OnInit {
     const organizacion = this.organizacionTpl();
     const nivel = this.nivelTpl();
     const hijos = this.hijosTpl();
-    const acciones = this.accionesTpl();
+
     if (jerarquia) templates['jerarquia'] = jerarquia;
     if (codigo) templates['codigo'] = codigo;
     if (objetoGasto) templates['objetoGastoNombre'] = objetoGasto;
     if (organizacion) templates['organizacionNombre'] = organizacion;
     if (nivel) templates['nivelOrden'] = nivel;
     if (hijos) templates['descendientes'] = hijos;
-    if (acciones) templates['acciones'] = acciones;
+
     return templates;
   });
 
@@ -114,6 +128,22 @@ export class CatalogoBienesComponent implements OnInit {
     { label: 'Ninguna / Global', value: undefined },
     ...this.organizaciones().map(org => ({ label: org.nombre, value: org.idOrganizacion }))
   ]);
+
+
+  setViewMode(mode: 'list' | 'tree') {
+    this.viewMode.set(mode);
+  }
+
+  handleTableAction(event: { action: string; row: any }) {
+    switch (event.action) {
+      case 'edit':
+        this.openEditModal(event.row);
+        break;
+      case 'delete':
+        this.confirmDelete(event.row);
+        break;
+    }
+  }
 
   ngOnInit() { this.loadVigencias(); this.loadOrganizaciones(); }
 
@@ -158,6 +188,24 @@ export class CatalogoBienesComponent implements OnInit {
     return (node.children || []).reduce((total, child) => total + 1 + this.countDescendants(child), 0);
   }
 
+  private sortTreeByHierarchy(nodes: CatalogoBienTreeItem[]): CatalogoBienTreeItem[] {
+    return [...nodes]
+      .map(node => ({ ...node, children: this.sortTreeByHierarchy(node.children || []) }))
+      .sort((a, b) => {
+        const aDesc = this.countDescendants(a);
+        const bDesc = this.countDescendants(b);
+        const aHasChildren = aDesc > 0 || a.hasChildren;
+        const bHasChildren = bDesc > 0 || b.hasChildren;
+        if (aHasChildren !== bHasChildren) return aHasChildren ? -1 : 1;
+        if (aDesc !== bDesc) return bDesc - aDesc;
+        return (a.nItem || '').localeCompare(b.nItem || '', 'es', { numeric: true, sensitivity: 'base' });
+      });
+  }
+
+  treeIndent(level: number): number {
+    return Math.min(Math.max(Number(level) || 0, 0), 6) * 14;
+  }
+
   expandAll() {
     const ids = new Set<number>();
     const visit = (nodes: CatalogoBienTreeItem[]) => nodes.forEach(node => {
@@ -200,7 +248,7 @@ export class CatalogoBienesComponent implements OnInit {
 
   loadOrganizaciones() { this.orgService.getActiveOrganizations().subscribe({ next: (res: any) => { if (res.success && res.data) this.organizaciones.set(res.data); } }); }
   loadObjetosGasto() { const id = this.selectedVigenciaId(); if (!id) return; this.objetoGastoService.getAll(id).subscribe({ next: (res: any) => { if (res.success && res.data) this.objetosGasto.set(res.data); } }); }
-  onVigenciaChange(value: any) { this.selectedVigenciaId.set(Number(value)); this.expandedNodes.set(new Set()); this.searchTerm.set(''); this.loadItems(); this.loadObjetosGasto(); }
+  onVigenciaChange(value: any) { this.selectedVigenciaId.set(Number(value)); this.expandedNodes.set(new Set()); this.treeSearchTerm.set(''); this.loadItems(); this.loadObjetosGasto(); }
 
   loadItems() {
     const id = this.selectedVigenciaId(); if (!id) return;
@@ -208,7 +256,7 @@ export class CatalogoBienesComponent implements OnInit {
     this.service.getAll(id).subscribe({
       next: (res: any) => {
         this.loading.set(false);
-        if (res.success && res.data) { this.parentList.set(res.data); this.treeNodes.set(this.buildTree(res.data)); }
+        if (res.success && res.data) { this.parentList.set(res.data); const tree = this.buildTree(res.data); this.treeNodes.set(tree); this.expandedNodes.set(new Set(tree.filter(n => n.hasChildren || (n.children?.length || 0) > 0).slice(0, 8).map(n => n.idItem))); }
         else this.treeNodes.set([]);
       },
       error: () => { this.loading.set(false); this.treeNodes.set([]); this.error.set('Error al cargar.'); }
@@ -229,7 +277,7 @@ export class CatalogoBienesComponent implements OnInit {
     obs.subscribe({ next: (res: any) => { this.isSaving.set(false); if (res.success) { this.closeModal(); this.showSuccess('Guardado.'); this.loadItems(); } }, error: (err: any) => { this.isSaving.set(false); this.error.set(err.error?.message || 'Error al guardar.'); } });
   }
 
-  confirmDelete(item: CatalogoBien) { if (!confirm(`¿Eliminar "${item.nItem}"?`)) return; this.service.delete(item.idItem).subscribe({ next: (res: any) => { if (res.success) { this.showSuccess('Eliminado.'); this.loadItems(); } }, error: () => this.error.set('Error.') }); }
+  async confirmDelete(item: CatalogoBien) { if (!(await this.confirmation.confirm({ title: 'Eliminar bien', message: `¿Eliminar "${item.nItem}"?`, confirmText: 'Eliminar', type: 'danger' }))) return; this.service.delete(item.idItem).subscribe({ next: (res: any) => { if (res.success) { this.showSuccess('Eliminado.'); this.loadItems(); } }, error: () => this.error.set('Error.') }); }
 
   private showSuccess(m: string) { this.success.set(m); setTimeout(() => this.success.set(null), 3000); }
   trackByFn(_index: number, item: CatalogoBienTreeItem): number { return item.idItem; }

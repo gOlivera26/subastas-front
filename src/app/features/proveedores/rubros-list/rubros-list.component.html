@@ -1,4 +1,4 @@
-<div class="relative flex min-h-[calc(100vh-64px)] flex-col px-4 py-8 sm:px-6 lg:px-8">
+﻿<div class="relative flex min-h-[calc(100vh-64px)] flex-col px-4 py-8 sm:px-6 lg:px-8">
   <div class="relative z-10 mx-auto w-full max-w-[1400px] animate-fade-in-up">
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
@@ -68,21 +68,11 @@
         </span>
       </ng-template>
 
-      <ng-template #accionesTpl let-row>
-        <div class="flex items-center justify-end gap-1.5">
-          <button (click)="openEditModal(row)" title="Editar" class="rounded-md bg-[var(--color-deep-slate)] p-1.5 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-charcoal-grey)] hover:text-[var(--color-cyan-spark)]">
-            <lucide-icon name="pencil" [size]="16"></lucide-icon>
-          </button>
-          <button (click)="deleteRubro(row.id)" title="Eliminar" class="rounded-md border border-red-500/20 bg-red-500/10 p-1.5 text-red-400 transition-colors hover:bg-red-500 hover:text-[var(--color-pitch-black)]">
-            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-          </button>
-        </div>
-      </ng-template>
-
       <app-smart-table
         [columns]="columns"
         [data]="rubros()"
         [customTemplates]="customTemplates()"
+        [actions]="actions"
         [loading]="loading()"
         [serverSide]="true"
         [totalServerItems]="totalRows()"
@@ -90,28 +80,54 @@
         searchPlaceholder="Buscar por código o descripción..."
         (sortChange)="onSort($event)"
         (pageChange)="onPageChange($event)"
+        (onAction)="handleTableAction($event)"
         (searchChange)="onSearch($event)">
       </app-smart-table>
     } @else {
-      <div class="mb-4 max-w-md">
-        <div class="relative">
+      <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="relative w-full lg:max-w-md">
           <lucide-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-storm-cloud)]"></lucide-icon>
-          <input [(ngModel)]="treeSearchTerm" type="text" placeholder="Buscar en el Árbol..." class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] py-2.5 pl-10 pr-4 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none">
+          <input [ngModel]="treeSearchTerm()" (ngModelChange)="treeSearchTerm.set($event)" type="text" placeholder="Buscar en el árbol..." class="rubro-tree-search-input w-full rounded-2xl py-3 pl-10 pr-4 text-[14px] text-[var(--color-porcelain)] outline-none transition-all">
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 text-[11px] font-[700] uppercase tracking-[0.16em] text-[var(--color-storm-cloud)]">
+          <span class="rubro-tree-chip inline-flex items-center gap-2 rounded-full px-3 py-2">
+            <lucide-icon name="folder-tree" [size]="14" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+            Jerarquía primero
+          </span>
+          <span class="rubro-tree-chip inline-flex items-center gap-2 rounded-full px-3 py-2">
+            {{ filteredTree().length }} raíces visibles
+          </span>
         </div>
       </div>
 
-      <div class="overflow-hidden rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-lg">
+      <div class="rubro-tree-shell overflow-hidden rounded-[1.75rem]">
         @if (treeLoading()) {
           <div class="flex items-center justify-center py-16 text-[var(--color-storm-cloud)]">
-            <lucide-icon name="loader-2" [size]="24" class="mr-3 animate-spin"></lucide-icon>Cargando Árbol de rubros...
+            <lucide-icon name="loader-2" [size]="24" class="mr-3 animate-spin"></lucide-icon>Cargando árbol de rubros...
           </div>
         } @else {
-          <div class="divide-y divide-[var(--color-charcoal-grey)]">
+          <div class="rubro-tree-header px-5 py-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p class="text-[11px] font-[740] uppercase tracking-[0.22em] text-[var(--color-storm-cloud)]">Árbol de rubros</p>
+                <p class="mt-1 text-[13px] text-[var(--color-fog-grey)]">Los agrupadores y nodos con hijos aparecen primero.</p>
+              </div>
+              <div class="rubro-tree-view-chip inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-[720] uppercase tracking-[0.14em] text-[var(--color-cyan-spark)]">
+                <lucide-icon name="sparkles" [size]="13"></lucide-icon>
+                Vista jerárquica
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 p-3 sm:p-4">
             @for (rubro of filteredTree(); track trackByRubro($index, rubro)) {
               <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: rubro, level: 0 }"></ng-container>
             } @empty {
               <div class="px-6 py-16 text-center">
-                <lucide-icon name="folder-tree" [size]="36" class="mx-auto mb-3 text-[var(--color-storm-cloud)]"></lucide-icon>
+                <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl border border-[var(--color-charcoal-grey)]/70 bg-[var(--color-deep-slate)]/50 text-[var(--color-storm-cloud)]">
+                  <lucide-icon name="folder-tree" [size]="34"></lucide-icon>
+                </div>
                 <p class="text-[15px] font-[590] text-[var(--color-porcelain)]">No hay rubros para mostrar</p>
                 <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Importá el CSV o creá el primer rubro.</p>
               </div>
@@ -124,58 +140,69 @@
 </div>
 
 <ng-template #treeRow let-rubro let-level="level">
-  <div class="group border-b border-[var(--color-charcoal-grey)]/70 px-3 py-3 transition-colors last:border-b-0 hover:bg-[var(--color-deep-slate)]/40 sm:px-5">
-    <div class="flex min-w-0 items-start gap-2.5" [style.padding-left.px]="treeIndent(level)">
-      <button
-        type="button"
-        (click)="toggleNode(rubro.id, $event)"
-        [class.opacity-0]="!rubro.hasChildren"
-        [class.pointer-events-none]="!rubro.hasChildren"
-        class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] text-[var(--color-porcelain)] transition-colors hover:border-[var(--color-cyan-spark)]/60 hover:text-[var(--color-cyan-spark)]"
-        [attr.aria-label]="isExpanded(rubro.id) ? 'Contraer rubro' : 'Expandir rubro'">
-        <lucide-icon [name]="isExpanded(rubro.id) ? 'chevron-down' : 'chevron-right'" [size]="16"></lucide-icon>
-      </button>
+  <div class="relative">
+    @if (level > 0) {
+      <div class="rubro-tree-connector absolute bottom-0 top-0 w-px" [style.left.px]="treeIndent(level) + 20"></div>
+    }
 
-      <div class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/55 text-[var(--color-storm-cloud)]">
-        <lucide-icon [name]="rubro.hasChildren ? 'folder' : 'file-text'" [size]="16"></lucide-icon>
-      </div>
+    <div class="rubro-tree-card group relative overflow-hidden rounded-2xl px-3 py-3 transition-all sm:px-4" [class.mt-1]="level > 0">
+      <div class="flex min-w-0 items-start gap-2.5" [style.padding-left.px]="treeIndent(level)">
+        <button
+          type="button"
+          (click)="toggleNode(rubro.id, $event)"
+          [class.opacity-0]="!rubro.hasChildren"
+          [class.pointer-events-none]="!rubro.hasChildren"
+          class="rubro-tree-toggle mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl text-[var(--color-light-steel)] transition-all"
+          [attr.aria-label]="isExpanded(rubro.id) ? 'Contraer rubro' : 'Expandir rubro'">
+          <lucide-icon [name]="isExpanded(rubro.id) ? 'chevron-down' : 'chevron-right'" [size]="16"></lucide-icon>
+        </button>
 
-      <div class="min-w-0 flex-1">
-        <div class="flex min-w-0 flex-wrap items-center gap-2">
-          <p class="min-w-0 max-w-full truncate text-[14px] font-[650] leading-5 text-[var(--color-porcelain)] sm:text-[15px]" [title]="rubro.descripcion">{{ rubro.descripcion }}</p>
-          @if (rubro.hasChildren) {
-            <span class="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2 py-0.5 text-[10px] font-[700] uppercase tracking-wider text-[var(--color-fog-grey)]">
-              <lucide-icon name="folder-tree" [size]="12"></lucide-icon>
-              {{ rubro.children?.length || 0 }} hijos
+        <div [ngClass]="rubro.hasChildren ? 'border-[var(--color-cyan-spark)]/25 bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]' : 'border-[var(--color-charcoal-grey)]/65 bg-[var(--color-pitch-black)]/50 text-[var(--color-storm-cloud)]'" class="rubro-tree-node-icon mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl transition-colors">
+          <lucide-icon [name]="rubro.hasChildren ? 'folder-tree' : 'file-text'" [size]="16"></lucide-icon>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex min-w-0 flex-wrap items-center gap-2">
+            <p class="min-w-0 max-w-full truncate text-[14px] font-[680] leading-5 text-[var(--color-porcelain)] sm:text-[15px]" [title]="rubro.descripcion">{{ rubro.descripcion }}</p>
+            @if (rubro.hasChildren) {
+              <span class="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-cyan-spark)]/20 bg-[var(--color-cyan-spark)]/10 px-2 py-0.5 text-[10px] font-[740] uppercase tracking-wider text-[var(--color-cyan-spark)]">
+                <lucide-icon name="folder-tree" [size]="12"></lucide-icon>
+                {{ rubro.children?.length || 0 }} hijos
+              </span>
+            } @else {
+              <span class="inline-flex shrink-0 items-center rounded-full border border-[var(--color-charcoal-grey)]/60 bg-[var(--color-pitch-black)]/45 px-2 py-0.5 text-[10px] font-[700] uppercase tracking-wider text-[var(--color-fog-grey)]">Sin hijos</span>
+            }
+          </div>
+
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <span class="rounded-lg border border-[var(--color-charcoal-grey)]/65 bg-[var(--color-pitch-black)]/65 px-2 py-1 font-mono text-[11px] text-[var(--color-fog-grey)]">{{ rubro.codigo }}</span>
+            <span [ngClass]="rubro.imputable ? 'border-[var(--color-cyan-spark)]/30 bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]' : 'border-[var(--color-charcoal-grey)]/65 bg-[var(--color-pitch-black)]/55 text-[var(--color-storm-cloud)]'" class="rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
+              {{ rubro.imputable ? 'Imputable' : 'No imputable' }}
             </span>
-          }
+            @if (level > 0) {
+              <span class="rounded-lg border border-[var(--color-charcoal-grey)]/45 bg-[var(--color-deep-slate)]/40 px-2 py-1 text-[10px] font-[650] uppercase tracking-wider text-[var(--color-storm-cloud)]">Nivel {{ level + 1 }}</span>
+            }
+          </div>
         </div>
 
-        <div class="mt-2 flex flex-wrap items-center gap-2">
-          <span class="rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-2 py-1 font-mono text-[11px] text-[var(--color-fog-grey)]">{{ rubro.codigo }}</span>
-          <span [ngClass]="rubro.imputable ? 'border-[var(--color-cyan-spark)]/30 bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]' : 'border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] text-[var(--color-storm-cloud)]'" class="rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
-            {{ rubro.imputable ? 'Imputable' : 'No imputable' }}
-          </span>
-          @if (level > 0) {
-            <span class="rounded-lg bg-[var(--color-deep-slate)]/70 px-2 py-1 text-[10px] font-[650] uppercase tracking-wider text-[var(--color-storm-cloud)]">Nivel {{ level + 1 }}</span>
-          }
+        <div class="flex shrink-0 items-center gap-1 opacity-80 transition-opacity group-hover:opacity-100">
+          <button (click)="openEditModal(rubro)" title="Editar rubro" class="rubro-tree-icon-btn rounded-xl p-2 text-[var(--color-storm-cloud)] transition-all hover:text-[var(--color-cyan-spark)]">
+            <lucide-icon name="pencil" [size]="16"></lucide-icon>
+          </button>
+          <button (click)="deleteRubro(rubro.id)" title="Eliminar rubro" class="rubro-tree-danger-btn rounded-xl p-2 text-red-400 transition-all hover:text-red-300">
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          </button>
         </div>
-      </div>
-
-      <div class="flex shrink-0 items-center gap-1">
-        <button (click)="openEditModal(rubro)" title="Editar" class="rounded-lg bg-[var(--color-deep-slate)] p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-charcoal-grey)] hover:text-[var(--color-cyan-spark)]">
-          <lucide-icon name="pencil" [size]="16"></lucide-icon>
-        </button>
-        <button (click)="deleteRubro(rubro.id)" title="Eliminar" class="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition-colors hover:bg-red-500 hover:text-white">
-          <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-        </button>
       </div>
     </div>
   </div>
+
   @if (rubro.hasChildren && isExpanded(rubro.id)) {
-    @for (child of rubro.children; track trackByRubro($index, child)) {
-      <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: child, level: level + 1 }"></ng-container>
-    }
+    <div class="mt-2 space-y-2">
+      @for (child of rubro.children; track trackByRubro($index, child)) {
+        <ng-container *ngTemplateOutlet="treeRow; context: { $implicit: child, level: level + 1 }"></ng-container>
+      }
+    </div>
   }
 </ng-template>
 
@@ -304,3 +331,4 @@
     </div>
   </app-modal>
 }
+
