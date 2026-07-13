@@ -28,14 +28,21 @@ export interface ProrrogaEnVivo {
   nuevaFechaFin: string;
 }
 
+export interface MejorOfertaItem {
+  idCotizacionDetalle?: number;
+  idRenglon?: number;
+  mejorMonto: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SignalRService {
   private connection: signalR.HubConnection | null = null;
   ofertas = signal<OfertaEnVivo[]>([]);
+  mejoresOfertas = signal<MejorOfertaItem[]>([]);
   mensajes = signal<MensajeEnVivo[]>([]);
   consultas = signal<Consulta[]>([]);
   usuarioEscribiendo = signal<string | null>(null);
-  prorrogaEvent = signal<ProrrogaEnVivo | null>(null); // Escucha de alargue
+  prorrogaEvent = signal<ProrrogaEnVivo | null>(null);
   connected = signal(false);
   error = signal<string | null>(null);
 
@@ -54,6 +61,19 @@ export class SignalRService {
 
     this.connection.on('OfertaRecibida', (oferta: OfertaEnVivo) => {
       this.ofertas.update(arr => [...arr.slice(-49), oferta]);
+    });
+
+    this.connection.on('MejorOfertaActualizada', (data: { idCotizacionDetalle?: number; idRenglon?: number; mejorMonto: number }) => {
+      this.mejoresOfertas.update(arr => {
+        const filtered = arr.filter(o =>
+          !(o.idCotizacionDetalle === data.idCotizacionDetalle && o.idRenglon === data.idRenglon)
+        );
+        return [...filtered, {
+          idCotizacionDetalle: data.idCotizacionDetalle,
+          idRenglon: data.idRenglon,
+          mejorMonto: data.mejorMonto
+        }];
+      });
     });
 
     // Escuchar cuando el servidor patea la hora de cierre
@@ -104,7 +124,7 @@ export class SignalRService {
     }
   }
 
-  clearOfertas(): void { this.ofertas.set([]); }
+  clearOfertas(): void { this.ofertas.set([]); this.mejoresOfertas.set([]); }
 
   async joinChat(idCotizacion: number): Promise<void> {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
