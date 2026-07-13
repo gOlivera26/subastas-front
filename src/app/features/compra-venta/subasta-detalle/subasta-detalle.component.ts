@@ -259,7 +259,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
       
       const bestPerItem: Record<number, number> = {};
       elementos.forEach((el: any) => {
-        const base = this.isPorRenglon ? (el._importeBaseConsolidado || 0) : (this.getVal(el.importeBase) * this.getVal(el.cantidad));
+        const base = this.isPorRenglon ? (el._importeBaseConsolidado || 0) : this.getVal(el.importeBase);
         bestPerItem[this.isPorRenglon ? el.idRenglon : el.idCotizacionDetalle] = base;
       });
 
