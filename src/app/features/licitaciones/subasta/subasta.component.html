@@ -1,4 +1,4 @@
-﻿<div class="page-container max-w-[1500px]">
+<div class="page-container max-w-[1500px]">
   <div class="page-heading">
     <h1 class="text-[24px] font-[590] text-[var(--color-porcelain)]">Subasta / Licitación</h1>
     <p class="text-[14px] text-[var(--color-storm-cloud)]">Administración de procesos de compra y subastas electrónicas.</p>
@@ -202,7 +202,7 @@
   }
 
   @if (pasoCrear() === 2) {
-    <div class="space-y-4">
+    <div class="space-y-4 subasta-create-flow">
       <div class="flex items-start justify-between gap-4 flex-wrap">
         <div class="flex w-full flex-wrap items-end gap-3 lg:w-auto">
           <div class="w-full sm:w-[320px]">
@@ -225,8 +225,8 @@
         <span class="text-[13px] text-[var(--color-storm-cloud)]"><span class="text-[var(--color-neon-lime)] font-[590]">{{ selectedCount() }}</span> seleccionados</span>
       </div>
 
-      <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
-        <div class="px-4 py-2.5 bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)]">
+      <div class="subasta-create-panel rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
+        <div class="subasta-create-panel-header px-4 py-2.5 bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)]">
           <h4 class="text-[13px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2"><lucide-icon name="package" [size]="14" class="text-[var(--color-storm-cloud)]"></lucide-icon>Bienes y Servicios Disponibles</h4>
         </div>
         <div class="overflow-x-auto">
@@ -266,8 +266,8 @@
       </div>
 
       @if (selectedCount() > 0) {
-        <div class="mt-6 rounded-xl border border-[var(--color-neon-lime)]/30 bg-[var(--color-neon-lime)]/5 overflow-hidden">
-          <div class="px-4 py-2.5 bg-[var(--color-neon-lime)]/10 border-b border-[var(--color-neon-lime)]/20 flex items-center justify-between">
+        <div class="subasta-create-selected-panel mt-6 rounded-xl border border-[var(--color-neon-lime)]/30 bg-[var(--color-neon-lime)]/5 overflow-hidden">
+          <div class="subasta-create-selected-header px-4 py-2.5 bg-[var(--color-neon-lime)]/10 border-b border-[var(--color-neon-lime)]/20 flex items-center justify-between">
             <h4 class="text-[13px] font-[590] text-[var(--color-neon-lime)] flex items-center gap-2"><lucide-icon name="check" [size]="14"></lucide-icon>Bienes a Subastar</h4>
             <span class="text-[12px] text-[var(--color-neon-lime)]">{{ selectedCount() }} ítems</span>
           </div>
@@ -347,7 +347,7 @@
               </tbody>
             </table>
           </div>
-          <div class="bg-[var(--color-pitch-black)]/50 px-4 py-3 border-t border-[var(--color-neon-lime)]/20 flex justify-end items-center gap-4">
+          <div class="subasta-create-selected-footer bg-[var(--color-pitch-black)]/50 px-4 py-3 border-t border-[var(--color-neon-lime)]/20 flex justify-end items-center gap-4">
             <span class="text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Total General Estimado:</span>
             <span class="text-[18px] font-mono font-bold text-[var(--color-neon-lime)]">${{ totalEstimadoGeneral | number:'1.2-2' }}</span>
           </div>
@@ -578,7 +578,7 @@
           </div>
         </div>
       } @else if (detalleItems().length > 0) {
-        <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
+        <div class="subasta-create-panel rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
           <div class="px-3 py-2 bg-[var(--color-deep-slate)]/30 border-b border-[var(--color-charcoal-grey)]">
             <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Ítems ({{ detalleItems().length }})</h4>
           </div>
@@ -687,7 +687,7 @@
     
     <div>
       <h4 class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3">Documentos Registrados</h4>
-      <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
+      <div class="subasta-create-panel rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
         <table class="w-full text-left text-[13px]">
           <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
             <tr><th class="px-4 py-3">Nombre del Archivo</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Fecha</th><th class="px-4 py-3 text-right">Acciones</th></tr>

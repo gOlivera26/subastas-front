@@ -152,7 +152,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     archivo: null as File | null
   };
 
-  // Helper para desencapsular los valores numÃ©ricos extraÃ±os de la API
+  // Helper para desencapsular los valores numéricos extraños de la API
   getVal(campo: any): number {
     if (campo && campo.parsedValue !== undefined) return campo.parsedValue;
     return Number(campo) || 0;
@@ -347,7 +347,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
 
       this.signalR['connection']?.on('SubastaCerradaPorTope', (cerradaId: number) => {
         if (cerradaId === this.idCotizacion()) {
-          this.notify.showWarning('La subasta ha finalizado porque se alcanzÃ³ el importe mÃ­nimo permitido.');
+          this.notify.showWarning('La subasta ha finalizado porque se alcanzó el importe mínimo permitido.');
           
           this.subasta.update(s => {
             if (!s) return s;
@@ -462,7 +462,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
       .filter(id => state[id].ofertar && state[id].miImporte > 0);
 
     if (ofertasCandidatas.length === 0) {
-      this.notify.showWarning('No hay ofertas marcadas con "SÃ­" o con importes vÃ¡lidos.');
+      this.notify.showWarning('No hay ofertas marcadas con "Sí" o con importes válidos.');
       return;
     }
 
@@ -492,7 +492,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
               if (r.textoError) {
                 const nombreItem = this.elementosOfertables().find((e: any) => 
                   isRenglon ? e.idRenglon === id : e.idCotizacionDetalle === id
-                )?.nItem || 'Ãtem #' + id;
+                )?.nItem || 'Ítem #' + id;
 
                 listaErrores.push({ item: nombreItem, error: r.textoError });
                 newState[id].textoError = r.textoError;
@@ -507,7 +507,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
           });
 
           if (exitos > 0) {
-            this.notify.showSuccess(`Â¡Se registraron ${exitos} ofertas con Ã©xito!`);
+            this.notify.showSuccess(`¡Se registraron ${exitos} ofertas con éxito!`);
             this.feedView.set('CHART'); 
           }
 
@@ -524,7 +524,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
           const listaErrores = ofertasCandidatas.map(id => {
             const nombreItem = this.elementosOfertables().find((e: any) => 
               isRenglon ? e.idRenglon === id : e.idCotizacionDetalle === id
-            )?.nItem || 'Lote / Ãtem';
+            )?.nItem || 'Lote / Ítem';
             
             this.ofertasForm.update(st => {
               const newState = { ...st };
@@ -544,7 +544,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- GARANTÃAS ---
+  // --- GARANTÍAS ---
   openGarantiasModal() { 
     this.cargarGarantias(); 
     this.resetGarantiaForm(); 
@@ -595,11 +595,11 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     const monedaId = Number(f.idMoneda);
 
     if (tipoDoc === 1 && (!f.companiaAseguradora || !f.montoCaucion || !f.nroPoliza || monedaId === 0)) { 
-      this.notify.showWarning('CompletÃ¡ los datos obligatorios de la PÃ³liza.'); 
+      this.notify.showWarning('Completá los datos obligatorios de la Póliza.'); 
       return; 
     }
     if (tipoDoc === 2 && (!f.montoPagare || !f.fechaPagare || monedaId === 0)) { 
-      this.notify.showWarning('CompletÃ¡ los datos obligatorios del PagarÃ©.'); 
+      this.notify.showWarning('Completá los datos obligatorios del Pagaré.'); 
       return; 
     }
     if (!f.archivo) { 
@@ -634,7 +634,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
       next: (res: any) => { 
         this.savingGarantia.set(false); 
         if (res.success) { 
-          this.notify.showSuccess('GarantÃ­a guardada.'); 
+          this.notify.showSuccess('Garantía guardada.'); 
           this.resetGarantiaForm(); 
           this.cargarGarantias(); 
         } else { 
@@ -653,12 +653,12 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     this.cotService.eliminarGarantia(id).subscribe({ 
       next: (res: any) => { 
         if (res.success) { 
-          this.notify.showSuccess('GarantÃ­a eliminada.'); 
+          this.notify.showSuccess('Garantía eliminada.'); 
           this.cargarGarantias(); 
         } 
       },
       error: (err) => {
-        this.notify.showError(err.error?.message || 'No se pudo eliminar la garantÃ­a.');
+        this.notify.showError(err.error?.message || 'No se pudo eliminar la garantía.');
       }
     });
   }
@@ -684,7 +684,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     },
     error: (err) => {
       this.desistiendo.set(false);
-      this.notify.showError(err.error?.message || 'Error de conexiÃ³n.');
+      this.notify.showError(err.error?.message || 'Error de conexión.');
     }
   });
 }

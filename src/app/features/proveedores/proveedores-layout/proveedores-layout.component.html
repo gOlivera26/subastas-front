@@ -75,7 +75,7 @@
       </ng-container>
     </app-header>
 
-    <main [@routeFade]="routeState()"
+    <main id="main-content" tabindex="-1" [@routeFade]="routeState()"
           class="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-pitch-black)]">
       @if (pageTitle() && pageTitle() !== 'Inicio') {
         <div class="flex min-w-0 items-center gap-2 overflow-x-auto border-b border-[var(--color-charcoal-grey)] px-3 py-3 sm:px-6 lg:px-8">

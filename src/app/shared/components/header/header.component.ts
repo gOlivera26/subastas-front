@@ -11,6 +11,7 @@ import { ProfileResponse } from '../../../core/models/auth.model';
   standalone: true,
   imports: [RouterLink, LucideAngularModule, NgClass, ReactiveFormsModule],
   templateUrl: './header.component.html',
+  styleUrl: './header.component.css',
 })
 export class HeaderComponent implements OnInit {
   @Input() variant: 'public' | 'module' = 'public';

@@ -16,6 +16,7 @@ export type ChartOptions = {
   standalone: true,
   imports: [CommonModule, RouterLink, NgApexchartsModule],
   templateUrl: './subasta-publica-detalle.component.html',
+  styleUrls: ['./subasta-publica-detalle.component.css'],
 })
 export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
   private cotService = inject(CotizacionService);
@@ -37,16 +38,16 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
   constructor() {
     this.chartOptions = {
       series: [{ name: "Total Subasta", data: [] }],
-      chart: { type: "area", height: 300, background: 'transparent', toolbar: { show: false }, animations: { enabled: false } },
+      chart: { type: "area", height: 300, background: 'transparent', toolbar: { show: false }, animations: { enabled: false }, fontFamily: 'Sora' },
       colors: ['#e4f222'],
       stroke: { curve: "stepline", width: 3 },
       fill: { type: "gradient", gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.02, stops: [0, 100] } },
       dataLabels: { enabled: false },
       theme: { mode: 'dark' },
-      xaxis: { type: "datetime", labels: { style: { colors: '#8a8f98', fontFamily: 'Inter' }, datetimeUTC: false, format: 'HH:mm:ss' }, axisBorder: { show: false }, axisTicks: { show: false } },
-      yaxis: { labels: { style: { colors: '#8a8f98', fontFamily: 'Inter' }, formatter: (val) => "$" + val.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) } },
+      xaxis: { type: "datetime", labels: { style: { colors: '#8a8f98', fontFamily: 'Sora' }, datetimeUTC: false, format: 'HH:mm:ss' }, axisBorder: { show: false }, axisTicks: { show: false } },
+      yaxis: { labels: { style: { colors: '#8a8f98', fontFamily: 'JetBrains Mono' }, formatter: (val) => "$" + val.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) } },
       tooltip: { theme: "dark", x: { format: 'HH:mm:ss' } },
-      markers: { size: 0 } // Ocultamos los puntos para que se vea más limpio
+      markers: { size: 0 } // Ocultamos los puntos para que se vea mÃ¡s limpio
     };
   }
 
@@ -56,7 +57,7 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
     this.tickTimer = setInterval(() => this.ahora.set(this.timeService.now()), 1000);
 
     const id = +(this.route.snapshot.paramMap.get('id') ?? 0);
-    if (!id) { this.error.set('ID de subasta no válido.'); this.loading.set(false); return; }
+    if (!id) { this.error.set('ID de subasta no vÃ¡lido.'); this.loading.set(false); return; }
     this.idCotizacion.set(id);
 
     this.loadData();
@@ -85,7 +86,7 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err.error?.message || err.message || 'Error de conexión.');
+        this.error.set(err.error?.message || err.message || 'Error de conexiÃ³n.');
       },
     });
   }
@@ -122,7 +123,7 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Estirar la línea hasta el momento actual
+    // Estirar la lÃ­nea hasta el momento actual
     const now = this.timeService.now();
     const end = new Date(subasta.fechaFin).getTime();
     if (now < end) {
@@ -174,7 +175,24 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
   }
 
   formatMoneda(valor: number | undefined | null): string {
-    if (valor === undefined || valor === null) return '—';
+    if (valor === undefined || valor === null) return 'â€”';
     return '$ ' + valor.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  formatFecha(valor: string | undefined | null): string {
+    if (!valor) return 'â€”';
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) return 'â€”';
+    return new Intl.DateTimeFormat('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(fecha);
+  }
+
+  formatPorcentaje(valor: number): string {
+    return Math.max(0, Math.min(100, valor)).toLocaleString('es-AR', { maximumFractionDigits: 0 }) + '%';
   }
 }

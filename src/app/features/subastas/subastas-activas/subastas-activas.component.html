@@ -1,103 +1,105 @@
-<div class="min-h-screen bg-[var(--color-pitch-black)] text-[var(--color-porcelain)] px-4 pt-24 pb-8">
+<div class="showroom-page">
   <span class="hidden">{{ tick() }}</span>
 
-  <div class="mx-auto max-w-7xl">
-    <div class="mb-8">
-      <h1 class="text-[28px] font-[700] tracking-tight">Vidriera Pública</h1>
-      <p class="mt-1 text-[14px] text-[var(--color-storm-cloud)]">Subastas activas abiertas a todo público</p>
-    </div>
+  <div class="showroom-shell">
+    <section class="showroom-hero">
+      <div>
+        <span class="showroom-kicker"><span></span> Vidriera OWEN</span>
+        <h1>Subastas activas</h1>
+        <p>Procesos públicos en curso, trazables y listos para consultar en vivo.</p>
+      </div>
+      <div class="showroom-hero-metrics" aria-label="Resumen de subastas públicas">
+        <strong>{{ subastas().length }}</strong>
+        <span>activas ahora</span>
+      </div>
+    </section>
 
     @if (loading()) {
-      <div class="flex flex-col items-center justify-center py-32">
-        <div class="size-10 animate-spin rounded-full border-2 border-[var(--color-neon-lime)] border-t-transparent"></div>
-        <p class="mt-4 text-[14px] text-[var(--color-storm-cloud)]">Cargando subastas activas...</p>
+      <div class="showroom-state">
+        <div class="showroom-spinner"></div>
+        <p>Cargando subastas activas...</p>
       </div>
     }
 
     @if (error()) {
-      <div class="mx-auto max-w-lg rounded-2xl border border-red-500/20 bg-red-500/10 p-8 text-center">
-        <p class="text-[16px] font-[590] text-red-400">Error</p>
-        <p class="mt-2 text-[14px] text-red-300/80">{{ error() }}</p>
+      <div class="showroom-error">
+        <p class="state-title">Error</p>
+        <p>{{ error() }}</p>
       </div>
     }
 
     @if (!loading() && !error() && subastas().length === 0) {
-      <div class="flex flex-col items-center justify-center py-32 text-center">
-        <div class="mb-4 flex size-20 items-center justify-center rounded-full bg-[var(--color-charcoal-grey)]/30">
-          <svg class="size-10 text-[var(--color-storm-cloud)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="showroom-empty">
+        <div class="empty-icon" aria-hidden="true">
+          <svg class="size-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
           </svg>
         </div>
-        <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">No hay subastas activas</p>
-        <p class="mt-1 text-[14px] text-[var(--color-storm-cloud)]">En este momento no hay subastas públicas en curso.</p>
+        <p>No hay subastas activas</p>
+        <small>En este momento no hay subastas públicas en curso.</small>
       </div>
     }
 
     @if (!loading() && subastas().length > 0) {
-      <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div class="auction-showroom-grid">
         @for (s of subastas(); track s.idCotizacion) {
-          <div class="group relative overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-lg transition-all duration-300 hover:border-[var(--color-neon-lime)]/40 hover:shadow-[0_0_30px_rgba(228,242,34,0.06)]">
-            <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--color-neon-lime)]/60 to-transparent"></div>
-
-            <div class="mb-4">
-              <div class="flex items-start justify-between gap-3">
-                <h3 class="text-[16px] font-[600] leading-snug text-[var(--color-porcelain)] line-clamp-2">{{ s.titulo }}</h3>
-                <span class="shrink-0 rounded-full border border-[var(--color-neon-lime)]/30 bg-[var(--color-neon-lime)]/10 px-3 py-0.5 text-[11px] font-[600] uppercase tracking-wider text-[var(--color-neon-lime)]">
-                  {{ s.tipo }}
-                </span>
+          <article class="showroom-card">
+            <div class="card-radar-glow" aria-hidden="true"></div>
+            <div class="card-header">
+              <div>
+                <span class="card-live"><span></span> En vivo</span>
+                <h2>{{ s.titulo }}</h2>
               </div>
+              <span class="card-type">{{ s.tipo }}</span>
             </div>
 
-            <div class="mb-4 grid grid-cols-2 gap-3">
-              <div class="rounded-xl bg-[var(--color-deep-slate)]/40 p-3">
-                <p class="text-[11px] font-[600] uppercase tracking-wider text-[var(--color-storm-cloud)]">Precio Base</p>
-                <p class="mt-1 text-[15px] font-[700] text-[var(--color-porcelain)]">{{ formatMoneda(s.precioBase) }}</p>
+            <div class="card-metrics">
+              <div>
+                <p>Precio base</p>
+                <strong>{{ formatMoneda(s.precioBase) }}</strong>
               </div>
-              <div class="rounded-xl bg-[var(--color-deep-slate)]/40 p-3">
-                <p class="text-[11px] font-[600] uppercase tracking-wider text-[var(--color-storm-cloud)]">Mejor Oferta</p>
-                <p class="mt-1 text-[15px] font-[700]" [class.text-[var(--color-neon-lime)]]="s.mejorOfertaActual != null" [class.text-[var(--color-storm-cloud)]]="s.mejorOfertaActual == null">
+              <div>
+                <p>Mejor oferta</p>
+                <strong [class.metric-empty]="s.mejorOfertaActual == null">
                   {{ s.mejorOfertaActual != null ? formatMoneda(s.mejorOfertaActual) : '—' }}
-                </p>
+                </strong>
               </div>
             </div>
 
-            <div class="mb-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-[var(--color-storm-cloud)]">
-              <span class="flex items-center gap-1.5">
-                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="card-meta-row">
+              <span>
+                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                 </svg>
                 {{ s.cantItems }} ítems
               </span>
-              <span class="flex items-center gap-1.5">
-                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span>
+                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
                 {{ s.cantOfertas }} ofertas
               </span>
-              <span class="flex items-center gap-1.5">
-                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span>
+                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 {{ s.moneda }}
               </span>
             </div>
 
-            <div class="flex items-center justify-between border-t border-[var(--color-charcoal-grey)] pt-4">
+            <div class="card-footer">
               <div>
-                <p class="text-[11px] font-[600] uppercase tracking-wider text-[var(--color-storm-cloud)]">Tiempo restante</p>
-                <p class="mt-0.5 text-[15px] font-[700] font-mono" [class.text-[var(--color-warning-red)]]="timeLeftFor(s.fechaFin) === 'Finalizada'" [class.text-[var(--color-neon-lime)]]="timeLeftFor(s.fechaFin) !== 'Finalizada'">
-                  {{ timeLeftFor(s.fechaFin) }}
-                </p>
+                <p>Tiempo restante</p>
+                <strong [class.time-ended]="timeLeftFor(s.fechaFin) === 'Finalizada'">{{ timeLeftFor(s.fechaFin) }}</strong>
               </div>
-              <a [routerLink]="['/subastas-activas', s.idCotizacion]"
-                 class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-neon-lime)] px-5 py-2.5 text-[12px] font-[700] uppercase tracking-wider text-black transition-all hover:brightness-110 shadow-[0_0_20px_rgba(228,242,34,0.12)]">
+              <a [routerLink]="['/subastas-activas', s.idCotizacion]" class="detail-link">
                 Ver detalle
-                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                 </svg>
               </a>
             </div>
-          </div>
+          </article>
         }
       </div>
     }

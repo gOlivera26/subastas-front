@@ -153,7 +153,7 @@
       </ng-container>
     </app-header>
 
-    <main class="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-pitch-black)]">
+    <main id="main-content" tabindex="-1" class="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-pitch-black)]">
       @if (showBreadcrumb()) {
         <div class="flex min-w-0 items-center gap-2 overflow-x-auto border-b border-[var(--color-charcoal-grey)] px-3 py-3 sm:px-6 lg:px-8">
           <a routerLink="/clasificadores" class="text-[13px] font-[510] text-[var(--color-storm-cloud)] transition-colors hover:text-[var(--color-porcelain)]">Clasificadores</a>

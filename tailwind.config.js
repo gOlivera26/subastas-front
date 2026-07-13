@@ -6,6 +6,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-owen-sans)'],
+        mono: ['var(--font-owen-mono)'],
+      },
       colors: {
         'pitch-black': 'var(--color-pitch-black)',
         'graphite': 'var(--color-graphite)',
