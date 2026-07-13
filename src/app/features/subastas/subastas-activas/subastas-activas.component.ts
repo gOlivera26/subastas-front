@@ -9,6 +9,7 @@ import { TimeService } from '../../../core/services/time.service';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './subastas-activas.component.html',
+  styleUrls: ['./subastas-activas.component.css'],
 })
 export class SubastasActivasComponent implements OnInit, OnDestroy {
   private cotService = inject(CotizacionService);
@@ -36,7 +37,7 @@ export class SubastasActivasComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err.error?.message || err.message || 'Error de conexión al cargar subastas.');
+        this.error.set(err.error?.message || err.message || 'Error de conexiÃ³n al cargar subastas.');
       },
     });
   }
@@ -46,7 +47,7 @@ export class SubastasActivasComponent implements OnInit, OnDestroy {
   }
 
   get timeLeft(): string {
-    // This is a placeholder — the real timeLeft is called per-subasta in the template
+    // This is a placeholder â€” the real timeLeft is called per-subasta in the template
     return '';
   }
 
@@ -62,7 +63,7 @@ export class SubastasActivasComponent implements OnInit, OnDestroy {
   }
 
  formatMoneda(valor: number): string {
-    if (valor === undefined || valor === null) return '—';
+    if (valor === undefined || valor === null) return 'â€”';
     return '$ ' + valor.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 }

@@ -1,0 +1,252 @@
+@media (max-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .hero-copy {
+    max-width: 760px;
+  }
+
+  .mission-visual {
+    max-width: 720px;
+  }
+
+  .audience-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .audience-card-public {
+    grid-column: 1 / -1;
+    min-height: 290px;
+  }
+
+  .legacy-card {
+    grid-template-columns: 120px 1fr;
+  }
+
+  .legacy-route {
+    display: none;
+  }
+
+  .final-cta-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-shell {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .hero-section {
+    padding-top: 82px;
+  }
+
+  .eyebrow {
+    align-items: flex-start;
+    gap: 8px;
+    padding: 9px 11px;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+  }
+
+  .hero-grid {
+    gap: 48px;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(42px, 13vw, 62px);
+  }
+
+  .hero-description {
+    font-size: 16px;
+  }
+
+  .hero-actions,
+  .final-cta-actions {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .home-button {
+    width: 100%;
+  }
+
+  .hero-honor {
+    align-items: flex-start;
+  }
+
+  .honor-divider {
+    width: 1px;
+    height: 34px;
+  }
+
+  .mission-panel {
+    border-radius: 22px;
+  }
+
+  .mission-panel-header {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .live-status {
+    padding-inline: 8px;
+  }
+
+  .route-map {
+    height: 300px;
+  }
+
+  .route-marker {
+    transform: scale(0.9);
+  }
+
+  .mission-panel-footer {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .mission-panel-footer > div {
+    padding: 0 0 14px;
+    border-right: 0;
+    border-bottom: 1px solid var(--home-border-soft);
+  }
+
+  .mission-panel-footer > div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .trust-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .trust-item {
+    border-right: 0;
+    border-bottom: 1px solid var(--home-border-soft);
+  }
+
+  .trust-item:last-child {
+    border-bottom: 0;
+  }
+
+  .home-section {
+    padding-block: 88px;
+  }
+
+  .audience-grid,
+  .process-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .audience-card,
+  .audience-card-public {
+    grid-column: auto;
+    min-height: 330px;
+    padding: 24px;
+  }
+
+  .audience-icon {
+    margin-bottom: 34px;
+  }
+
+  .process-layout {
+    gap: 48px;
+  }
+
+  .process-copy {
+    position: static;
+  }
+
+  .process-step {
+    grid-template-columns: 54px 1fr;
+    gap: 18px;
+  }
+
+  .step-number {
+    width: 54px;
+    height: 54px;
+  }
+
+  .step-icon {
+    display: none;
+  }
+
+  .process-steps::before {
+    left: 26px;
+  }
+
+  .legacy-card {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 28px;
+  }
+
+  .legacy-mark {
+    grid-template-columns: auto auto auto;
+    justify-content: start;
+    gap: 12px;
+    min-height: auto;
+    padding-bottom: 24px;
+    border-right: 0;
+    border-bottom: 1px solid var(--home-border-soft);
+  }
+
+  .legacy-mark span {
+    font-size: 42px;
+  }
+
+  .legacy-mark strong,
+  .legacy-mark small {
+    margin: 0;
+  }
+
+  .final-cta {
+    padding-top: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radar-sweep {
+    animation: none;
+  }
+
+  .reveal-on-scroll,
+  .home-button,
+  .audience-card {
+    transition: none;
+  }
+}
+
+:host-context(html:not(.dark)) .owen-home {
+  --home-border: color-mix(in srgb, var(--color-charcoal-grey) 68%, white 32%);
+  --home-border-soft: color-mix(in srgb, var(--color-charcoal-grey) 48%, transparent);
+  --home-surface: color-mix(in srgb, white 86%, var(--color-deep-slate) 14%);
+  --home-surface-strong: color-mix(in srgb, white 92%, var(--color-deep-slate) 8%);
+  --home-shadow: 0 28px 70px rgba(23, 59, 114, 0.09);
+}
+
+:host-context(html:not(.dark)) .mission-panel,
+:host-context(html:not(.dark)) .legacy-card {
+  background:
+    radial-gradient(circle at 84% 20%, color-mix(in srgb, var(--color-cyan-spark) 9%, transparent), transparent 30%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.97), color-mix(in srgb, var(--color-deep-slate) 32%, white 68%));
+}
+
+:host-context(html:not(.dark)) .route-marker {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+:host-context(html:not(.dark)) .step-number {
+  background: white;
+}
+
+:host-context(html:not(.dark)) .hero-section::before {
+  opacity: 0.65;
+}

@@ -1,6 +1,6 @@
 <div class="flex flex-col min-h-screen">
   <app-header />
-  <main [@routeFade]="routeState()">
+  <main id="main-content" tabindex="-1" [@routeFade]="routeState()">
     <router-outlet />
   </main>
   <div class="mt-auto">

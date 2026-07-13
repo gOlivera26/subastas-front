@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, signal, computed, TemplateRef, viewChild } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, TemplateRef, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -679,7 +679,13 @@ getRenglonOfItem(itemId: number): string {
     this.http.get<any>(`${this.api}/Cotizacion/${item.idCotizacion}`).subscribe({
       next: (r: any) => {
         if (r?.success && r.data) {
-          const e = r.data.especificacion || {};
+          const full = r.data;
+          const e = full.especificacion || {};
+          this.especItem.set({
+            ...item,
+            ...full,
+            titulo: full.observacion ?? item?.titulo ?? '',
+          });
           this.especNroExpediente.set(e.nroExpediente || '');
           this.especFechaInicio.set(e.fechaInicioSubasta || '');
           this.especFechaFin.set(e.fechaFinalizacionSubasta || '');
@@ -699,12 +705,19 @@ getRenglonOfItem(itemId: number): string {
   closeEspec() { this.showEspec.set(false); }
 
   grabarEspec() {
+    const item = this.especItem();
+    const especificacionActual = item?.especificacion || {};
+    if (!item?.idCotizacion || !item?.idTipoContratacion || !item?.idVigencia || !item?.idOrganizacion || !item?.idUnidadAdm) {
+      this.notify.showError('No se pudieron cargar los datos completos de la subasta para guardar especificaciones.');
+      return;
+    }
     this.savingEspec.set(true);
-    this.http.put(`${this.api}/Cotizacion/${this.especItem().idCotizacion}`, {
-      idTipoContratacion: this.especItem().tipoContratacionId || 7,
-      idVigencia: this.filterVigencia(),
-      idUnidadAdm: this.especItem().idUnidadAdm || 0,
-      observacion: this.especItem().titulo || '',
+    this.http.put(`${this.api}/Cotizacion/${item.idCotizacion}`, {
+      idTipoContratacion: item.idTipoContratacion || item.tipoContratacionId || 7,
+      idVigencia: item.idVigencia || this.filterVigencia(),
+      idOrganizacion: item.idOrganizacion,
+      idUnidadAdm: item.idUnidadAdm,
+      observacion: item.observacion ?? item.titulo ?? '',
       especificacion: {
         nroExpediente: this.especNroExpediente(),
         fechaInicioSubasta: this.especFechaInicio() || null,
@@ -715,6 +728,7 @@ getRenglonOfItem(itemId: number): string {
         permiteProrroga: this.especProrroga(),
         prorrogaMinutos: this.especProrrogaMin() || null,
         redeterminacion: this.especRedet() || null,
+        gestionDocumentacion: especificacionActual.gestionDocumentacion ?? false,
       }
     }).subscribe({
       next: (r: any) => {

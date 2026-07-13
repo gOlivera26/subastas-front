@@ -28,7 +28,9 @@
     --color-emerald: #059669;
     --color-warning-red: #C53030;
 
-    --font-inter-variable: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-owen-sans: 'Sora', 'Aptos', 'Segoe UI', sans-serif;
+    --font-owen-mono: 'JetBrains Mono', 'Cascadia Mono', 'SFMono-Regular', monospace;
+    --font-inter-variable: var(--font-owen-sans);
     --radius-pill: 9999px;
     --radius-buttons: 6px;
     --shadow-subtle-2: rgba(15, 43, 92, 0.10) 0px 18px 50px -28px;
@@ -76,7 +78,8 @@
 
   body {
     margin: 0;
-    font-family: var(--font-inter-variable);
+    font-family: var(--font-owen-sans);
+    font-feature-settings: 'ss01' 1, 'cv01' 1;
     background:
       radial-gradient(circle at top right, color-mix(in srgb, var(--color-cyan-spark) 7%, transparent) 0, transparent 34rem),
       linear-gradient(180deg, var(--color-pitch-black) 0%, color-mix(in srgb, var(--color-pitch-black) 88%, var(--color-deep-slate) 12%) 100%);
@@ -1261,4 +1264,173 @@ html:not(.dark) .classifier-hierarchy-cell:focus-visible {
 html:not(.dark) :where(.classifier-level-pill, .classifier-count-pill, .classifier-org-pill) {
   border-color: rgba(23, 59, 114, 0.12) !important;
   background: rgba(255, 255, 255, 0.70) !important;
+}
+
+/* Nueva subasta: modal y tablas con estética soft (evita bordes blancos por clases Tailwind con alpha/arbitrary). */
+app-modal:has(.subasta-create-flow) [role="dialog"] > .relative {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 10%, transparent) !important;
+  background:
+    radial-gradient(circle at 14% -8%, color-mix(in srgb, var(--color-cyan-spark) 5%, transparent), transparent 26rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 92%, var(--color-pitch-black) 8%), var(--color-graphite)) !important;
+  box-shadow: 0 28px 86px -58px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.026) !important;
+}
+
+app-modal:has(.subasta-create-flow) [role="dialog"] > .relative > div:first-child,
+app-modal:has(.subasta-create-flow) [role="dialog"] > .relative > div:last-child {
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 34%, transparent) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 72%, transparent), color-mix(in srgb, var(--color-pitch-black) 18%, transparent)) !important;
+}
+
+.subasta-create-panel,
+.subasta-create-selected-panel {
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 42%, transparent) !important;
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--color-cyan-spark) 4%, transparent), transparent 22rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 58%, transparent), color-mix(in srgb, var(--color-pitch-black) 20%, transparent)) !important;
+  box-shadow: 0 18px 54px -44px rgba(0, 0, 0, 0.82), inset 0 1px 0 rgba(255, 255, 255, 0.024) !important;
+}
+
+.subasta-create-panel-header,
+.subasta-create-selected-header,
+.subasta-create-selected-footer {
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 32%, transparent) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-pitch-black) 22%, transparent), color-mix(in srgb, var(--color-graphite) 28%, transparent)) !important;
+}
+
+.subasta-create-selected-panel {
+  border-color: color-mix(in srgb, var(--color-neon-lime) 24%, var(--color-charcoal-grey) 16%) !important;
+  background:
+    radial-gradient(circle at 6% 0%, color-mix(in srgb, var(--color-neon-lime) 5%, transparent), transparent 18rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-graphite) 56%, transparent), color-mix(in srgb, var(--color-pitch-black) 18%, transparent)) !important;
+}
+
+.subasta-create-selected-header,
+.subasta-create-selected-footer {
+  border-color: color-mix(in srgb, var(--color-neon-lime) 18%, transparent) !important;
+  background: color-mix(in srgb, var(--color-neon-lime) 4%, transparent) !important;
+}
+
+.subasta-create-flow :where(table, thead, tbody, tr, th, td) {
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 30%, transparent) !important;
+}
+
+.subasta-create-selected-panel :where(thead, tbody, tr, th, td) {
+  border-color: color-mix(in srgb, var(--color-neon-lime) 13%, transparent) !important;
+}
+
+.subasta-create-flow :where(table, thead, tbody) {
+  background: transparent !important;
+}
+
+.subasta-create-flow tbody {
+  background: color-mix(in srgb, var(--color-pitch-black) 20%, transparent) !important;
+}
+
+.subasta-create-flow tr:hover {
+  background: color-mix(in srgb, var(--color-cyan-spark) 6%, transparent) !important;
+}
+
+.subasta-create-selected-panel tr:hover {
+  background: color-mix(in srgb, var(--color-neon-lime) 5%, transparent) !important;
+}
+
+.subasta-create-flow :where(input, select) {
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 38%, transparent) !important;
+  background: color-mix(in srgb, var(--color-pitch-black) 28%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.024) !important;
+}
+
+.subasta-create-flow :where(input:focus, select:focus) {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 42%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-cyan-spark) 10%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+}
+
+.subasta-create-selected-panel :where(input:focus, select:focus) {
+  border-color: color-mix(in srgb, var(--color-neon-lime) 44%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-neon-lime) 10%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+}
+
+html:not(.dark) app-modal:has(.subasta-create-flow) [role="dialog"] > .relative {
+  border-color: rgba(23, 59, 114, 0.10) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(18, 104, 196, 0.08), transparent 24rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 255, 0.94)) !important;
+  box-shadow: 0 28px 82px -52px rgba(15, 43, 92, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.94) !important;
+}
+
+html:not(.dark) app-modal:has(.subasta-create-flow) [role="dialog"] > .relative > div:first-child,
+html:not(.dark) app-modal:has(.subasta-create-flow) [role="dialog"] > .relative > div:last-child,
+html:not(.dark) .subasta-create-panel-header,
+html:not(.dark) .subasta-create-selected-header,
+html:not(.dark) .subasta-create-selected-footer {
+  border-color: rgba(23, 59, 114, 0.09) !important;
+  background: rgba(248, 251, 255, 0.72) !important;
+}
+
+html:not(.dark) :where(.subasta-create-panel, .subasta-create-selected-panel) {
+  border-color: rgba(23, 59, 114, 0.10) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  box-shadow: 0 22px 60px -46px rgba(15, 43, 92, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+html:not(.dark) .subasta-create-selected-panel {
+  border-color: rgba(218, 162, 0, 0.22) !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(218, 162, 0, 0.08), transparent 18rem),
+    rgba(255, 255, 255, 0.80) !important;
+}
+
+html:not(.dark) .subasta-create-flow :where(table, thead, tbody, tr, th, td) {
+  border-color: rgba(23, 59, 114, 0.10) !important;
+}
+
+html:not(.dark) .subasta-create-selected-panel :where(thead, tbody, tr, th, td) {
+  border-color: rgba(218, 162, 0, 0.14) !important;
+}
+
+/* WCAG focus and motion safety */
+:where(a, button, input, select, textarea, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid var(--color-cyan-spark, #02b8cc);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-cyan-spark, #02b8cc) 18%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 20000;
+  transform: translateY(-140%);
+  border: 2px solid var(--color-cyan-spark);
+  border-radius: 0.85rem;
+  background: var(--color-pitch-black);
+  color: var(--color-porcelain);
+  padding: 0.65rem 0.9rem;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.28);
+  transition: transform 150ms ease;
+}
+
+.skip-link:focus-visible { transform: translateY(0); }
+#main-content:focus { outline: none; }
+
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, [tabindex]:not([tabindex='-1'])):focus-visible { outline: 2px solid CanvasText !important; }
 }

@@ -1,3 +1,4 @@
+<a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 @if (variant === 'module') {
   <header class="relative z-[10000] flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/95 px-4 backdrop-blur-md sm:px-6 lg:px-8">
     <div class="flex min-w-0 items-center gap-2">
@@ -6,12 +7,12 @@
     </div>
 
     <div class="relative flex items-center gap-2 sm:gap-3">
-      <button (click)="toggleTheme()" class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-[var(--color-storm-cloud)] transition-all hover:border-[var(--color-charcoal-grey)] hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]" title="Cambiar tema">
+      <button type="button" (click)="toggleTheme()" [attr.aria-label]="isDarkMode() ? 'Activar modo claro' : 'Activar modo oscuro'" class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-[var(--color-storm-cloud)] transition-all hover:border-[var(--color-charcoal-grey)] hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]" title="Cambiar tema">
         <lucide-icon [name]="isDarkMode() ? 'sun' : 'moon'" [size]="18"></lucide-icon>
       </button>
 
       @if (authService.isAuthenticated() && user()) {
-        <button id="user-menu-button" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] uppercase ring-2 ring-[var(--color-pitch-black)] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95">
+        <button id="user-menu-button" type="button" aria-haspopup="menu" aria-controls="user-dropdown" [attr.aria-expanded]="isUserMenuOpen()" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] uppercase ring-2 ring-[var(--color-pitch-black)] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95">
           {{ userInitials() }}
         </button>
 
@@ -37,7 +38,7 @@
               <p class="mb-2 px-2 text-[10px] font-[800] uppercase tracking-[0.18em] text-[var(--color-fog-grey)]">Operando como:</p>
               <div class="overflow-hidden rounded-2xl border border-transparent bg-[var(--color-pitch-black)]/55 shadow-none dark:bg-[var(--color-pitch-black)]/38">
                 @for (ent of visibleEntidades(); track ent.id + ent.tipo) {
-                  <button (click)="switchContext(ent.tipo, ent.id)" class="w-full border-0 outline-none ring-0 focus:outline-none focus:ring-0 px-3 py-2.5 text-left text-[13px] font-[650] transition-all" [ngClass]="isCurrentContext(ent.tipo, ent.id) ? 'bg-[var(--color-cyan-spark)]/12 text-[var(--color-cyan-spark)] cursor-default' : 'text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/70 dark:hover:bg-[rgba(2,184,204,0.08)]'">
+                  <button type="button" (click)="switchContext(ent.tipo, ent.id)" class="w-full border-0 outline-none ring-0 focus:outline-none focus:ring-0 px-3 py-2.5 text-left text-[13px] font-[650] transition-all" [ngClass]="isCurrentContext(ent.tipo, ent.id) ? 'bg-[var(--color-cyan-spark)]/12 text-[var(--color-cyan-spark)] cursor-default' : 'text-[var(--color-porcelain)] hover:bg-[var(--color-deep-slate)]/70 dark:hover:bg-[rgba(2,184,204,0.08)]'">
                     <div class="flex items-center gap-3">
                       @if (isCurrentContext(ent.tipo, ent.id)) {
                         <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] shadow-[0_0_12px_rgba(2,184,204,0.30)]"><lucide-icon name="check" [size]="13" [strokeWidth]="3"></lucide-icon></span>
@@ -54,9 +55,9 @@
           }
 
           <div class="flex flex-col gap-1">
-            <button (click)="openProfile()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[rgba(2,184,204,0.08)]"><lucide-icon name="user-circle" [size]="17" class="text-[var(--color-porcelain)]/90"></lucide-icon>Mi Perfil</button>
-            <button (click)="openPassword()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[rgba(2,184,204,0.08)]"><lucide-icon name="key-round" [size]="17" class="text-[var(--color-porcelain)]/90"></lucide-icon>Cambiar Contraseña</button>
-            <button (click)="logout()" class="mt-1 flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-left text-[13px] font-[700] text-red-300 transition-all hover:border-red-500/20 hover:bg-red-500/10"><lucide-icon name="log-out" [size]="17"></lucide-icon>Cerrar Sesión</button>
+            <button type="button" (click)="openProfile()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[rgba(2,184,204,0.08)]"><lucide-icon name="user-circle" [size]="17" class="text-[var(--color-porcelain)]/90"></lucide-icon>Mi Perfil</button>
+            <button type="button" (click)="openPassword()" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[rgba(2,184,204,0.08)]"><lucide-icon name="key-round" [size]="17" class="text-[var(--color-porcelain)]/90"></lucide-icon>Cambiar Contraseña</button>
+            <button type="button" (click)="logout()" class="mt-1 flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-left text-[13px] font-[700] text-red-300 transition-all hover:border-red-500/20 hover:bg-red-500/10"><lucide-icon name="log-out" [size]="17"></lucide-icon>Cerrar Sesión</button>
           </div>
         </div>
       } @else {
@@ -73,7 +74,7 @@
 >
   <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
     
- <a routerLink="/" (click)="closeMenu()" class="flex items-center transition-opacity hover:opacity-80 z-50 group">
+ <a routerLink="/" (click)="closeMenu()" aria-label="Ir al inicio de OWEN" class="flex items-center transition-opacity hover:opacity-80 z-50 group">
       <svg viewBox="0 -30 180 80" class="h-10 md:h-12 w-auto fill-current text-[var(--color-porcelain)] transition-all duration-300" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="trail-grad" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -112,7 +113,7 @@
           </a>
           
           <div>
-            <button id="user-menu-button" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95 ring-2 ring-[var(--color-pitch-black)] uppercase">
+            <button id="user-menu-button" type="button" aria-haspopup="menu" aria-controls="user-dropdown" [attr.aria-expanded]="isUserMenuOpen()" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95 ring-2 ring-[var(--color-pitch-black)] uppercase">
               {{ userInitials() }}
             </button>
 
@@ -134,7 +135,7 @@
                   <p class="text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-2">Operando como:</p>
                   <div class="overflow-hidden rounded-2xl border border-transparent bg-[var(--color-pitch-black)]/55 shadow-none dark:bg-[var(--color-pitch-black)]/38">
                     @for (ent of visibleEntidades(); track ent.id + ent.tipo) {
-                      <button (click)="switchContext(ent.tipo, ent.id)"
+                      <button type="button" (click)="switchContext(ent.tipo, ent.id)"
                               class="w-full text-left rounded-lg border-0 outline-none ring-0 focus:outline-none focus:ring-0 px-2.5 py-2 text-[12px] font-[510] transition-all"
                               [ngClass]="isCurrentContext(ent.tipo, ent.id) ? 'bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] cursor-default' : 'text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]'">
                         <div class="flex items-center justify-between">
@@ -150,15 +151,15 @@
               }
 
               <div class="flex flex-col gap-1">
-                <button (click)="openProfile()" class="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+                <button type="button" (click)="openProfile()" class="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
                   <lucide-icon name="user-circle" [size]="16"></lucide-icon>
                   Mi Perfil
                 </button>
-                <button (click)="openPassword()" class="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
+                <button type="button" (click)="openPassword()" class="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] transition-colors">
                   <lucide-icon name="key-round" [size]="16"></lucide-icon>
                   Cambiar Contraseña
                 </button>
-                <button (click)="logout()" class="mt-1 flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-red-400 hover:bg-red-500/10 transition-colors">
+                <button type="button" (click)="logout()" class="mt-1 flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-[510] text-red-400 hover:bg-red-500/10 transition-colors">
                   <lucide-icon name="log-out" [size]="16"></lucide-icon>
                   Cerrar Sesión
                 </button>
@@ -172,24 +173,43 @@
         </a>
       }
       
-      <button (click)="toggleTheme()" class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-[var(--color-storm-cloud)] hover:border-[var(--color-charcoal-grey)] hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)] transition-all">
+      <button type="button" (click)="toggleTheme()" [attr.aria-label]="isDarkMode() ? 'Activar modo claro' : 'Activar modo oscuro'" class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-[var(--color-storm-cloud)] hover:border-[var(--color-charcoal-grey)] hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)] transition-all">
         <lucide-icon [name]="isDarkMode() ? 'sun' : 'moon'" [size]="18"></lucide-icon>
       </button>
     </nav>
 
-    <button (click)="toggleMenu()" class="md:hidden flex items-center justify-center p-2 rounded-lg border border-transparent text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)]/50 hover:border-[var(--color-charcoal-grey)] z-50 transition-all active:scale-95">
+    <button type="button" (click)="toggleMenu()" class="public-menu-trigger md:hidden flex items-center justify-center p-2 rounded-lg border border-transparent text-[var(--color-light-steel)] z-50 transition-all active:scale-95" [class.is-open]="isMobileMenuOpen()" aria-controls="public-mobile-menu" [attr.aria-expanded]="isMobileMenuOpen()" [attr.aria-label]="isMobileMenuOpen() ? 'Cerrar navegación' : 'Abrir navegación'">
       <lucide-icon [name]="isMobileMenuOpen() ? 'x' : 'menu'" [size]="22"></lucide-icon>
     </button>
   </div>
 
+  @if (isMobileMenuOpen()) {
+    <button type="button" class="public-mobile-backdrop fixed inset-0 top-16 z-[9998] md:hidden" (click)="closeMenu()" aria-label="Cerrar navegación"></button>
+  }
+
   <div 
-    class="absolute left-3 right-3 top-[calc(100%+0.5rem)] z-[10000] h-[calc(100dvh-5.5rem)] min-w-0 overflow-hidden rounded-[1.75rem] border border-white/[0.07] bg-[linear-gradient(145deg,rgb(12,17,26),rgb(6,9,15))] shadow-[0_28px_90px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-2xl transition-all duration-300 md:hidden"
-    [ngClass]="isMobileMenuOpen() ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
+    id="public-mobile-menu"
+    role="navigation"
+    aria-label="Navegación principal"
+    class="public-mobile-menu absolute left-3 right-3 top-[calc(100%+0.65rem)] z-[10000] max-h-[calc(100dvh-5.65rem)] min-w-0 overflow-hidden rounded-[1.75rem] transition-all duration-300 md:hidden"
+    [ngClass]="isMobileMenuOpen() ? 'is-open opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
   >
-    <div class="flex max-h-full flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-3 sm:px-4 sm:py-4">
+    <div class="public-mobile-menu-content flex max-h-full flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-3 sm:px-4 sm:py-4">
+      <div class="public-mobile-menu-heading">
+        <div class="public-mobile-heading-mark" aria-hidden="true">
+          <svg viewBox="-16 -16 36 32">
+            <path d="M18 0 12-3H7L0-14h-4L1-3h-8l-4-5h-3l4 7v2l-4 7h3l4-5h8l-5 11h4L7 3h5Z"></path>
+          </svg>
+        </div>
+        <div>
+          <span>Navegación OWEN</span>
+          <strong>Elegí tu próximo rumbo</strong>
+        </div>
+        <small>4-A-115</small>
+      </div>
       
-      <button (click)="toggleTheme()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all active:bg-white/[0.06]">
-        <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]">
+      <button type="button" (click)="toggleTheme()" [attr.aria-label]="isDarkMode() ? 'Activar modo claro' : 'Activar modo oscuro'" class="public-mobile-menu-item flex items-center gap-3 w-full rounded-2xl p-3 transition-all">
+        <div class="public-mobile-menu-icon public-mobile-menu-icon-sun flex size-9 shrink-0 items-center justify-center rounded-xl">
           <lucide-icon [name]="isDarkMode() ? 'sun' : 'moon'" [size]="20"></lucide-icon>
         </div>
         <span class="text-[14px] font-[650] text-[var(--color-porcelain)]">
@@ -197,8 +217,8 @@
         </span>
       </button>
       
-      <a routerLink="/subastas-activas" (click)="closeMenu()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all hover:bg-white/[0.055] active:scale-[0.98]">
-        <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+      <a routerLink="/subastas-activas" (click)="closeMenu()" class="public-mobile-menu-item public-mobile-menu-item-featured flex items-center gap-3 w-full rounded-2xl p-3 transition-all active:scale-[0.98]">
+        <div class="public-mobile-menu-icon flex size-9 shrink-0 items-center justify-center rounded-xl">
           <lucide-icon name="sparkles" [size]="20"></lucide-icon>
         </div>
         <div class="flex flex-col text-left">
@@ -208,7 +228,7 @@
         <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
       </a>
       @if (authService.isAuthenticated() && user()) {
-        <div class="mb-4 flex items-center gap-4 rounded-3xl border border-[var(--color-charcoal-grey)]/80 bg-[var(--color-graphite)] p-5">
+        <div class="public-mobile-profile mb-4 flex items-center gap-4 rounded-3xl p-5">
           <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[20px] font-bold text-[var(--color-pitch-black)] uppercase">
             {{ userInitials() }}
           </div>
@@ -218,24 +238,24 @@
           </div>
         </div>
 
-        <a routerLink="/modulos" (click)="closeMenu()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all active:bg-white/[0.06]">
-          <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-light-steel)]/10 text-[var(--color-porcelain)]">
+        <a routerLink="/modulos" (click)="closeMenu()" class="public-mobile-menu-item flex items-center gap-3 w-full rounded-2xl p-3 transition-all">
+          <div class="public-mobile-menu-icon flex size-9 shrink-0 items-center justify-center rounded-xl">
             <lucide-icon name="layout-template" [size]="20"></lucide-icon>
           </div>
           <span class="text-[14px] font-[650] text-[var(--color-porcelain)]">Mi Panel</span>
           <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
         </a>
 
-        <button (click)="openProfile()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all active:bg-white/[0.06]">
-          <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-aether-blue)]/10 text-[var(--color-aether-blue)]">
+        <button type="button" (click)="openProfile()" class="public-mobile-menu-item flex items-center gap-3 w-full rounded-2xl p-3 transition-all">
+          <div class="public-mobile-menu-icon flex size-9 shrink-0 items-center justify-center rounded-xl">
             <lucide-icon name="user-circle" [size]="20"></lucide-icon>
           </div>
           <span class="text-[14px] font-[650] text-[var(--color-porcelain)]">Mi Perfil</span>
           <lucide-icon name="chevron-right" [size]="18" class="ml-auto text-[var(--color-storm-cloud)]"></lucide-icon>
         </button>
 
-        <button (click)="openPassword()" class="flex items-center gap-3 w-full rounded-2xl border border-white/[0.065] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all active:bg-white/[0.06]">
-          <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)]">
+        <button type="button" (click)="openPassword()" class="public-mobile-menu-item flex items-center gap-3 w-full rounded-2xl p-3 transition-all">
+          <div class="public-mobile-menu-icon flex size-9 shrink-0 items-center justify-center rounded-xl">
             <lucide-icon name="key-round" [size]="20"></lucide-icon>
           </div>
           <span class="text-[14px] font-[650] text-[var(--color-porcelain)]">Cambiar Contraseña</span>
@@ -243,13 +263,17 @@
         </button>
 
         <div class="my-4 h-px w-full bg-[var(--color-charcoal-grey)]/50"></div>
-
-        <button (click)="logout()" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-[15px] font-[590] text-red-400 transition-all active:scale-[0.97]">
-          <lucide-icon name="log-out" [size]="18"></lucide-icon>
-          Cerrar Sesión
+        <button type="button" (click)="logout()" class="public-mobile-menu-logout group flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-[14px] font-[650] transition-all active:scale-[0.98]">
+          <span class="flex items-center gap-3">
+            <span class="public-mobile-menu-logout-icon flex size-9 items-center justify-center rounded-xl">
+              <lucide-icon name="log-out" [size]="17"></lucide-icon>
+            </span>
+            Cerrar Sesión
+          </span>
+          <span class="public-mobile-menu-logout-status">Salir</span>
         </button>
       } @else {
-        <a routerLink="/login" (click)="closeMenu()" class="mt-2 inline-flex w-full items-center justify-center rounded-2xl bg-[var(--color-neon-lime)] px-5 py-4 text-[15px] font-[590] text-[var(--color-pitch-black)] transition-all active:scale-[0.97] shadow-lg shadow-[var(--color-neon-lime)]/10">
+        <a routerLink="/login" (click)="closeMenu()" class="public-mobile-menu-login mt-2 inline-flex w-full items-center justify-center rounded-2xl px-5 py-4 text-[15px] font-[650] transition-all active:scale-[0.97]">
           Iniciar Sesión
         </a>
       }

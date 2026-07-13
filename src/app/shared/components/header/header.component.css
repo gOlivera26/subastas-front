@@ -1,0 +1,285 @@
+:host {
+  display: contents;
+}
+
+.public-menu-trigger {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 18%, transparent);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--color-graphite) 38%, transparent);
+  color: var(--color-light-steel);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.public-menu-trigger::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-cyan-spark) 18%, transparent), transparent 68%);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.public-menu-trigger:hover,
+.public-menu-trigger.is-open {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 55%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 10%, var(--color-graphite));
+  color: var(--color-cyan-spark);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-cyan-spark) 7%, transparent), 0 12px 30px color-mix(in srgb, black 24%, transparent);
+}
+
+.public-menu-trigger:hover::after,
+.public-menu-trigger.is-open::after {
+  opacity: 1;
+}
+
+.public-mobile-backdrop {
+  border: 0;
+  background: color-mix(in srgb, var(--color-pitch-black) 48%, transparent);
+  backdrop-filter: blur(5px);
+  animation: mobile-backdrop-in 220ms ease both;
+}
+
+.public-mobile-menu {
+  width: min(calc(100vw - 1.5rem), 28rem);
+  max-height: calc(100dvh - 5.65rem);
+  border: 1px solid color-mix(in srgb, var(--color-cyan-spark) 18%, transparent);
+  background:
+    linear-gradient(color-mix(in srgb, var(--color-cyan-spark) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cyan-spark) 4%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 82% 0%, color-mix(in srgb, var(--color-cyan-spark) 16%, transparent), transparent 34%),
+    linear-gradient(150deg, color-mix(in srgb, var(--color-graphite) 98%, transparent), color-mix(in srgb, var(--color-pitch-black) 98%, transparent));
+  background-size: 44px 44px, 44px 44px, auto, auto;
+  box-shadow: 0 32px 90px color-mix(in srgb, black 68%, transparent), inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
+  opacity: 0;
+  transform: translateY(-10px) scale(0.985);
+  transform-origin: top center;
+  backdrop-filter: blur(24px);
+}
+
+.public-mobile-menu::before {
+  content: '';
+  position: absolute;
+  inset: 0 16% auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-cyan-spark), transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-cyan-spark) 42%, transparent);
+}
+
+.public-mobile-menu.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.public-mobile-menu-content {
+  scrollbar-color: color-mix(in srgb, var(--color-cyan-spark) 28%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
+.public-mobile-menu-heading {
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 52%, transparent);
+}
+
+.public-mobile-heading-mark {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-cyan-spark) 30%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-cyan-spark) 9%, transparent);
+  color: var(--color-cyan-spark);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--color-cyan-spark) 12%, transparent);
+}
+
+.public-mobile-heading-mark svg {
+  width: 25px;
+  height: 25px;
+  overflow: visible;
+  fill: currentColor;
+  transform: rotate(-12deg);
+}
+
+.public-mobile-menu-heading > div:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.public-mobile-menu-heading span,
+.public-mobile-menu-heading small {
+  color: var(--color-cyan-spark);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.public-mobile-menu-heading strong {
+  overflow: hidden;
+  color: var(--color-porcelain);
+  font-size: 14px;
+  font-weight: 680;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-mobile-menu-heading small {
+  color: var(--color-neon-lime);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.public-mobile-menu-item {
+  border: 1px solid color-mix(in srgb, var(--color-charcoal-grey) 48%, transparent);
+  background: color-mix(in srgb, var(--color-graphite) 48%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+  text-decoration: none;
+}
+
+.public-mobile-menu-item:hover,
+.public-mobile-menu-item:focus-visible {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 44%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 9%, var(--color-graphite));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-cyan-spark) 6%, transparent), 0 14px 34px color-mix(in srgb, black 18%, transparent);
+  transform: translateY(-2px);
+}
+
+.public-mobile-menu-item-featured {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 28%, transparent);
+  background:
+    linear-gradient(105deg, color-mix(in srgb, var(--color-cyan-spark) 11%, var(--color-graphite)), color-mix(in srgb, var(--color-graphite) 46%, transparent));
+}
+
+.public-mobile-menu-icon {
+  border: 1px solid color-mix(in srgb, var(--color-cyan-spark) 20%, transparent);
+  background: color-mix(in srgb, var(--color-cyan-spark) 10%, transparent);
+  color: var(--color-cyan-spark);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.public-mobile-menu-icon-sun {
+  border-color: color-mix(in srgb, var(--color-neon-lime) 22%, transparent);
+  background: color-mix(in srgb, var(--color-neon-lime) 9%, transparent);
+  color: var(--color-neon-lime);
+}
+
+.public-mobile-menu-item:hover .public-mobile-menu-icon {
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-cyan-spark) 20%, transparent);
+  transform: translateX(2px) rotate(-3deg);
+}
+
+.public-mobile-profile {
+  border: 1px solid color-mix(in srgb, var(--color-cyan-spark) 20%, transparent);
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--color-cyan-spark) 12%, transparent), transparent 38%),
+    color-mix(in srgb, var(--color-graphite) 62%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
+}
+
+.public-mobile-menu-logout {
+  border: 1px solid color-mix(in srgb, var(--color-warning-red) 22%, transparent);
+  background:
+    radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--color-warning-red) 12%, transparent), transparent 42%),
+    color-mix(in srgb, var(--color-graphite) 46%, transparent);
+  color: color-mix(in srgb, var(--color-warning-red) 76%, var(--color-porcelain));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+}
+
+.public-mobile-menu-logout-icon {
+  border: 1px solid color-mix(in srgb, var(--color-warning-red) 28%, transparent);
+  background: color-mix(in srgb, var(--color-warning-red) 10%, transparent);
+  color: color-mix(in srgb, var(--color-warning-red) 78%, var(--color-porcelain));
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.public-mobile-menu-logout-status {
+  color: color-mix(in srgb, var(--color-warning-red) 42%, var(--color-storm-cloud));
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.public-mobile-menu-logout:hover {
+  border-color: color-mix(in srgb, var(--color-warning-red) 46%, transparent);
+  background:
+    radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--color-warning-red) 18%, transparent), transparent 44%),
+    color-mix(in srgb, var(--color-warning-red) 8%, var(--color-graphite));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-warning-red) 6%, transparent), 0 12px 32px color-mix(in srgb, var(--color-warning-red) 12%, transparent);
+  transform: translateY(-2px);
+}
+
+.public-mobile-menu-logout:hover .public-mobile-menu-logout-icon {
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-warning-red) 24%, transparent);
+  transform: translateX(2px);
+}
+
+.public-mobile-menu-login {
+  border: 1px solid color-mix(in srgb, var(--color-cyan-spark) 82%, white 18%);
+  background: var(--color-cyan-spark);
+  color: white;
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--color-cyan-spark) 28%, transparent);
+}
+
+.public-mobile-menu-login:hover {
+  background: color-mix(in srgb, var(--color-cyan-spark) 88%, white 12%);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-cyan-spark) 9%, transparent), 0 18px 42px color-mix(in srgb, var(--color-cyan-spark) 34%, transparent);
+  transform: translateY(-2px);
+}
+
+@keyframes mobile-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+:host-context(html:not(.dark)) .public-mobile-menu {
+  border-color: color-mix(in srgb, var(--color-cyan-spark) 24%, white);
+  background:
+    linear-gradient(color-mix(in srgb, var(--color-cyan-spark) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cyan-spark) 4%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 82% 0%, color-mix(in srgb, var(--color-cyan-spark) 10%, transparent), transparent 34%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.98), color-mix(in srgb, var(--color-deep-slate) 45%, white 55%));
+  background-size: 44px 44px, 44px 44px, auto, auto;
+  box-shadow: 0 30px 80px rgba(23, 59, 114, 0.2), inset 0 1px 0 white;
+}
+
+:host-context(html:not(.dark)) .public-mobile-backdrop {
+  background: rgba(23, 59, 114, 0.14);
+}
+
+:host-context(html:not(.dark)) .public-mobile-menu-item,
+:host-context(html:not(.dark)) .public-mobile-profile {
+  border-color: color-mix(in srgb, var(--color-charcoal-grey) 68%, white 32%);
+  background-color: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 24px rgba(23, 59, 114, 0.06), inset 0 1px 0 white;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-mobile-menu,
+  .public-mobile-backdrop,
+  .public-mobile-menu-item,
+  .public-menu-trigger {
+    animation: none;
+    transition: none;
+  }
+}
+
+
+.public-menu-trigger {
+  min-width: 44px;
+  min-height: 44px;
+}
