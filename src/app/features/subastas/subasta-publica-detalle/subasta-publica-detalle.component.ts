@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, ViewChild } from '@angula
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { CotizacionService, SubastaPublicaDetalleDto } from '../../../core/services/cotizacion.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { TimeService } from '../../../core/services/time.service';
 import { NgApexchartsModule, ChartComponent, ApexAxisChartSeries, ApexChart, ApexXAxis, ApexStroke, ApexDataLabels, ApexYAxis, ApexFill, ApexTooltip, ApexTheme } from 'ng-apexcharts';
 
@@ -22,6 +23,8 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
   private cotService = inject(CotizacionService);
   private timeService = inject(TimeService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  auth = inject(AuthService);
 
   idCotizacion = signal(0);
   subasta = signal<SubastaPublicaDetalleDto | null>(null);
@@ -47,7 +50,7 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
       xaxis: { type: "datetime", labels: { style: { colors: '#8a8f98', fontFamily: 'Sora' }, datetimeUTC: false, format: 'HH:mm:ss' }, axisBorder: { show: false }, axisTicks: { show: false } },
       yaxis: { labels: { style: { colors: '#8a8f98', fontFamily: 'JetBrains Mono' }, formatter: (val) => "$" + val.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) } },
       tooltip: { theme: "dark", x: { format: 'HH:mm:ss' } },
-      markers: { size: 0 } // Ocultamos los puntos para que se vea mÃ¡s limpio
+      markers: { size: 0 } // Ocultamos los puntos para que se vea más limpio
     };
   }
 
@@ -57,7 +60,7 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
     this.tickTimer = setInterval(() => this.ahora.set(this.timeService.now()), 1000);
 
     const id = +(this.route.snapshot.paramMap.get('id') ?? 0);
-    if (!id) { this.error.set('ID de subasta no vÃ¡lido.'); this.loading.set(false); return; }
+    if (!id) { this.error.set('ID de subasta no válido.'); this.loading.set(false); return; }
     this.idCotizacion.set(id);
 
     this.loadData();
@@ -86,7 +89,7 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err.error?.message || err.message || 'Error de conexiÃ³n.');
+        this.error.set(err.error?.message || err.message || 'Error de conexión.');
       },
     });
   }
@@ -123,7 +126,7 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Estirar la lÃ­nea hasta el momento actual
+    // Estirar la línea hasta el momento actual
     const now = this.timeService.now();
     const end = new Date(subasta.fechaFin).getTime();
     if (now < end) {
@@ -175,14 +178,14 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
   }
 
   formatMoneda(valor: number | undefined | null): string {
-    if (valor === undefined || valor === null) return 'â€”';
+    if (valor === undefined || valor === null) return '—';
     return '$ ' + valor.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   formatFecha(valor: string | undefined | null): string {
-    if (!valor) return 'â€”';
+    if (!valor) return '—';
     const fecha = new Date(valor);
-    if (Number.isNaN(fecha.getTime())) return 'â€”';
+    if (Number.isNaN(fecha.getTime())) return '—';
     return new Intl.DateTimeFormat('es-AR', {
       day: '2-digit',
       month: '2-digit',
@@ -194,5 +197,14 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
 
   formatPorcentaje(valor: number): string {
     return Math.max(0, Math.min(100, valor)).toLocaleString('es-AR', { maximumFractionDigits: 0 }) + '%';
+  }
+
+  participar(): void {
+    const id = this.idCotizacion();
+    if (this.auth.isAuthenticated()) {
+      this.router.navigate(['/compra-venta', 'subasta-detalle', id]);
+    } else {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: `/subastas-activas/${id}` } });
+    }
   }
 }
