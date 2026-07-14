@@ -1,12 +1,18 @@
-<div class="w-full group/container">
+﻿<div class="w-full group/container">
 
     @if (label) {
-        <label class="ml-1 mb-1.5 block text-[11px] font-[700] uppercase tracking-wider text-[var(--color-storm-cloud)]">
+        <label [id]="selectId + '-label'" class="ml-1 mb-1.5 block text-[11px] font-[700] uppercase tracking-wider text-[var(--color-storm-cloud)]">
             {{ label }}
         </label>
     }
 
-    <button #triggerButton type="button" (click)="toggle()"
+    <button #triggerButton type="button" (click)="toggle()" (keydown)="onTriggerKeydown($event)"
+            [disabled]="disabled"
+            [attr.aria-haspopup]="'listbox'"
+            [attr.aria-expanded]="isOpen()"
+            [attr.aria-controls]="listboxId"
+            [attr.aria-labelledby]="label ? selectId + '-label' : null"
+            [attr.aria-label]="!label ? triggerAriaLabel : null"
             [class.opacity-60]="disabled"
             [class.cursor-not-allowed]="disabled"
             [class.cursor-pointer]="!disabled"
@@ -19,7 +25,7 @@
         </span>
 
         <span class="pointer-events-none flex items-center ml-2 text-gray-400 transition-colors"
-              [class.group-hover/container:text-brand-500]="!disabled">
+              [class.group-hover/container:text-brand-500]="!disabled" aria-hidden="true">
             <lucide-icon name="chevron-down" class="w-4 h-4 transition-transform duration-300" [class.rotate-180]="isOpen()"></lucide-icon>
         </span>
     </button>
@@ -38,22 +44,29 @@
                      [class.border-t]="dropdownPosition() === 'top'">
 
                     <div class="relative group/search">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" aria-hidden="true">
                             <lucide-icon name="search" class="h-4 w-4 text-[var(--color-storm-cloud)] transition-colors group-focus-within/search:text-[var(--color-cyan-spark)]"></lucide-icon>
                         </div>
-                        <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" (click)="onSearchClick($event)"
+                        <input [id]="searchInputId" type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" (click)="onSearchClick($event)"
                                placeholder="Buscar..."
+                               [attr.aria-label]="'Buscar en ' + triggerAriaLabel"
                                class="block w-full rounded-lg border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] py-2 pl-10 pr-3 text-sm text-[var(--color-porcelain)] placeholder:text-[var(--color-fog-grey)] transition-all focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-2 focus:ring-[var(--color-cyan-spark)]/20">
                     </div>
                 </div>
             }
 
-            <ul class="custom-scrollbar flex-grow space-y-0.5 overflow-y-auto bg-[var(--color-graphite)] py-2">
-                @for (option of filteredOptions(); track option.value) {
+            <ul [id]="listboxId" role="listbox" [attr.aria-multiselectable]="multi ? 'true' : null" class="custom-scrollbar flex-grow space-y-0.5 overflow-y-auto bg-[var(--color-graphite)] py-2">
+                @for (option of filteredOptions(); track option.value; let i = $index) {
                     <li (click)="select(option)"
+                        (keydown)="onOptionKeydown($event, option)"
+                        [id]="optionId(i)"
+                        role="option"
+                        [attr.aria-selected]="!option.disabled ? isSelected(option.value) : null"
+                        [attr.aria-disabled]="option.disabled ? 'true' : null"
+                        [attr.tabindex]="option.disabled ? -1 : 0"
                         [ngClass]="option.disabled ?
                             'mt-4 mb-2 cursor-default select-none px-4 text-[10px] font-extrabold uppercase tracking-widest text-[var(--color-fog-grey)] first:mt-0' :
-                            'group/item relative cursor-pointer select-none py-2 pl-3 pr-3 mx-2 rounded-lg text-sm transition-all duration-200 ' +
+                            'group/item relative cursor-pointer select-none py-2 pl-3 pr-3 mx-2 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-cyan-spark)]/30 ' +
                             (isSelected(option.value)
                                 ? 'bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] font-semibold'
                                 : 'text-[var(--color-light-steel)] hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]')"
@@ -61,7 +74,7 @@
                         <div class="flex items-center justify-between overflow-hidden">
                             <span class="flex items-center gap-3 overflow-hidden" [class.pl-1]="!option.disabled">
                                 @if (multi && !option.disabled) {
-                                    <div class="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-all duration-200"
+                                    <div class="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-all duration-200" aria-hidden="true"
                                          [ngClass]="isSelected(option.value) ? 'bg-[var(--color-cyan-spark)] border-[var(--color-cyan-spark)]' : 'border-[var(--color-charcoal-grey)] group-hover/item:border-[var(--color-cyan-spark)]'">
 
                                         @if (isSelected(option.value)) {
@@ -75,7 +88,7 @@
                             </span>
 
                             @if (!multi && isSelected(option.value) && !option.disabled) {
-                                <span class="ml-2 flex shrink-0 animate-scale-in items-center text-[var(--color-cyan-spark)]">
+                                <span class="ml-2 flex shrink-0 animate-scale-in items-center text-[var(--color-cyan-spark)]" aria-hidden="true">
                                     <lucide-icon name="check" class="w-4 h-4 stroke-[3]"></lucide-icon>
                                 </span>
                             }
@@ -84,8 +97,8 @@
                 }
 
                 @if (filteredOptions().length === 0) {
-                    <li class="py-8 px-3 text-center flex flex-col items-center justify-center gap-3 select-none">
-                        <div class="rounded-full bg-[var(--color-deep-slate)] p-3">
+                    <li role="status" class="py-8 px-3 text-center flex flex-col items-center justify-center gap-3 select-none">
+                        <div class="rounded-full bg-[var(--color-deep-slate)] p-3" aria-hidden="true">
                             <lucide-icon name="search-x" class="h-6 w-6 text-[var(--color-storm-cloud)]"></lucide-icon>
                         </div>
                         <span class="text-xs font-medium text-[var(--color-storm-cloud)]">No hay coincidencias.</span>

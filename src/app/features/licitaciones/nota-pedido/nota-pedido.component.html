@@ -79,8 +79,8 @@
 </div>
 
 @if (isItemsListOpen() && selectedReserva()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeItemsList()"></div>
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-label="Cuadro de diálogo" aria-modal="true">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeItemsList()"></div>
     <div class="relative w-full max-w-5xl rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[90vh]">
       
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-t-[2rem]">
@@ -124,8 +124,8 @@
 }
 
 @if (isBienModalOpen()) {
-  <div class="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeBienModal()"></div>
+  <div class="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-label="Cuadro de diálogo" aria-modal="true">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeBienModal()"></div>
     <div class="relative w-full max-w-2xl rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[90vh]">
       
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4 bg-[var(--color-graphite)] rounded-t-xl">
@@ -148,7 +148,7 @@
           <div>
             <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">Programa del gasto <span class="text-red-500">*</span></label>
             <div class="flex items-center gap-0">
-              <div (click)="openSelectCatProg()" class="flex-1 rounded-l-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] cursor-pointer hover:border-[#448b54] transition-colors truncate min-h-[42px] flex items-center">
+              <div role="button" tabindex="0" aria-label="Seleccionar categoría programática" (keydown.enter)="openSelectCatProg()" (keydown.space)="openSelectCatProg(); $event.preventDefault()" (click)="openSelectCatProg()" class="flex-1 rounded-l-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] cursor-pointer hover:border-[#448b54] transition-colors truncate min-h-[42px] flex items-center">
                 {{ getSelectedCatProgName() }}
               </div>
               <button type="button" (click)="clearCatProg()" class="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-r-xl bg-[#448b54] text-[#0B0E14] border border-[#448b54] hover:bg-[#367043] transition-colors shadow-sm">
@@ -160,7 +160,7 @@
           <div>
             <label class="mb-1.5 block text-[13px] font-[590] text-[var(--color-light-steel)]">Bien o servicio <span class="text-red-500">*</span></label>
             <div class="flex items-center gap-0">
-              <div (click)="openSelectBien()" class="flex-1 rounded-l-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] cursor-pointer hover:border-[#448b54] transition-colors truncate min-h-[42px] flex items-center">
+              <div role="button" tabindex="0" aria-label="Seleccionar bien o servicio" (keydown.enter)="openSelectBien()" (keydown.space)="openSelectBien(); $event.preventDefault()" (click)="openSelectBien()" class="flex-1 rounded-l-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-2.5 text-[14px] text-[var(--color-porcelain)] cursor-pointer hover:border-[#448b54] transition-colors truncate min-h-[42px] flex items-center">
                 {{ getSelectedBienName() }}
               </div>
               <button type="button" (click)="clearBien()" class="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-r-xl bg-[#448b54] text-[#0B0E14] border border-[#448b54] hover:bg-[#367043] transition-colors shadow-sm">
@@ -229,7 +229,7 @@
 }
 
 <ng-template #catProgTreeRow let-node let-level="level">
-  <div class="relative flex items-center justify-between py-3 px-4 mb-2 rounded-xl bg-[var(--color-graphite)] border border-[var(--color-charcoal-grey)] hover:border-[#448b54] transition-all cursor-pointer overflow-hidden group shadow-sm" 
+  <div role="button" tabindex="0" [attr.aria-label]="'Seleccionar categoría programática ' + (node.nombre || node.descripcion || node.codigo || '')" (keydown.enter)="selectCatProg(node)" (keydown.space)="selectCatProg(node); $event.preventDefault()" class="relative flex items-center justify-between py-3 px-4 mb-2 rounded-xl bg-[var(--color-graphite)] border border-[var(--color-charcoal-grey)] hover:border-[#448b54] transition-all cursor-pointer overflow-hidden group shadow-sm" 
        [style.margin-left.rem]="level * 2" 
        (click)="selectCatProg(node)">
      
@@ -271,8 +271,8 @@
 </ng-template>
 
 @if (isSelectCatProgModalOpen()) {
-  <div class="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" role="dialog">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isSelectCatProgModalOpen.set(false)"></div>
+  <div class="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-label="Cuadro de diálogo">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isSelectCatProgModalOpen.set(false)"></div>
     <div class="relative w-full max-w-4xl rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col h-[85vh] overflow-hidden">
       
       <div class="flex items-center justify-between px-6 py-5 shrink-0 bg-[var(--color-graphite)] border-b border-[var(--color-charcoal-grey)] rounded-t-xl">
@@ -304,8 +304,8 @@
 }
 
 @if (isSelectBienModalOpen()) {
-  <div class="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" role="dialog">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isSelectBienModalOpen.set(false)"></div>
+  <div class="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-label="Cuadro de diálogo">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isSelectBienModalOpen.set(false)"></div>
     <div class="relative w-full max-w-4xl rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col h-[85vh] overflow-hidden">
       
       <div class="flex items-center justify-between px-6 py-5 shrink-0 bg-[var(--color-graphite)] border-b border-[var(--color-charcoal-grey)] rounded-t-xl">
@@ -329,7 +329,7 @@
 
       <div class="flex-1 overflow-y-auto p-6 bg-[var(--color-graphite)] rounded-b-xl">
         <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-graphite)] shadow-sm">
-          <table class="w-full text-left text-[13px]">
+          <table aria-label="Tabla de datos" class="w-full text-left text-[13px]">
             <thead class="bg-[#448b54] text-white text-[11px] font-[600] uppercase tracking-widest">
               <tr>
                 <th class="px-6 py-3 border-r border-[#367043]/30 w-32">Código</th>
@@ -363,8 +363,8 @@
 }
 
 @if (isModalOpen()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-label="Cuadro de diálogo" aria-modal="true">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
     <div class="relative w-full max-w-2xl rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[90vh]">
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-t-[2rem]">
         <div>
@@ -421,8 +421,8 @@
 }
 
 @if (isDetailOpen() && selectedReserva()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeDetail()"></div>
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-label="Cuadro de diálogo" aria-modal="true">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeDetail()"></div>
     <div class="relative w-full max-w-4xl rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[90vh]">
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5 bg-[var(--color-graphite)] rounded-t-[2rem]">
         <div>
@@ -464,7 +464,7 @@
           </div>
         } @else {
           <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-pitch-black)]">
-            <table class="w-full text-left text-[13px]">
+            <table aria-label="Tabla de datos" class="w-full text-left text-[13px]">
               <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
                 <tr>
                   <th class="px-4 py-3">Nombre</th>
@@ -505,8 +505,8 @@
 }
 
 @if (reservaToClone()) {
-  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeCloneModal()"></div>
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-label="Cuadro de diálogo" aria-modal="true">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeCloneModal()"></div>
     <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col overflow-hidden">
       @if (isCloning()) {
         <div class="p-10 flex flex-col items-center justify-center">
@@ -530,8 +530,8 @@
 }
 
 @if (reservaToAuthorize()) {
-  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeAuthorizeModal()"></div>
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-label="Cuadro de diálogo" aria-modal="true">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeAuthorizeModal()"></div>
     <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col overflow-hidden">
       @if (isAuthorizing()) {
         <div class="p-10 flex flex-col items-center justify-center">

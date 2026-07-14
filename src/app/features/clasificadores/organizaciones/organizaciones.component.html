@@ -30,8 +30,8 @@
 </div>
 
 @if (isModalOpen()) {
-  <div class="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
+  <div class="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-label="Cuadro de diálogo" aria-modal="true">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeModal()"></div>
     <div class="relative w-full max-w-lg rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col">
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-5">
         <div><h3 class="text-[18px] font-[590] text-[var(--color-porcelain)]">{{ isEditing() ? 'Editar Organización' : 'Nueva Organización' }}</h3><p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">{{ isEditing() ? 'Modificá los datos de la organización.' : 'Registrá una nueva organización en el sistema.' }}</p></div>

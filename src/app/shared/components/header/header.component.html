@@ -12,11 +12,12 @@
       </button>
 
       @if (authService.isAuthenticated() && user()) {
-        <button id="user-menu-button" type="button" aria-haspopup="menu" aria-controls="user-dropdown" [attr.aria-expanded]="isUserMenuOpen()" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] uppercase ring-2 ring-[var(--color-pitch-black)] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95">
+        <button id="user-menu-button" type="button" aria-haspopup="dialog" aria-controls="user-dropdown" [attr.aria-expanded]="isUserMenuOpen()" [attr.aria-label]="isUserMenuOpen() ? 'Cerrar menú de usuario' : 'Abrir menú de usuario de ' + (user()?.nombreUsuario || 'usuario')" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] uppercase ring-2 ring-[var(--color-pitch-black)] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95">
           {{ userInitials() }}
         </button>
 
         <div id="user-dropdown"
+             role="dialog" aria-label="Menú de usuario"
              style="z-index: 10001" class="fixed right-4 top-[4.5rem] w-[18rem] max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-3 shadow-[0_24px_80px_rgba(15,43,92,0.18)] backdrop-blur-2xl transition-all duration-200 dark:border-[rgba(2,184,204,0.10)] dark:bg-[linear-gradient(145deg,rgba(27,34,46,0.99),rgba(9,13,20,0.99))] dark:shadow-[0_24px_80px_rgba(0,0,0,0.72)]"
              [ngClass]="isUserMenuOpen() ? 'scale-100 opacity-100 visible' : 'scale-95 opacity-0 invisible'">
           <div class="mb-3 flex items-center gap-3 rounded-xl bg-[var(--color-pitch-black)]/45 px-3 py-3 shadow-[0_1px_0_rgba(18,104,196,0.14)] dark:bg-transparent dark:px-1 dark:pb-3 dark:pt-0 dark:shadow-[0_1px_0_rgba(2,184,204,0.10)]">
@@ -113,11 +114,12 @@
           </a>
           
           <div>
-            <button id="user-menu-button" type="button" aria-haspopup="menu" aria-controls="user-dropdown" [attr.aria-expanded]="isUserMenuOpen()" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95 ring-2 ring-[var(--color-pitch-black)] uppercase">
+            <button id="user-menu-button" type="button" aria-haspopup="dialog" aria-controls="user-dropdown" [attr.aria-expanded]="isUserMenuOpen()" [attr.aria-label]="isUserMenuOpen() ? 'Cerrar menú de usuario' : 'Abrir menú de usuario de ' + (user()?.nombreUsuario || 'usuario')" (click)="toggleUserMenu()" class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-aether-blue)] to-[var(--color-cyan-spark)] text-[var(--color-pitch-black)] font-bold text-[14px] transition-all hover:shadow-[0_0_15px_rgba(2,184,204,0.4)] active:scale-95 ring-2 ring-[var(--color-pitch-black)] uppercase">
               {{ userInitials() }}
             </button>
 
             <div id="user-dropdown" 
+                 role="dialog" aria-label="Menú de usuario"
                  class="absolute right-0 top-12 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-4 shadow-[0_24px_80px_rgba(15,43,92,0.18)] backdrop-blur-2xl transition-all duration-200 transform origin-top-right dark:border-transparent dark:bg-[radial-gradient(circle_at_20%_0%,rgba(2,184,204,0.12),transparent_32%),linear-gradient(145deg,rgba(31,38,51,0.98),rgba(13,17,25,0.98))] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(2,184,204,0.08)]"
                  [ngClass]="isUserMenuOpen() ? 'scale-100 opacity-100 visible' : 'scale-95 opacity-0 invisible'">
               
@@ -284,21 +286,21 @@
 }
 
 @if (isProfileModalOpen() && user()) {
-  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+  <div role="dialog" aria-modal="true" aria-labelledby="profile-modal-title" class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
     <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
       
       <div class="absolute right-6 top-6 flex items-center gap-3 z-10">
         @if (!isLoadingProfile() && profileData()) {
-          <button (click)="toggleEditProfile()" class="text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] transition-colors active:scale-95" title="Editar Perfil">
+          <button type="button" (click)="toggleEditProfile()" aria-label="Editar perfil" class="text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)] transition-colors active:scale-95" title="Editar Perfil">
             <lucide-icon name="pencil" [size]="20"></lucide-icon>
           </button>
         }
-        <button (click)="closeProfile()" class="text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors active:scale-95">
+        <button type="button" (click)="closeProfile()" aria-label="Cerrar perfil" class="text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors active:scale-95">
           <lucide-icon name="x" [size]="24"></lucide-icon>
         </button>
       </div>
 
-      <h2 class="text-[24px] font-[590] text-[var(--color-porcelain)] mb-6">Mi Perfil</h2>
+      <h2 id="profile-modal-title" class="text-[24px] font-[590] text-[var(--color-porcelain)] mb-6">Mi Perfil</h2>
       
       @if (isLoadingProfile()) {
         <div class="flex py-10 items-center justify-center text-[var(--color-cyan-spark)]">
@@ -314,8 +316,8 @@
             <div class="w-full">
               @if (isEditingProfile()) {
                 <div class="flex gap-3 mb-1">
-                  <input formControlName="nombre" type="text" class="w-full border-b border-[var(--color-cyan-spark)] bg-transparent text-[18px] font-[590] text-[var(--color-porcelain)] focus:outline-none" placeholder="Nombre">
-                  <input formControlName="apellido" type="text" class="w-full border-b border-[var(--color-cyan-spark)] bg-transparent text-[18px] font-[590] text-[var(--color-porcelain)] focus:outline-none" placeholder="Apellido">
+                  <input formControlName="nombre" type="text" aria-label="Nombre" class="w-full border-b border-[var(--color-cyan-spark)] bg-transparent text-[18px] font-[590] text-[var(--color-porcelain)] focus:outline-none" placeholder="Nombre">
+                  <input formControlName="apellido" type="text" aria-label="Apellido" class="w-full border-b border-[var(--color-cyan-spark)] bg-transparent text-[18px] font-[590] text-[var(--color-porcelain)] focus:outline-none" placeholder="Apellido">
                 </div>
               } @else {
                 <p class="text-[18px] font-[590] text-[var(--color-porcelain)]">{{ profileData()?.nombre }} {{ profileData()?.apellido }}</p>
@@ -342,7 +344,7 @@
             <div>
               <label class="mb-1 block text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Teléfono</label>
               @if (isEditingProfile()) {
-                <input formControlName="telefono" type="text" placeholder="+54 9 11 2345 6789" class="w-full rounded-xl border border-[var(--color-cyan-spark)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:outline-none shadow-[0_0_10px_rgba(2,184,204,0.15)] transition-all">
+                <input formControlName="telefono" type="text" aria-label="Teléfono" placeholder="+54 9 11 2345 6789" class="w-full rounded-xl border border-[var(--color-cyan-spark)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:outline-none shadow-[0_0_10px_rgba(2,184,204,0.15)] transition-all">
               } @else {
                 <div class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/50 px-4 py-3 text-[14px] text-[var(--color-fog-grey)] cursor-not-allowed">
                   {{ profileData()?.telefono }}
@@ -377,25 +379,25 @@
 }
 
 @if (isPasswordModalOpen()) {
-  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
+  <div role="dialog" aria-modal="true" aria-labelledby="password-modal-title" aria-describedby="password-modal-desc" class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-pitch-black)]/80 backdrop-blur-sm p-4 animate-fade-in">
     <div class="relative w-full max-w-md rounded-[2rem] border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-6 shadow-2xl sm:p-8">
       
-      <button (click)="closePassword()" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+      <button type="button" (click)="closePassword()" aria-label="Cerrar cambio de contraseña" class="absolute right-6 top-6 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
         <lucide-icon name="x" [size]="24"></lucide-icon>
       </button>
 
-      <h2 class="text-[24px] font-[590] text-[var(--color-porcelain)] mb-2">Cambiar Contraseña</h2>
-      <p class="text-[14px] text-[var(--color-storm-cloud)] mb-6">Ingresa tu contraseña actual y la nueva para actualizar tus credenciales.</p>
+      <h2 id="password-modal-title" class="text-[24px] font-[590] text-[var(--color-porcelain)] mb-2">Cambiar Contraseña</h2>
+      <p id="password-modal-desc" class="text-[14px] text-[var(--color-storm-cloud)] mb-6">Ingresa tu contraseña actual y la nueva para actualizar tus credenciales.</p>
       
       @if (passwordError()) {
-        <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-left animate-fade-in">
+        <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-left animate-fade-in" role="alert">
           <lucide-icon name="lock" [size]="18" class="mt-0.5 shrink-0 text-red-400"></lucide-icon>
           <p class="text-[13px] font-[510] text-red-400">{{ passwordError() }}</p>
         </div>
       }
 
       @if (passwordSuccess()) {
-        <div class="mb-6 flex items-start gap-3 rounded-xl border border-[var(--color-neon-lime)]/20 bg-[var(--color-neon-lime)]/10 p-4 text-left animate-fade-in">
+        <div class="mb-6 flex items-start gap-3 rounded-xl border border-[var(--color-neon-lime)]/20 bg-[var(--color-neon-lime)]/10 p-4 text-left animate-fade-in" role="status" aria-live="polite">
           <lucide-icon name="shield-check" [size]="18" class="mt-0.5 shrink-0 text-[var(--color-neon-lime)]"></lucide-icon>
           <p class="text-[13px] font-[510] text-[var(--color-neon-lime)]">{{ passwordSuccess() }}</p>
         </div>
@@ -406,7 +408,7 @@
           <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Contraseña Actual</label>
           <div class="relative">
             <lucide-icon name="lock" [size]="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-fog-grey)]"></lucide-icon>
-            <input formControlName="passwordActual" type="password" placeholder="••••••••" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)] transition-all">
+            <input formControlName="passwordActual" type="password" aria-label="Contraseña actual" placeholder="••••••••" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)] transition-all">
           </div>
         </div>
         
@@ -414,7 +416,7 @@
           <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Nueva Contraseña</label>
           <div class="relative">
             <lucide-icon name="key-round" [size]="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-fog-grey)]"></lucide-icon>
-            <input formControlName="nuevaPassword" type="password" placeholder="••••••••" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)] transition-all" [ngClass]="{'border-red-500/50 focus:border-red-500 focus:ring-red-500': passwordForm.hasError('mismatch') && passwordForm.get('nuevaPassword')?.touched}">
+            <input formControlName="nuevaPassword" type="password" aria-label="Nueva contraseña" placeholder="••••••••" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)] transition-all" [ngClass]="{'border-red-500/50 focus:border-red-500 focus:ring-red-500': passwordForm.hasError('mismatch') && passwordForm.get('nuevaPassword')?.touched}">
           </div>
         </div>
 
@@ -422,7 +424,7 @@
           <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Confirmar Nueva Contraseña</label>
           <div class="relative">
             <lucide-icon name="key-round" [size]="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-fog-grey)]"></lucide-icon>
-            <input formControlName="confirmarPassword" type="password" placeholder="••••••••" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)] transition-all" [ngClass]="{'border-red-500/50 focus:border-red-500 focus:ring-red-500': passwordForm.hasError('mismatch') && passwordForm.get('confirmarPassword')?.touched}">
+            <input formControlName="confirmarPassword" type="password" aria-label="Confirmar nueva contraseña" placeholder="••••••••" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/50 px-4 py-3.5 pl-11 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] focus:outline-none focus:ring-1 focus:ring-[var(--color-cyan-spark)] transition-all" [ngClass]="{'border-red-500/50 focus:border-red-500 focus:ring-red-500': passwordForm.hasError('mismatch') && passwordForm.get('confirmarPassword')?.touched}">
           </div>
           @if (passwordForm.hasError('mismatch') && passwordForm.get('confirmarPassword')?.touched) {
             <p class="mt-1.5 text-[11px] text-red-400">Las contraseñas no coinciden.</p>

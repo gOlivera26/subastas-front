@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -16,9 +16,12 @@ export class Modal {
   @Input() maxWidthClass = 'max-w-md';
   @Output() close = new EventEmitter<void>();
 
+  readonly modalId = 'app-modal-' + Math.random().toString(36).slice(2, 10);
+
   onBackdropClick(event: MouseEvent) {
     if ((event.target as HTMLElement).classList.contains('backdrop-layer')) {
       this.close.emit();
     }
   }
 }
+

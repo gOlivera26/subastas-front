@@ -42,7 +42,7 @@
             <p class="text-[14px] text-[var(--color-storm-cloud)] py-8 text-center">Seleccioná una vigencia para cargar las reservas disponibles.</p>
           } @else {
             <div class="overflow-y-auto max-h-[60vh] rounded-xl border border-[var(--color-charcoal-grey)]">
-              <table class="w-full text-left text-[14px]">
+              <table aria-label="Tabla de datos" class="w-full text-left text-[14px]">
                 <thead class="sticky top-0 bg-[var(--color-deep-slate)] text-[11px] uppercase text-[var(--color-storm-cloud)]"><tr><th class="px-4 py-3 w-12"></th><th class="px-4 py-3">Nro Reserva</th><th class="px-4 py-3">Ítem</th><th class="px-4 py-3 w-24">Cant.</th><th class="px-4 py-3 w-32">Importe</th></tr></thead>
                 <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
                   @for (r of reservas(); track r.idReserva || r.id) {

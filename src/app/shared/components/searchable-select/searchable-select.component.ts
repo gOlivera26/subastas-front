@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed } from '@angular/core';
+﻿import { Component, input, output, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -23,6 +23,9 @@ export class SearchableSelectComponent {
   nullLabel = input<string>('— Sin selección —');
   showNullOption = input<boolean>(true);
 
+  readonly selectId = 'searchable-select-' + Math.random().toString(36).slice(2, 10);
+  readonly listboxId = this.selectId + '-listbox';
+
   isOpen = signal(false);
   searchQuery = signal('');
 
@@ -38,9 +41,24 @@ export class SearchableSelectComponent {
     return found ? found.label : this.nullLabel();
   });
 
+  optionId(index: number): string {
+    return `${this.listboxId}-option-${index}`;
+  }
+
   toggleDropdown() {
     this.isOpen.set(!this.isOpen());
     if (this.isOpen()) this.searchQuery.set('');
+  }
+
+  onTriggerKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      this.closeDropdown();
+      return;
+    }
+    if (event.key === 'ArrowDown' && !this.isOpen()) {
+      event.preventDefault();
+      this.toggleDropdown();
+    }
   }
 
   closeDropdown() {

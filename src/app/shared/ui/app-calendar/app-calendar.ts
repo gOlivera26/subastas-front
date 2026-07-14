@@ -20,6 +20,8 @@ export class AppCalendar implements ControlValueAccessor {
   maxDate = input<Date | null>(null);
   showTime = input<boolean>(false);
 
+  readonly calendarId = 'app-calendar-' + Math.random().toString(36).slice(2, 10);
+
   isOpen = signal(false);
   currentView = signal<CalendarView>('day');
   selectedDate = signal<Date | null>(null);
@@ -112,6 +114,14 @@ export class AppCalendar implements ControlValueAccessor {
 
   fmtIso(d: Date) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
   fmtDtIso(d: Date) { return `${this.fmtIso(d)}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+
+  dateAriaLabel(d: Date): string {
+    return d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  monthAriaLabel(index: number): string {
+    return `${this.months[index]} ${this.currentViewDate().getFullYear()}`;
+  }
 
   get displayDate(): string {
     const d = this.selectedDate(); if (!d) return '';

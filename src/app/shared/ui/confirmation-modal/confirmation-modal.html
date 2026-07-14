@@ -1,10 +1,10 @@
-@if (isOpen) {
-  <div class="fixed inset-0 z-[160] flex items-end justify-center p-2 sm:items-center sm:p-6" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-slate-950/55 backdrop-blur-sm transition-opacity animate-fade-in" (click)="onCancel()"></div>
+﻿@if (isOpen) {
+  <div class="fixed inset-0 z-[160] flex items-end justify-center p-2 sm:items-center sm:p-6" role="dialog" aria-modal="true" [attr.aria-labelledby]="modalId + '-title'" [attr.aria-describedby]="modalId + '-message'">
+    <div aria-hidden="true" class="fixed inset-0 bg-slate-950/55 backdrop-blur-sm transition-opacity animate-fade-in" (click)="onCancel()" aria-hidden="true"></div>
 
     <div class="relative flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] p-5 shadow-2xl animate-scale-in sm:p-6">
       <div class="flex items-start gap-4">
-        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full"
+        <div aria-hidden="true" class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full"
              [ngClass]="{
                'bg-red-500/10 text-red-400 ring-1 ring-red-500/20': type === 'danger',
                'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20': type === 'warning',
@@ -16,8 +16,8 @@
         </div>
 
         <div class="min-w-0 flex-1">
-          <h3 class="text-[17px] font-[650] leading-6 text-[var(--color-porcelain)]">{{ title }}</h3>
-          <p class="mt-2 text-[14px] leading-6 text-[var(--color-storm-cloud)]">{{ message }}</p>
+          <h3 [id]="modalId + '-title'" class="text-[17px] font-[650] leading-6 text-[var(--color-porcelain)]">{{ title }}</h3>
+          <p [id]="modalId + '-message'" class="mt-2 text-[14px] leading-6 text-[var(--color-storm-cloud)]">{{ message }}</p>
         </div>
       </div>
 
@@ -33,3 +33,4 @@
     </div>
   </div>
 }
+
