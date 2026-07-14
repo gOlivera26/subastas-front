@@ -61,8 +61,8 @@
 
 <!-- MODAL: ROLE CRUD -->
 @if (isRoleModalOpen()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isRoleModalOpen.set(false)"></div>
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-label="Cuadro de diálogo">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isRoleModalOpen.set(false)"></div>
     <div class="relative w-full max-w-md rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in">
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4">
         <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">{{ isEditingRole() ? 'Editar' : 'Nuevo' }} Rol</h3>
@@ -84,8 +84,8 @@
 
 <!-- MODAL: PAGE ASSIGNMENT -->
 @if (isPagesModalOpen()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isPagesModalOpen.set(false)"></div>
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-label="Cuadro de diálogo">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isPagesModalOpen.set(false)"></div>
     <div class="relative w-full max-w-2xl rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in flex flex-col max-h-[85vh]">
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4 shrink-0">
         <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">Páginas de "{{ selectedRole()?.nombre }}"</h3>
@@ -129,8 +129,8 @@
 
 <!-- MODAL: LINK USER TO ORG -->
 @if (isLinkModalOpen()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isLinkModalOpen.set(false)"></div>
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-label="Cuadro de diálogo">
+    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isLinkModalOpen.set(false)"></div>
     <div class="relative w-full max-w-md rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in">
       <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4">
         <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">Asignar Usuario a Organización</h3>

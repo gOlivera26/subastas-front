@@ -2,10 +2,12 @@
   @if (showSearch()) {
   <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div class="relative w-full sm:max-w-sm">
-      <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+      <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none" aria-hidden="true">
         <lucide-icon name="search" [size]="16" class="text-[var(--color-storm-cloud)]"></lucide-icon>
       </div>
+      <label [for]="tableId + '-search'" class="sr-only">{{ searchPlaceholder() }}</label>
       <input
+        [id]="tableId + '-search'"
         type="text"
         [placeholder]="searchPlaceholder()"
         (input)="onSearchInput($event)"
@@ -16,7 +18,7 @@
 
   <div class="relative mb-0 flex flex-col overflow-hidden rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-sm">
     @if (loading()) {
-      <div class="absolute inset-0 z-50 flex items-center justify-center rounded-2xl bg-[var(--color-graphite)]/85 backdrop-blur-[2px] transition-all">
+      <div class="absolute inset-0 z-50 flex items-center justify-center rounded-2xl bg-[var(--color-graphite)]/85 backdrop-blur-[2px] transition-all" role="status" aria-live="polite" aria-label="Cargando tabla">
         <app-loading-spinner label="Cargando..."></app-loading-spinner>
       </div>
     }
@@ -25,13 +27,19 @@
       <span class="uppercase tracking-[0.18em]">Tabla</span>
       <span>Deslizá para ver más columnas →</span>
     </div>
-    <div class="smart-table-scroll w-full overflow-x-auto overflow-y-hidden" role="region" aria-label="Tabla de resultados">
-      <table class="smart-table-native min-w-full text-left">
+    <div class="smart-table-scroll w-full overflow-x-auto overflow-y-hidden" role="region" [attr.aria-label]="tableLabel() + ' con desplazamiento horizontal'">
+      <table class="smart-table-native min-w-full text-left" [attr.aria-label]="tableLabel()">
         <thead class="border-b border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)]/55">
           <tr>
             @for (col of columns(); track col.key) {
               <th
                 (click)="handleSort(col)"
+                (keydown.enter)="handleSort(col)"
+                (keydown.space)="handleSort(col); $event.preventDefault()"
+                [attr.tabindex]="col.sortable ? 0 : null"
+                [attr.role]="col.sortable ? 'button' : null"
+                [attr.aria-sort]="ariaSort(col)"
+                [attr.aria-label]="col.sortable ? sortButtonLabel(col) : null"
                 class="px-3 py-3 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] select-none sm:px-4 md:px-6 md:text-[11px]"
                 [class.cursor-pointer]="col.sortable"
                 [class.hover:text-[var(--color-porcelain)]]="col.sortable">
@@ -48,7 +56,7 @@
             }
             @if (selectable()) {
               <th class="w-10 px-3 py-3 text-center sm:px-4 md:px-6">
-                <input type="checkbox" [checked]="isAllSelected()" (change)="toggleAll()" class="rounded border-[var(--color-charcoal-grey)]">
+                <input type="checkbox" aria-label="Seleccionar todas las filas visibles" [checked]="isAllSelected()" (change)="toggleAll()" class="rounded border-[var(--color-charcoal-grey)]">
               </th>
             }
           </tr>
@@ -92,7 +100,7 @@
                           (click)="handleAction(act.action, row)"
                           [title]="act.tooltip || act.action"
                           class="smart-table-action-button {{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
-                          <lucide-icon [name]="act.icon" [size]="16"></lucide-icon>
+                          <lucide-icon [name]="act.icon" [size]="16" aria-hidden="true"></lucide-icon>
                           </button>
                         }
                       }
@@ -104,13 +112,16 @@
                         (click)="toggleActionsMenu(row, $index, $event)"
                         class="smart-table-actions-trigger"
                         [attr.aria-expanded]="isActionsMenuOpen(rowActionKey(row, $index))"
-                        aria-label="Abrir acciones">
+                        [attr.aria-controls]="actionsPopoverId(row, $index)"
+                        [attr.aria-label]="'Abrir acciones de ' + rowAccessibleLabel(row)">
                         <span class="action-menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
                       </button>
 
                       <div
                         [id]="actionsPopoverId(row, $index)"
                         [attr.popover]="'auto'"
+                        role="menu"
+                        [attr.aria-label]="'Acciones de ' + rowAccessibleLabel(row)"
                         (toggle)="onActionsPopoverToggle(rowActionKey(row, $index), $event)"
                         (click)="closeActionsMenu()"
                         class="smart-table-action-menu rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] p-1.5 text-left shadow-2xl"
@@ -121,10 +132,12 @@
                           @if (isActionVisible(act, row)) {
                             <button
                               type="button"
+                              role="menuitem"
                               (click)="handleActionFromMenu(act.action, row, $event)"
                               [title]="act.tooltip || act.action"
+                              [attr.aria-label]="actionLabel(act, row)"
                               class="{{ act.color || 'text-[var(--color-storm-cloud)] hover:text-[var(--color-cyan-spark)]' }}">
-                              <lucide-icon [name]="act.icon" [size]="15"></lucide-icon>
+                              <lucide-icon [name]="act.icon" [size]="15" aria-hidden="true"></lucide-icon>
                             </button>
                           }
                         }
@@ -136,7 +149,7 @@
 
               @if (selectable()) {
                 <td class="px-3 py-3 text-center sm:px-4 md:px-6 md:py-4">
-                  <input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="rounded border-[var(--color-charcoal-grey)]">
+                  <input type="checkbox" [attr.aria-label]="'Seleccionar ' + rowAccessibleLabel(row)" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="rounded border-[var(--color-charcoal-grey)]">
                 </td>
               }
             </tr>
@@ -144,7 +157,7 @@
             <tr>
               <td [attr.colspan]="columns().length + (actions().length ? 1 : 0) + (selectable() ? 1 : 0)" class="p-12 text-center text-[var(--color-storm-cloud)]">
                 <div class="flex flex-col items-center justify-center">
-                  <lucide-icon name="inbox" [size]="32" class="mb-2 text-[var(--color-fog-grey)]"></lucide-icon>
+                  <lucide-icon name="inbox" [size]="32" aria-hidden="true" class="mb-2 text-[var(--color-fog-grey)]"></lucide-icon>
                   <p class="text-[14px]">{{ emptyMessage() }}</p>
                   @if (emptySubMessage()) {<p class="mt-1 text-[12px] text-[var(--color-fog-grey)]">{{ emptySubMessage() }}</p>}
                 </div>
@@ -165,11 +178,11 @@
       <div class="flex flex-col gap-3 border-t border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/35 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <span class="text-[13px] text-[var(--color-storm-cloud)]">Mostrando <span class="font-medium text-[var(--color-porcelain)]">{{ rangeInfo() }}</span></span>
         <div class="flex items-center justify-between gap-2 sm:justify-end">
-          <button (click)="prevPage()" [disabled]="currentPage() === 1" class="rounded-lg border border-transparent p-2 text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] disabled:opacity-50">
+          <button type="button" (click)="prevPage()" aria-label="Página anterior" [disabled]="currentPage() === 1" class="rounded-lg border border-transparent p-2 text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] disabled:opacity-50">
             <lucide-icon name="chevron-left" [size]="18"></lucide-icon>
           </button>
           <span class="px-2 text-[13px] font-medium text-[var(--color-porcelain)]">{{ currentPage() }} / {{ totalPages() }}</span>
-          <button (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="rounded-lg border border-transparent p-2 text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] disabled:opacity-50">
+          <button type="button" (click)="nextPage()" aria-label="Página siguiente" [disabled]="currentPage() === totalPages()" class="rounded-lg border border-transparent p-2 text-[var(--color-storm-cloud)] transition-all hover:bg-[var(--color-deep-slate)] disabled:opacity-50">
             <lucide-icon name="chevron-right" [size]="18"></lucide-icon>
           </button>
         </div>

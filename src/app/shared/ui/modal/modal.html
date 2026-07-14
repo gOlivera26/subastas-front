@@ -1,16 +1,17 @@
-@if (isOpen) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true">
-      <div class="backdrop-layer fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-fade-in" (click)="onBackdropClick($event)"></div>
+﻿@if (isOpen) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true" [attr.aria-labelledby]="modalId + '-title'" [attr.aria-describedby]="subtitle ? modalId + '-subtitle' : null">
+      <div class="backdrop-layer fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-fade-in" (click)="onBackdropClick($event)" aria-hidden="true"></div>
       <div class="relative bg-[var(--color-graphite)] rounded-2xl shadow-2xl w-full min-w-0 overflow-hidden transform transition-all animate-scale-in flex flex-col border border-[var(--color-charcoal-grey)] max-h-[calc(100dvh-1.5rem)] sm:max-h-[90vh]" [ngClass]="maxWidthClass">
         <div class="flex min-w-0 flex-shrink-0 items-center justify-between border-b border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-3 sm:px-6 sm:py-4">
             <div class="min-w-0">
-                <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] leading-6 truncate">{{ title }}</h3>
-                @if (subtitle) { <p class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5 truncate">{{ subtitle }}</p> }
+                <h3 [id]="modalId + '-title'" class="text-[16px] font-[590] text-[var(--color-porcelain)] leading-6 truncate">{{ title }}</h3>
+                @if (subtitle) { <p [id]="modalId + '-subtitle'" class="text-[12px] text-[var(--color-storm-cloud)] mt-0.5 truncate">{{ subtitle }}</p> }
             </div>
-            <button (click)="close.emit()" class="text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors p-1.5 rounded-lg hover:bg-[var(--color-deep-slate)] flex-shrink-0 ml-4"><lucide-icon name="x" [size]="20"></lucide-icon></button>
+            <button type="button" (click)="close.emit()" aria-label="Cerrar modal" class="text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors p-1.5 rounded-lg hover:bg-[var(--color-deep-slate)] flex-shrink-0 ml-4"><lucide-icon name="x" [size]="20" aria-hidden="true"></lucide-icon></button>
         </div>
         <div class="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6"><ng-content></ng-content></div>
         <div class="flex min-w-0 shrink-0 flex-col-reverse gap-2 border-t border-[var(--color-charcoal-grey)] px-4 py-3 sm:flex-row sm:justify-end sm:gap-3 sm:px-6 sm:py-4"><ng-content select="[footer]"></ng-content></div>
       </div>
   </div>
 }
+

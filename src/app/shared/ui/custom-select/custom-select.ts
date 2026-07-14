@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output, ViewChild, computed, inject, signal } from '@angular/core';
+﻿import { AfterViewChecked, Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output, ViewChild, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -41,6 +41,10 @@ export class CustomSelect implements AfterViewChecked {
   @Input() value: any | any[] = null;
   @Output() valueChange = new EventEmitter<any>();
 
+  readonly selectId = 'custom-select-' + Math.random().toString(36).slice(2, 10);
+  readonly listboxId = this.selectId + '-listbox';
+  readonly searchInputId = this.selectId + '-search';
+
   isOpen = signal(false);
   searchTerm = signal('');
   dropdownPosition = signal<'top' | 'bottom'>('bottom');
@@ -70,6 +74,14 @@ export class CustomSelect implements AfterViewChecked {
     return selected ? selected.label : '';
   }
 
+  get triggerAriaLabel(): string {
+    return this.label || this.placeholder || 'Selector';
+  }
+
+  optionId(index: number): string {
+    return `${this.listboxId}-option-${index}`;
+  }
+
   toggle() {
     if (this.disabled) return;
     if (this._options().length > 0) {
@@ -80,6 +92,30 @@ export class CustomSelect implements AfterViewChecked {
         this.isOpen.set(true);
         requestAnimationFrame(() => this.positionDropdown());
       }
+    }
+  }
+
+  onTriggerKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      this.close();
+      return;
+    }
+    if (event.key === 'ArrowDown' && !this.isOpen()) {
+      event.preventDefault();
+      this.toggle();
+    }
+  }
+
+  onOptionKeydown(event: KeyboardEvent, option: SelectOption) {
+    if (event.key === 'Escape') {
+      this.close();
+      this.triggerButton?.nativeElement.focus();
+      return;
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.select(option);
+      if (!this.multi) this.triggerButton?.nativeElement.focus();
     }
   }
 

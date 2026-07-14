@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgClass } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
@@ -19,6 +19,7 @@ export class LoginComponent implements OnDestroy {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // State
   currentState = signal<LoginState>('login');
@@ -82,10 +83,14 @@ export class LoginComponent implements OnDestroy {
         this.isLoading.set(false);
         const user = this.authService.currentUser();
         const proveedor = user?.entidades?.find(e => e.tipo === 'PROVEEDOR');
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'];
         if (proveedor) {
+          if (returnUrl) {
+            sessionStorage.setItem('returnUrl', returnUrl);
+          }
           this.authService.switchContext(proveedor.tipo, proveedor.id).subscribe();
         } else {
-          this.router.navigate(['/modulos']);
+          this.router.navigate(returnUrl ? [returnUrl] : ['/modulos']);
         }
       },
       error: (err) => {

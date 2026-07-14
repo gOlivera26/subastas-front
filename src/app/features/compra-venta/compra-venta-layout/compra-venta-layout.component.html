@@ -1,8 +1,9 @@
 <div class="flex h-dvh min-h-0 overflow-hidden bg-[var(--color-pitch-black)]">
   @if (isSidebarOpen()) {
-    <div (click)="closeSidebar()" class="fixed inset-0 z-40 bg-slate-950/35 lg:hidden transition-opacity"></div>
+    <div (click)="closeSidebar()" aria-hidden="true" class="fixed inset-0 z-40 bg-slate-950/35 lg:hidden transition-opacity"></div>
   }
   <aside
+    aria-label="Menú lateral"
     class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl lg:shadow-none overflow-hidden transition-[transform,width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] max-w-[calc(100vw-2rem)] will-change-transform lg:static lg:translate-x-0"
     [ngClass]="isSidebarOpen() ? 'w-[min(18rem,calc(100vw-2rem))] translate-x-0 lg:w-72' : '-translate-x-full lg:translate-x-0 lg:w-[68px]'">
     <div class="flex h-16 shrink-0 items-center px-4 border-b border-[var(--color-charcoal-grey)]"
@@ -14,7 +15,7 @@
         <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)] truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()">Compra y Venta</span>
       </a>
-      <button (click)="closeSidebar()" class="lg:hidden text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]">
+      <button type="button" aria-label="Cerrar menú lateral" (click)="closeSidebar()" class="lg:hidden text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]">
         <lucide-icon name="x" [size]="20"></lucide-icon>
       </button>
     </div>
@@ -61,10 +62,10 @@
   <div class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
     <app-header variant="module" title="Compra y Venta">
       <ng-container header-left>
-        <button (click)="toggleSidebar()" class="lg:hidden flex items-center justify-center rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
+        <button type="button" aria-label="Abrir o cerrar menú lateral" (click)="toggleSidebar()" class="lg:hidden flex items-center justify-center rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)]">
           <lucide-icon name="menu" [size]="24"></lucide-icon>
         </button>
-        <button (click)="toggleSidebar()" class="hidden items-center justify-center rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] lg:flex">
+        <button type="button" aria-label="Expandir o contraer menú lateral" (click)="toggleSidebar()" class="hidden items-center justify-center rounded-lg p-2 text-[var(--color-storm-cloud)] transition-colors hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] lg:flex">
           <lucide-icon [name]="isSidebarOpen() ? 'panel-left-close' : 'panel-left'" [size]="20"></lucide-icon>
         </button>
       </ng-container>

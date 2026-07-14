@@ -83,6 +83,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
 
   ofertasForm = signal<Record<number, any>>({});
   ofertas = computed(() => this.signalR.ofertas().filter(o => o.idCotizacion === this.idCotizacion()));
+  mejoresOfertas = computed(() => this.signalR.mejoresOfertas());
   
   // === TRADING CHART ===
   @ViewChild('chart') chart!: ChartComponent;
@@ -124,16 +125,10 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
   });
 
   getMejorOferta(idFila: number): number | null {
-    const pujas = this.ofertas().filter(o => 
+    const match = this.mejoresOfertas().find(o =>
       this.isPorRenglon ? o.idRenglon === idFila : o.idCotizacionDetalle === idFila
     );
-    if (pujas.length === 0) return null;
-    
-    if (this.isDirecta) {
-      return Math.max(...pujas.map(p => p.monto)); 
-    } else {
-      return Math.min(...pujas.map(p => p.monto)); 
-    }
+    return match ? match.mejorMonto : null;
   }
 
   isGarantiasModalOpen = signal(false);
@@ -256,6 +251,7 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
 
     effect(() => {
       const pujas = this.ofertas();
+      const mejores = this.mejoresOfertas();
       const elementos = this.elementosOfertables();
       if (elementos.length === 0) return;
 
@@ -265,6 +261,13 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
       elementos.forEach((el: any) => {
         const base = this.isPorRenglon ? (el._importeBaseConsolidado || 0) : (this.getVal(el.importeBase) * this.getVal(el.cantidad));
         bestPerItem[this.isPorRenglon ? el.idRenglon : el.idCotizacionDetalle] = base;
+      });
+
+      mejores.forEach(m => {
+        const idItem = m.idRenglon || m.idCotizacionDetalle;
+        if (idItem && bestPerItem[idItem] !== undefined) {
+          bestPerItem[idItem] = m.mejorMonto;
+        }
       });
 
       const pujasOrdenadas = [...pujas].sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
@@ -277,23 +280,13 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
         usuario: puja.usuario
       }));
 
-      pujasOrdenadas.forEach(puja => {
-        const idItem = this.isPorRenglon ? puja.idRenglon : puja.idCotizacionDetalle;
-        if (idItem && bestPerItem[idItem] !== undefined) {
-          const precioAnterior = bestPerItem[idItem];
-          if ((!this.isDirecta && puja.monto < precioAnterior) || (this.isDirecta && puja.monto > precioAnterior)) {
-            bestPerItem[idItem] = puja.monto;
-          }
-        }
-      });
-
       this.ofertasForm.update(state => {
         const newState = { ...state };
         elementos.forEach((el: any) => {
           const idItem = this.isPorRenglon ? el.idRenglon : el.idCotizacionDetalle;
           const mejorOferta = bestPerItem[idItem];
           
-          const hasBids = pujas.some(o => this.isPorRenglon ? o.idRenglon === idItem : o.idCotizacionDetalle === idItem);
+          const hasBids = mejores.some(m => (m.idRenglon || m.idCotizacionDetalle) === idItem);
 
           if (mejorOferta > 0 && newState[idItem]) {
             if (!hasBids) {
@@ -375,9 +368,10 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
   cargarHistorialOfertas(idCotizacion: number) {
     this.http.get<any>(`${this.api}/OfertaSubasta/${idCotizacion}`).subscribe({
       next: (res) => {
-        const ofertasHistorial = res.data || res;
-        if (ofertasHistorial && ofertasHistorial.length > 0) {
-          const mapeadas = ofertasHistorial.map((o: any) => ({
+        const data = res.data || res;
+
+        if (data.ofertas && data.ofertas.length > 0) {
+          const mapeadas = data.ofertas.map((o: any) => ({
             idCotizacion: idCotizacion,
             idCotizacionDetalle: o.idCotizacionDetalle,
             idRenglon: o.idRenglon,
@@ -388,7 +382,16 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
             proveedor: o.proveedor,
             representante: o.representante
           }));
-          this.signalR.ofertas.set(mapeadas); 
+          this.signalR.ofertas.set(mapeadas);
+        }
+
+        if (data.mejoresOfertas && data.mejoresOfertas.length > 0) {
+          const mapeadasMejores = data.mejoresOfertas.map((m: any) => ({
+            idCotizacionDetalle: m.idCotizacionDetalle ?? m.IdCotizacionDetalle,
+            idRenglon: m.idRenglon ?? m.IdRenglon,
+            mejorMonto: m.mejorMonto ?? m.MejorMonto
+          }));
+          this.signalR.mejoresOfertas.set(mapeadasMejores);
         }
       }
     });

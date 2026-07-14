@@ -22,6 +22,7 @@ export class SmartTableComponent {
   emptyMessage = input<string>('No se encontraron resultados.');
   emptySubMessage = input<string>('');
   showSearch = input<boolean>(true);
+  tableLabel = input<string>('Tabla de datos');
 
   serverSide = input<boolean>(false);
   totalServerItems = input<number>(0);
@@ -34,6 +35,7 @@ export class SmartTableComponent {
   @Output() selectedIdsChange = new EventEmitter<any[]>();
   @Output() onAction = new EventEmitter<{action: string, row: any}>();
 
+  readonly tableId = 'smart-table-' + Math.random().toString(36).slice(2, 10);
   searchTerm = signal('');
   sortColumn = signal<string | null>(null);
   sortDirection = signal<'asc' | 'desc'>('asc');
@@ -209,6 +211,31 @@ export class SmartTableComponent {
       this.currentPage.set(1);
       this.sortChange.emit({ key: column.key, direction: this.sortDirection() });
     }
+  }
+
+  ariaSort(column: TableColumn): 'ascending' | 'descending' | null {
+    if (!column.sortable || this.sortColumn() !== column.key) return null;
+    return this.sortDirection() === 'asc' ? 'ascending' : 'descending';
+  }
+
+  sortButtonLabel(column: TableColumn): string {
+    if (this.sortColumn() !== column.key) return `Ordenar por ${column.header}`;
+    const nextDirection = this.sortDirection() === 'asc' ? 'descendente' : 'ascendente';
+    return `Ordenar ${column.header} de forma ${nextDirection}`;
+  }
+
+  rowAccessibleLabel(row: any): string {
+    const keys = ['nombre', 'nombreUsuario', 'descripcion', 'razonSocial', 'email', 'nroCotizacion', 'nroReserva', 'codigo', 'numeroObjeto', 'id'];
+    for (const key of keys) {
+      const value = row?.[key];
+      if (value !== null && value !== undefined && `${value}`.trim().length > 0) return `${value}`.trim();
+    }
+    return 'fila';
+  }
+
+  actionLabel(action: TableAction, row: any): string {
+    const label = action.tooltip || action.action || 'Acción';
+    return `${label}: ${this.rowAccessibleLabel(row)}`;
   }
 
   private readonly actionsPopoverPrefix = 'smart-table-actions-' + Math.random().toString(36).slice(2, 9);

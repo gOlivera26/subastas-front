@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -20,6 +20,9 @@ export class ConfirmationModal {
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
+  readonly modalId = 'confirmation-modal-' + Math.random().toString(36).slice(2, 10);
+
   onConfirm() { this.confirm.emit(); }
   onCancel() { this.cancel.emit(); }
 }
+

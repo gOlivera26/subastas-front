@@ -68,6 +68,7 @@
               <button 
                 type="button" 
                 (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
                 class="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-fog-grey)] hover:text-[var(--color-porcelain)] transition-colors"
               >
                 <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="18"></lucide-icon>
@@ -157,7 +158,7 @@
               Enviando...
             } @else {
               <lucide-icon name="send" [size]="18"></lucide-icon>
-              Enviar Código
+              Enviar código
             }
           </button>
         </div>
@@ -216,6 +217,7 @@
                   (input)="onCodigoInput($index, $event)"
                   (keydown)="onCodigoKeyDown($index, $event)"
                   (focus)="$event.target.select()"
+                  [attr.aria-label]="'Dígito ' + ($index + 1) + ' del código de verificación'"
                   class="codigo-input size-11 rounded-xl border text-center text-[20px] font-[590] text-[var(--color-porcelain)] outline-none transition-all sm:size-12 sm:text-[22px]"
                   [ngClass]="digit 
                     ? 'border-[var(--color-cyan-spark)] bg-[var(--color-pitch-black)] ring-1 ring-[var(--color-cyan-spark)]' 
@@ -241,6 +243,7 @@
               <button 
                 type="button" 
                 (click)="toggleNewPasswordVisibility()"
+                [attr.aria-label]="showNewPassword() ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'"
                 class="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-fog-grey)] hover:text-[var(--color-porcelain)] transition-colors"
               >
                 <lucide-icon [name]="showNewPassword() ? 'eye-off' : 'eye'" [size]="18"></lucide-icon>
@@ -260,7 +263,7 @@
               Restableciendo...
             } @else {
               <lucide-icon name="key-round" [size]="18"></lucide-icon>
-              Restablecer Contraseña
+              Restablecer contraseña
             }
           </button>
 

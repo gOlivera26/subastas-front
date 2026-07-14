@@ -1,18 +1,23 @@
 <div class="relative w-full group/calendar">
 
     @if (label()) {
-        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide ml-1">
+        <label [id]="calendarId + '-label'" class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide ml-1">
             {{ label() }}
         </label>
     }
 
     <button type="button" (click)="toggle()" [disabled]="disabled()"
+            [attr.aria-haspopup]="'dialog'"
+            [attr.aria-expanded]="isOpen()"
+            [attr.aria-controls]="calendarId + '-panel'"
+            [attr.aria-labelledby]="label() ? calendarId + '-label' : null"
+            [attr.aria-label]="!label() ? placeholder() : null"
             class="w-full flex items-center justify-between bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white py-2.5 px-3 rounded-xl
             shadow-sm hover:border-brand-400 dark:hover:border-brand-500/50 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all duration-200"
             [class.opacity-60]="disabled()" [class.cursor-not-allowed]="disabled()">
 
         <div class="flex items-center gap-2 overflow-hidden">
-            <lucide-icon name="calendar" class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0"></lucide-icon>
+            <lucide-icon name="calendar" class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" aria-hidden="true"></lucide-icon>
             <span class="block truncate text-sm font-medium"
                   [class.text-gray-400]="!selectedDate()"
                   [class.dark:text-gray-500]="!selectedDate()"
@@ -22,23 +27,23 @@
             </span>
         </div>
 
-        <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-400 transition-transform duration-200" [class.rotate-180]="isOpen()"></lucide-icon>
+        <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-400 transition-transform duration-200" [class.rotate-180]="isOpen()" aria-hidden="true"></lucide-icon>
     </button>
 
     @if (isOpen()) {
-        <div class="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-[#1c2128] rounded-xl shadow-xl border border-gray-200 dark:border-white/10 p-4 z-50 animate-scale-in origin-top-left select-none">
+        <div [id]="calendarId + '-panel'" role="dialog" [attr.aria-label]="'Selector de fecha: ' + headerLabel" class="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-[#1c2128] rounded-xl shadow-xl border border-gray-200 dark:border-white/10 p-4 z-50 animate-scale-in origin-top-left select-none">
 
             <div class="flex items-center justify-between mb-4">
-                <button type="button" (click)="navigate(-1)" class="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-600 dark:text-gray-300 transition-colors">
+                <button type="button" (click)="navigate(-1)" aria-label="Periodo anterior" class="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-600 dark:text-gray-300 transition-colors">
                     <lucide-icon name="chevron-left" class="w-4 h-4"></lucide-icon>
                 </button>
 
-                <button type="button" (click)="zoomOut()"
+                <button type="button" (click)="zoomOut()" [attr.aria-label]="'Cambiar vista. Vista actual: ' + headerLabel"
                         class="text-sm font-bold text-gray-900 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 transition-colors px-2 py-1 rounded-md hover:bg-gray-50 dark:hover:bg-white/5">
                     {{ headerLabel }}
                 </button>
 
-                <button type="button" (click)="navigate(1)" class="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-600 dark:text-gray-300 transition-colors">
+                <button type="button" (click)="navigate(1)" aria-label="Periodo siguiente" class="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-600 dark:text-gray-300 transition-colors">
                     <lucide-icon name="chevron-right" class="w-4 h-4"></lucide-icon>
                 </button>
             </div>
@@ -85,7 +90,7 @@
             @if (currentView() === 'month') {
                 <div class="grid grid-cols-3 gap-2 animate-fade-in">
                     @for (m of months; track $index) {
-                        <button type="button" (click)="selectMonth($index)"
+                        <button type="button" (click)="selectMonth($index)" [attr.aria-label]="monthAriaLabel($index)" [attr.aria-selected]="currentViewDate().getMonth() === $index"
                                 class="py-3 rounded-lg text-xs font-semibold transition-colors"
                                 [class.bg-brand-600]="currentViewDate().getMonth() === $index"
                                 [class.text-white]="currentViewDate().getMonth() === $index"
@@ -102,7 +107,7 @@
             @if (currentView() === 'year') {
                 <div class="grid grid-cols-3 gap-2 animate-fade-in">
                     @for (y of yearsList(); track $index) {
-                        <button type="button" (click)="selectYear(y)"
+                        <button type="button" (click)="selectYear(y)" [attr.aria-label]="'Año ' + y" [attr.aria-selected]="currentViewDate().getFullYear() === y"
                                 class="py-3 rounded-lg text-xs font-semibold transition-colors"
                                 [class.bg-brand-600]="currentViewDate().getFullYear() === y"
                                 [class.text-white]="currentViewDate().getFullYear() === y"
@@ -135,7 +140,7 @@
                                (keydown)="$event.key === 'e' || $event.key === 'E' || $event.key === '+' || $event.key === '-' ? $event.preventDefault() : null"
                                class="w-14 text-center bg-gray-100 dark:bg-white/10 border-0 rounded-lg py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500" />
                     </div>
-                    <button (click)="confirmDateTime()" class="px-4 py-1.5 bg-brand-500 text-white rounded-lg text-xs font-semibold hover:bg-brand-600 transition-colors">OK</button>
+                    <button type="button" (click)="confirmDateTime()" class="px-4 py-1.5 bg-brand-500 text-white rounded-lg text-xs font-semibold hover:bg-brand-600 transition-colors">OK</button>
                 </div>
             }
 

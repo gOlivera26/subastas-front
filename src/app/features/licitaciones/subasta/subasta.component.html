@@ -49,6 +49,8 @@
       <div
         [id]="subastaActionsPopoverId(row)"
         [attr.popover]="'auto'"
+        role="menu"
+        aria-label="Acciones de subasta"
         (click)="closeSubastaActions()"
         class="subasta-actions-menu-list rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] p-1.5 text-left shadow-2xl"
         [style.top.px]="subastaActionsMenuPosition()?.top"
@@ -230,7 +232,7 @@
           <h4 class="text-[13px] font-[590] text-[var(--color-porcelain)] flex items-center gap-2"><lucide-icon name="package" [size]="14" class="text-[var(--color-storm-cloud)]"></lucide-icon>Bienes y Servicios Disponibles</h4>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-[13px] whitespace-nowrap">
+          <table aria-label="Tabla de datos" class="w-full text-left text-[13px] whitespace-nowrap">
             <thead class="bg-[var(--color-graphite)] border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
               <tr>
                 <th class="px-4 py-3 w-10 text-center"><input type="checkbox" disabled class="rounded border-[var(--color-charcoal-grey)] opacity-50"></th>
@@ -272,7 +274,7 @@
             <span class="text-[12px] text-[var(--color-neon-lime)]">{{ selectedCount() }} ítems</span>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-[13px] whitespace-nowrap">
+            <table aria-label="Tabla de datos" class="w-full text-left text-[13px] whitespace-nowrap">
               <thead class="bg-[var(--color-pitch-black)]/40 border-b border-[var(--color-neon-lime)]/20 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
                 <tr>
                   <th class="px-4 py-3">Bien / Servicio</th>
@@ -688,7 +690,7 @@
     <div>
       <h4 class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3">Documentos Registrados</h4>
       <div class="subasta-create-panel rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden">
-        <table class="w-full text-left text-[13px]">
+        <table aria-label="Tabla de datos" class="w-full text-left text-[13px]">
           <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
             <tr><th class="px-4 py-3">Nombre del Archivo</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Fecha</th><th class="px-4 py-3 text-right">Acciones</th></tr>
           </thead>
@@ -795,7 +797,7 @@
       </div>
 
       <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-pitch-black)] shadow-sm">
-        <table class="w-full text-left text-[13px]">
+        <table aria-label="Tabla de datos" class="w-full text-left text-[13px]">
           <thead class="bg-[var(--color-deep-slate)]/40 border-b border-[var(--color-charcoal-grey)] text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">
             <tr>
               <th class="px-4 py-3">{{ isDirectaProp ? 'Oferente' : 'Proveedor' }} / Razón Social</th>
@@ -889,7 +891,7 @@
     <div>
       <h4 class="text-[12px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] mb-3">Fotos Cargadas ({{ imagenesSubidas().length }})</h4>
       <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-graphite)]/50">
-        <table class="w-full text-left text-[13px]">
+        <table aria-label="Tabla de datos" class="w-full text-left text-[13px]">
           <tbody class="divide-y divide-[var(--color-charcoal-grey)]">
             @for (img of imagenesSubidas(); track img.id) {
               <tr class="hover:bg-[var(--color-deep-slate)]/30 transition-colors">
@@ -994,7 +996,7 @@
         </div>
 
         <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-graphite)]/50">
-          <table class="w-full text-left text-[13px] whitespace-nowrap">
+          <table aria-label="Tabla de datos" class="w-full text-left text-[13px] whitespace-nowrap">
             <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
               <tr>
                 <th class="px-4 py-3">Proveedor</th>
@@ -1035,7 +1037,7 @@
         </div>
 
         <div class="rounded-xl border border-[var(--color-charcoal-grey)] overflow-hidden bg-[var(--color-graphite)]/50">
-          <table class="w-full text-left text-[13px]">
+          <table aria-label="Tabla de datos" class="w-full text-left text-[13px]">
             <thead class="bg-[var(--color-deep-slate)]/40 text-[11px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] border-b border-[var(--color-charcoal-grey)]">
               <tr>
                 <th class="px-4 py-3">Proveedor</th>
