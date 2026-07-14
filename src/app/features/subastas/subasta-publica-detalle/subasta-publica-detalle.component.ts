@@ -202,7 +202,7 @@ export class SubastaPublicaDetalleComponent implements OnInit, OnDestroy {
   participar(): void {
     const id = this.idCotizacion();
     if (this.auth.isAuthenticated()) {
-      this.router.navigate(['/compra-venta', 'subasta-detalle', id]);
+      this.router.navigate(['/compra-venta', 'subastas', id]);
     } else {
       this.router.navigate(['/login'], { queryParams: { returnUrl: `/subastas-activas/${id}` } });
     }
