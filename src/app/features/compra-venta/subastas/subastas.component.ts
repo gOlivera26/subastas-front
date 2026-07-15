@@ -110,7 +110,7 @@ export class SubastasComponent implements OnInit {
       icon: 'upload',
       tooltip: 'Documentación por ítem/renglón',
       color: 'text-[var(--color-neon-lime)] hover:text-[var(--color-neon-lime)]',
-      visible: (item) => item.idEstado === 40,
+      visible: (item) => (item.idEstado === 39 || item.idEstado === 40) && this.requiereGestionDocumental(item),
     },
     {
       action: 'contratacion-directa',
@@ -278,6 +278,12 @@ export class SubastasComponent implements OnInit {
 
   ahora(): number {
     return this.timeService.now();
+  }
+
+  requiereGestionDocumental(item: any): boolean {
+    return item?.idTipoContratacion === this.TIPO_LICITACION
+      || item?.gestionDocumentacion === true
+      || item?.especificacion?.gestionDocumentacion === true;
   }
 
   verObservaciones(fechaLimiteImpugnar?: string): boolean {

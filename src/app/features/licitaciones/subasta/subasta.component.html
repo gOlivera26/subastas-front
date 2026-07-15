@@ -142,10 +142,17 @@
     </div>
   </ng-template>
 
-  <app-smart-table
-    [columns]="columns" [data]="items()" [actions]="actions"
-    [customTemplates]="customTemplates()" [loading]="loading()" [pageSize]="20">
-  </app-smart-table>
+  <div class="relative">
+    @if (generatingReporte()) {
+      <div class="absolute inset-0 z-40 flex min-h-[260px] items-center justify-center rounded-2xl bg-[var(--color-graphite)]/90 backdrop-blur-[2px]" role="status" aria-live="polite" aria-label="Procesando reporte">
+        <app-loading-spinner label="Procesando reporte..."></app-loading-spinner>
+      </div>
+    }
+    <app-smart-table
+      [columns]="columns" [data]="items()" [actions]="actions"
+      [customTemplates]="customTemplates()" [loading]="loading()" [pageSize]="20">
+    </app-smart-table>
+  </div>
 </div>
 
 <app-modal [isOpen]="showCrear()" title="Nueva Subasta"
@@ -494,6 +501,55 @@
             </label>
           </div>
           
+          <label
+            class="group relative block overflow-hidden rounded-2xl p-[1px] shadow-[0_14px_34px_rgba(0,0,0,0.16)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(0,201,216,0.08)]"
+            [class.cursor-not-allowed]="requiereDocumentacionObligatoria(tipoContratacion())"
+            [class.cursor-pointer]="!requiereDocumentacionObligatoria(tipoContratacion())"
+            style="background:linear-gradient(135deg, rgba(0,201,216,.42), rgba(228,255,0,.14) 46%, rgba(255,255,255,.06));">
+            <span class="flex items-center justify-between gap-4 rounded-[15px] bg-[var(--color-graphite)]/95 px-4 py-3 backdrop-blur-sm">
+              <span class="flex min-w-0 items-center gap-3">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-cyan-spark)]/10 text-[var(--color-cyan-spark)] ring-1 ring-[var(--color-cyan-spark)]/20">
+                  <lucide-icon name="file-text" [size]="17"></lucide-icon>
+                </span>
+                <span class="min-w-0">
+                  <span class="flex flex-wrap items-center gap-2 text-[13px] font-[650] text-[var(--color-porcelain)]">
+                    Gestión documental
+                    @if (requiereDocumentacionObligatoria(tipoContratacion())) {
+                      <span class="rounded-full bg-[var(--color-neon-lime)]/10 px-2 py-0.5 text-[9px] font-[800] uppercase tracking-[0.14em] text-[var(--color-neon-lime)]">Obligatoria</span>
+                    }
+                  </span>
+                  <span class="mt-0.5 block text-[11px] leading-4 text-[var(--color-storm-cloud)]">
+                    Adjuntos, garantías y validación documental para proveedores.
+                  </span>
+                </span>
+              </span>
+              <span class="flex w-full shrink-0 items-center justify-between gap-3 sm:w-auto sm:justify-end">
+                <span class="hidden text-right sm:block">
+                  <span class="block text-[9px] font-[700] uppercase tracking-[0.16em] text-[var(--color-storm-cloud)]">Estado</span>
+                  <span class="block text-[11px] font-[650] text-[var(--color-cyan-spark)]">
+                    {{ requiereDocumentacionObligatoria(tipoContratacion()) ? 'Obligatoria' : (crearGestionDocumentacion() ? 'Activada' : 'Opcional') }}
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  class="peer sr-only"
+                  [ngModel]="requiereDocumentacionObligatoria(tipoContratacion()) || crearGestionDocumentacion()"
+                  (ngModelChange)="crearGestionDocumentacion.set($event)"
+                  [disabled]="requiereDocumentacionObligatoria(tipoContratacion())" />
+                <span
+              aria-hidden="true"
+              class="relative h-7 w-12 rounded-full ring-1 ring-white/5 transition-colors duration-200"
+              [style.background]="(requiereDocumentacionObligatoria(tipoContratacion()) || crearGestionDocumentacion()) ? 'var(--color-cyan-spark)' : 'rgba(255,255,255,.08)'">
+              <span
+                class="absolute left-1 top-1 h-5 w-5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.35)] transition-transform duration-200"
+                [class.bg-[var(--color-pitch-black)]]="requiereDocumentacionObligatoria(tipoContratacion()) || crearGestionDocumentacion()"
+                [class.bg-[var(--color-storm-cloud)]]="!(requiereDocumentacionObligatoria(tipoContratacion()) || crearGestionDocumentacion())"
+                [style.transform]="(requiereDocumentacionObligatoria(tipoContratacion()) || crearGestionDocumentacion()) ? 'translateX(20px)' : 'translateX(0)'"></span>
+            </span>
+              </span>
+            </span>
+          </label>
+
           <div class="flex flex-col gap-2">
             <label class="block text-[11px] uppercase text-[var(--color-storm-cloud)]">Visibilidad</label>
             <div class="flex gap-4">
@@ -724,29 +780,29 @@
 <app-modal [isOpen]="showEspec()" [title]="isDirectaProp ? 'Especificaciones Subasta Directa' : 'Especificaciones'" [subtitle]="'Subasta #' + (especItem()?.nroCotizacion || '')" maxWidthClass="max-w-3xl" (close)="closeEspec()">
   @if (showEspec()) {
     <div class="space-y-6">
-      <div class="grid grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
         <div class="space-y-3">
           <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Datos Generales</h4>
           <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Nro. Expediente</label><input class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="especNroExpediente" /></div>
         </div>
         <div class="space-y-3">
           <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Fechas</h4>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <app-calendar label="Inicio Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="especFechaInicio()" (ngModelChange)="especFechaInicio.set($event)" />
           <app-calendar label="Fin Subasta" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="especFechaFin()" (ngModelChange)="especFechaFin.set($event)" />
         </div>
         <app-calendar label="Límite Consultas" placeholder="dd/MM/yyyy HH:mm" [showTime]="true" [ngModel]="especFechaLimite()" (ngModelChange)="especFechaLimite.set($event)" />
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
         <div class="space-y-3">
           <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Parámetros</h4>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Margen (%)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="especMargen" /></div>
             <div><label class="block text-[10px] uppercase text-[var(--color-storm-cloud)] ml-1 mb-1">Prórroga (min)</label><input type="number" class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)] px-3 py-2 text-[13px] text-[var(--color-porcelain)]" [(ngModel)]="especProrrogaMin" /></div>
           </div>
           <label class="flex items-center gap-2 text-[12px] text-[var(--color-storm-cloud)] cursor-pointer"><input type="checkbox" [(ngModel)]="especProrroga" class="rounded" /> Admite prórroga</label>
-          <div class="flex items-center gap-4 mt-2">
+          <div class="flex flex-wrap items-center gap-3 mt-2">
             <span class="text-[12px] text-[var(--color-storm-cloud)]">Visibilidad:</span>
             <div class="flex rounded-lg border border-[var(--color-charcoal-grey)] overflow-hidden">
               @for (opt of [{l:'Pública',v:'1'},{l:'Privada',v:'0'},{l:'Cerrada',v:'2'}]; track opt.v) {
@@ -762,24 +818,59 @@
         </div>
         <div class="space-y-3">
           <h4 class="text-[12px] font-[590] uppercase text-[var(--color-storm-cloud)]">Criterio</h4>
-          <p class="text-[11px] leading-4 text-[var(--color-storm-cloud)]">El criterio de adjudicaci?n se define al crear la subasta y no puede modificarse desde especificaciones.</p>
-          <div class="flex rounded-lg border border-[var(--color-charcoal-grey)] overflow-hidden w-fit">
+          <p class="text-[11px] leading-4 text-[var(--color-storm-cloud)]">El criterio de adjudicación se define al crear la subasta y no puede modificarse desde especificaciones.</p>
+          <div class="flex w-full max-w-xs rounded-lg border border-[var(--color-charcoal-grey)] overflow-hidden sm:w-fit">
             <button type="button" disabled
-              class="px-4 py-1.5 text-[12px] font-[590] transition-colors cursor-not-allowed opacity-80"
+              class="flex-1 px-4 py-1.5 text-[12px] font-[590] transition-colors cursor-not-allowed opacity-80 sm:flex-none"
               [class.bg-[var(--color-neon-lime)]]="especCriterio() === 0"
               [class.text-black]="especCriterio() === 0"
               [class.text-[var(--color-storm-cloud)]]="especCriterio() !== 0">Por Ítem</button>
             <button type="button" disabled
-              class="px-4 py-1.5 text-[12px] font-[590] transition-colors cursor-not-allowed opacity-80"
+              class="flex-1 px-4 py-1.5 text-[12px] font-[590] transition-colors cursor-not-allowed opacity-80 sm:flex-none"
               [class.bg-[var(--color-neon-lime)]]="especCriterio() === 1"
               [class.text-black]="especCriterio() === 1"
               [class.text-[var(--color-storm-cloud)]]="especCriterio() !== 1">Por Renglón</button>
           </div>
         </div>
       </div>
-      <div class="flex justify-end gap-3">
-        <button (click)="closeEspec()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
-        <button (click)="grabarEspec()" [disabled]="savingEspec()" class="rounded-xl bg-[var(--color-neon-lime)] px-5 py-2 text-[13px] font-[590] text-black disabled:opacity-50">@if (savingEspec()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1"></lucide-icon>}Guardar</button>
+      <label
+        class="group flex flex-col gap-3 rounded-2xl bg-[var(--color-pitch-black)]/28 px-4 py-3 ring-1 ring-white/[0.06] transition-all duration-200 hover:bg-[var(--color-pitch-black)]/38 hover:ring-[var(--color-cyan-spark)]/20 sm:flex-row sm:items-center sm:justify-between"
+        [class.cursor-not-allowed]="requiereDocumentacionObligatoria(especItem()?.idTipoContratacion)"
+        [class.cursor-pointer]="!requiereDocumentacionObligatoria(especItem()?.idTipoContratacion)">
+        <span class="flex min-w-0 items-center gap-3">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/8 text-[var(--color-cyan-spark)] ring-1 ring-[var(--color-cyan-spark)]/15">
+            <lucide-icon name="file-text" [size]="16"></lucide-icon>
+          </span>
+          <span class="min-w-0">
+            <span class="block text-[13px] font-[650] text-[var(--color-porcelain)]">Documentación</span>
+            <span class="block truncate text-[11px] text-[var(--color-storm-cloud)]">Adjuntos y verificación de proveedores</span>
+          </span>
+        </span>
+        <span class="flex w-full shrink-0 items-center justify-between gap-3 sm:w-auto sm:justify-end">
+          <span class="rounded-full bg-[var(--color-cyan-spark)]/8 px-2.5 py-1 text-[10px] font-[750] uppercase tracking-[0.12em] text-[var(--color-cyan-spark)] ring-1 ring-[var(--color-cyan-spark)]/14">
+            {{ requiereDocumentacionObligatoria(especItem()?.idTipoContratacion) ? 'Obligatoria' : (especGestionDocumentacion() ? 'Activa' : 'Opcional') }}
+          </span>
+          <input
+            type="checkbox"
+            class="peer sr-only"
+            [ngModel]="requiereDocumentacionObligatoria(especItem()?.idTipoContratacion) || especGestionDocumentacion()"
+            (ngModelChange)="especGestionDocumentacion.set($event)"
+            [disabled]="requiereDocumentacionObligatoria(especItem()?.idTipoContratacion)" />
+          <span
+            aria-hidden="true"
+            class="relative h-6 w-11 rounded-full ring-1 ring-white/[0.06] transition-colors duration-200"
+            [style.background]="(requiereDocumentacionObligatoria(especItem()?.idTipoContratacion) || especGestionDocumentacion()) ? 'var(--color-cyan-spark)' : 'rgba(255,255,255,.08)'">
+            <span
+              class="absolute left-1 top-1 h-4 w-4 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.35)] transition-transform duration-200"
+              [class.bg-[var(--color-pitch-black)]]="requiereDocumentacionObligatoria(especItem()?.idTipoContratacion) || especGestionDocumentacion()"
+              [class.bg-[var(--color-storm-cloud)]]="!(requiereDocumentacionObligatoria(especItem()?.idTipoContratacion) || especGestionDocumentacion())"
+              [style.transform]="(requiereDocumentacionObligatoria(especItem()?.idTipoContratacion) || especGestionDocumentacion()) ? 'translateX(20px)' : 'translateX(0)'"></span>
+          </span>
+        </span>
+      </label>
+      <div class="mt-4 flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+        <button (click)="closeEspec()" class="rounded-xl border border-[var(--color-charcoal-grey)] px-4 py-2 text-[13px] text-[var(--color-storm-cloud)] transition-colors hover:border-[var(--color-cyan-spark)]/35 hover:bg-[var(--color-deep-slate)] hover:text-[var(--color-porcelain)] sm:min-w-[92px]">Cancelar</button>
+        <button (click)="grabarEspec()" [disabled]="savingEspec()" class="rounded-xl bg-[var(--color-neon-lime)] px-5 py-2 text-[13px] font-[590] text-black transition-transform hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(228,255,0,0.18)] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none sm:min-w-[96px]">@if (savingEspec()) {<lucide-icon name="loader-2" [size]="14" class="animate-spin mr-1"></lucide-icon>}Guardar</button>
       </div>
     </div>
   }

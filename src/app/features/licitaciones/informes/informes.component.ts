@@ -10,6 +10,7 @@ import { ReporteService } from '../../../core/services/reporte.service';
 import { UnidadAdministrativaService } from '../../../core/services/unidad-administrativa.service';
 import { VigenciaService } from '../../../core/services/vigencia.service';
 import { AppCalendar } from '../../../shared/ui/app-calendar/app-calendar';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
 import { TableColumn } from '../../../shared/ui/smart-table/table.models';
@@ -27,7 +28,7 @@ interface InformeTipo {
 @Component({
   selector: 'app-informes-placeholder',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, CustomSelect, AppCalendar, SmartTableComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, CustomSelect, AppCalendar, SmartTableComponent, LoadingSpinnerComponent],
   template: `
     <div class="space-y-6">
       <section class="relative overflow-hidden informes-soft-hero rounded-3xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/60 p-6 shadow-2xl">
@@ -116,7 +117,12 @@ interface InformeTipo {
         </div>
       </section>
 
-      <section class="informes-soft-panel rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/35 p-4 shadow-xl">
+      <section class="relative informes-soft-panel rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/35 p-4 shadow-xl">
+        @if (generatingId() !== null) {
+          <div class="absolute inset-0 z-40 flex items-center justify-center rounded-2xl bg-[var(--color-graphite)]/90 backdrop-blur-[2px]" role="status" aria-live="polite" aria-label="Generando informe">
+            <app-loading-spinner label="Procesando informe..."></app-loading-spinner>
+          </div>
+        }
         <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 class="text-[15px] font-[700] text-[var(--color-porcelain)]">Subastas encontradas</h2>
@@ -150,7 +156,8 @@ interface InformeTipo {
         <ng-template #accionesTpl let-row>
           <button (click)="generar(row)" [disabled]="generatingId() === row.idCotizacion" class="btn-accent btn-compact">
             @if (generatingId() === row.idCotizacion) {
-              Generando...
+              <lucide-icon name="loader-2" [size]="14" class="animate-spin"></lucide-icon>
+              Generando
             } @else {
               <lucide-icon [name]="formato() === 'pdf' ? 'file-text' : 'download'" [size]="14"></lucide-icon>
               {{ formato() === 'pdf' ? 'Generar' : 'CSV' }}

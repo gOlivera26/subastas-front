@@ -19,7 +19,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { TableColumn, TableAction } from '../../../shared/ui/smart-table/table.models';
 import { environment } from '../../../../environments/environment';
 import { TimeService } from '../../../core/services/time.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, finalize } from 'rxjs';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { ConfirmationModal } from '../../../shared/ui/confirmation-modal/confirmation-modal';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
@@ -71,6 +71,7 @@ export class SubastaComponent implements OnInit {
   itemToAnular = signal<any>(null);
   itemToDesistir = signal<any>(null);
   generatingGanadores = signal<number | null>(null);
+  generatingReporte = signal(false);
   openSubastaActions = signal<string | null>(null);
   subastaActionsMenuPosition = signal<{ top: number; left: number; maxHeight: number } | null>(null);
 
@@ -119,6 +120,7 @@ export class SubastaComponent implements OnInit {
   fechaInicio = signal(''); fechaFin = signal('');
   fechaLimiteConsultas = signal(''); margenMejora = signal(5);
   permiteProrroga = signal(false); crearProrrogaMinutos = signal<number | null>(null);
+  crearGestionDocumentacion = signal(false);
 
   useRenglones = signal(false);
   renglones = signal<RenglonItem[]>([]);
@@ -174,6 +176,10 @@ export class SubastaComponent implements OnInit {
 
   get isDirectaProv(): boolean { return this.provItem()?.idTipoContratacion === this.TIPO_DIRECTA; }
   get isDirectaProp(): boolean { return this.propuestasItem()?.idTipoContratacion === this.TIPO_DIRECTA; }
+
+  requiereDocumentacionObligatoria(idTipoContratacion?: number | null): boolean {
+    return idTipoContratacion === this.TIPO_LICITACION;
+  }
 
   ahora(): number {
     return this.timeService.now();
@@ -298,11 +304,20 @@ export class SubastaComponent implements OnInit {
   }
 
 
-  abrirActaPrelacion(item: any) {
-    this.reporteService.descargarActaPrelacion(item.idCotizacion).subscribe({
-      next: (blob) => this.reporteService.abrirPdf(blob),
-      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el informe final de subasta.')
+  private abrirReporte(request$: any, errorMessage: string) {
+    if (this.generatingReporte()) return;
+    this.generatingReporte.set(true);
+    request$.pipe(finalize(() => this.generatingReporte.set(false))).subscribe({
+      next: (blob: Blob) => this.reporteService.abrirPdf(blob),
+      error: (err: any) => this.notify.showError(err.error?.message || errorMessage)
     });
+  }
+
+  abrirActaPrelacion(item: any) {
+    this.abrirReporte(
+      this.reporteService.descargarActaPrelacion(item.idCotizacion),
+      'No se pudo generar el informe final de subasta.'
+    );
   }
 
   generarGanadores(item: any) {
@@ -329,45 +344,45 @@ export class SubastaComponent implements OnInit {
   }
 
   abrirDetalleSubasta(item: any) {
-    this.reporteService.descargarDetalleSubasta(item.idCotizacion).subscribe({
-      next: (blob) => this.reporteService.abrirPdf(blob),
-      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el detalle de subasta.')
-    });
+    this.abrirReporte(
+      this.reporteService.descargarDetalleSubasta(item.idCotizacion),
+      'No se pudo generar el detalle de subasta.'
+    );
   }
 
   abrirProveedoresInvitados(item: any) {
-    this.reporteService.descargarProveedoresInvitados(item.idCotizacion).subscribe({
-      next: (blob) => this.reporteService.abrirPdf(blob),
-      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el listado de proveedores invitados.')
-    });
+    this.abrirReporte(
+      this.reporteService.descargarProveedoresInvitados(item.idCotizacion),
+      'No se pudo generar el listado de proveedores invitados.'
+    );
   }
 
   abrirPreguntasRespuestas(item: any) {
-    this.reporteService.descargarPreguntasRespuestas(item.idCotizacion).subscribe({
-      next: (blob) => this.reporteService.abrirPdf(blob),
-      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el reporte de preguntas y respuestas.')
-    });
+    this.abrirReporte(
+      this.reporteService.descargarPreguntasRespuestas(item.idCotizacion),
+      'No se pudo generar el reporte de preguntas y respuestas.'
+    );
   }
 
   abrirDesistimiento(item: any) {
-    this.reporteService.descargarDesistimiento(item.idCotizacion).subscribe({
-      next: (blob) => this.reporteService.abrirPdf(blob),
-      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar la constancia de desistimiento.')
-    });
+    this.abrirReporte(
+      this.reporteService.descargarDesistimiento(item.idCotizacion),
+      'No se pudo generar la constancia de desistimiento.'
+    );
   }
 
   abrirObservacionesProveedores(item: any) {
-    this.reporteService.descargarObservacionesProveedores(item.idCotizacion).subscribe({
-      next: (blob) => this.reporteService.abrirPdf(blob),
-      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el reporte de observaciones de proveedores.')
-    });
+    this.abrirReporte(
+      this.reporteService.descargarObservacionesProveedores(item.idCotizacion),
+      'No se pudo generar el reporte de observaciones de proveedores.'
+    );
   }
 
   abrirAuditoriaSubasta(item: any) {
-    this.reporteService.descargarAuditoriaSubasta(item.idCotizacion).subscribe({
-      next: (blob) => this.reporteService.abrirPdf(blob),
-      error: (err) => this.notify.showError(err.error?.message || 'No se pudo generar el reporte de auditoría de subasta.')
-    });
+    this.abrirReporte(
+      this.reporteService.descargarAuditoriaSubasta(item.idCotizacion),
+      'No se pudo generar el reporte de auditoría de subasta.'
+    );
   }
 
   loadVigencias() {
@@ -420,6 +435,7 @@ export class SubastaComponent implements OnInit {
     this.fechaInicio.set(''); this.fechaFin.set('');
     this.fechaLimiteConsultas.set(''); this.margenMejora.set(5);
     this.permiteProrroga.set(false); this.crearProrrogaMinutos.set(null);
+    this.crearGestionDocumentacion.set(false);
   }
 
   closeCrear() { this.showCrear.set(false); }
@@ -596,7 +612,8 @@ getRenglonOfItem(itemId: number): string {
         criterioAdjudicacion: this.useRenglones() ? 1 : 0,
         permiteProrroga: this.permiteProrroga(),
         prorrogaMinutos: this.crearProrrogaMinutos() || null,
-        redeterminacion: this.crearRedeterminacion() || null
+        redeterminacion: this.crearRedeterminacion() || null,
+        gestionDocumentacion: this.requiereDocumentacionObligatoria(this.tipoContratacion()) || this.crearGestionDocumentacion()
       },
     };
 
@@ -672,6 +689,7 @@ getRenglonOfItem(itemId: number): string {
   especFechaLimite = signal(''); especMargen = signal(5);
   especCriterio = signal(0); especCriterioOriginal = signal(0); especProrroga = signal(false);
   especProrrogaMin = signal(0); especRedet = signal('');
+  especGestionDocumentacion = signal(false);
   savingEspec = signal(false);
 
   openEspecificaciones(item: any) {
@@ -696,6 +714,7 @@ getRenglonOfItem(itemId: number): string {
           this.especProrroga.set(e.permiteProrroga || false);
           this.especProrrogaMin.set(e.prorrogaMinutos || 0);
           this.especRedet.set(e.redeterminacion || '');
+          this.especGestionDocumentacion.set(this.requiereDocumentacionObligatoria(full.idTipoContratacion) || e.gestionDocumentacion === true);
         }
         this.showEspec.set(true);
       },
@@ -728,7 +747,7 @@ getRenglonOfItem(itemId: number): string {
         permiteProrroga: this.especProrroga(),
         prorrogaMinutos: this.especProrrogaMin() || null,
         redeterminacion: this.especRedet() || null,
-        gestionDocumentacion: especificacionActual.gestionDocumentacion ?? false,
+        gestionDocumentacion: this.requiereDocumentacionObligatoria(item.idTipoContratacion) || this.especGestionDocumentacion(),
       }
     }).subscribe({
       next: (r: any) => {

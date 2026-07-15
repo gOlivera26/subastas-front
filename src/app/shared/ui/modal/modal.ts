@@ -7,6 +7,11 @@ import { LucideAngularModule } from 'lucide-angular';
   standalone: true,
   imports: [CommonModule, LucideAngularModule],
   templateUrl: './modal.html',
+  styles: [`
+    .modal-footer:not(:has([footer])) {
+      display: none;
+    }
+  `],
   host: { '[attr.title]': 'null' }
 })
 export class Modal {
