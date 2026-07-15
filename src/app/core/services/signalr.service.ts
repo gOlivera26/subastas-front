@@ -2,7 +2,7 @@
 import * as signalR from '@microsoft/signalr';
 import { environment } from '../../../environments/environment';
 import { Consulta } from './consulta.service';
-
+import { AuthService } from './auth.service';
 
 export interface OfertaEnVivo {
   idCotizacion: number;
@@ -36,7 +36,9 @@ export interface MejorOfertaItem {
 
 @Injectable({ providedIn: 'root' })
 export class SignalRService {
+  private authService = inject(AuthService);
   private connection: signalR.HubConnection | null = null;
+  
   ofertas = signal<OfertaEnVivo[]>([]);
   mejoresOfertas = signal<MejorOfertaItem[]>([]);
   mensajes = signal<MensajeEnVivo[]>([]);
@@ -59,7 +61,32 @@ export class SignalRService {
       .withAutomaticReconnect()
       .build();
 
+    // === INTERCEPTAMOS LA OFERTA ACÁ ===
     this.connection.on('OfertaRecibida', (oferta: OfertaEnVivo) => {
+      const user: any = this.authService.currentUser();
+      
+      // 1. Verificamos si es admin
+      const esAdmin = user?.idRol === 1 || 
+                      user?.roles?.some((r: any) => r.rolId === 1 || r.rolId === 5) || 
+                      this.authService.isSuperAdmin();
+
+      // 2. Extraemos el idProveedor del token
+      let miIdProveedor = null;
+      if (user && user.token) {
+        try {
+          const payload = JSON.parse(atob(user.token.split('.')[1]));
+          miIdProveedor = payload.IdProveedor ? Number(payload.IdProveedor) : null;
+        } catch (e) {}
+      }
+
+      // 3. Aplicamos la regla de anonimato
+      if (!esAdmin && oferta.idProveedor !== miIdProveedor) {
+        oferta.proveedor = "Proveedor Anónimo";
+        oferta.usuario = "Proveedor Anónimo";
+        oferta.representante = undefined;
+      }
+
+      // 4. Actualizamos la señal
       this.ofertas.update(arr => [...arr.slice(-49), oferta]);
     });
 
@@ -152,4 +179,3 @@ export class SignalRService {
     this.connected.set(false);
   }
 }
-

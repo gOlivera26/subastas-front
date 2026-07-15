@@ -83,6 +83,11 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
 
   ofertasForm = signal<Record<number, any>>({});
   ofertas = computed(() => this.signalR.ofertas().filter(o => o.idCotizacion === this.idCotizacion()));
+
+  ofertasOrdenadas = computed(() => {
+    return [...this.ofertas()].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+  });
+
   mejoresOfertas = computed(() => this.signalR.mejoresOfertas());
   
   // === TRADING CHART ===
