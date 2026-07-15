@@ -1,5 +1,5 @@
-import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+﻿import { inject } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivateChildFn, CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
@@ -12,3 +12,16 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   return router.createUrlTree(['/login']);
 };
+function checkPageAccess(route: ActivatedRouteSnapshot) {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  const pageKey = route.data?.['pageKey'] as string | undefined;
+
+  if (!pageKey) return true;
+  if (!authService.isAuthenticated()) return router.createUrlTree(['/login']);
+  if (authService.hasPageAccess(pageKey)) return true;
+
+  return router.createUrlTree(['/modulos']);
+}
+
+export const pageAccessChildGuard: CanActivateChildFn = (childRoute) => checkPageAccess(childRoute);

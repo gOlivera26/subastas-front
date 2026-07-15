@@ -8,76 +8,92 @@
   </p>
 
   <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <a routerLink="/clasificadores/organizaciones"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
-        <lucide-icon name="building" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-      </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Organizaciones</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de reparticiones base.</p>
-    </a>
+    @if (auth.hasPageAccess('clasificadores.organizaciones')) {
+      <a routerLink="/clasificadores/organizaciones"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
+          <lucide-icon name="building" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+        </div>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Organizaciones</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de reparticiones base.</p>
+      </a>
+    }
 
-    <a routerLink="/clasificadores/vigencias"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
-        <lucide-icon name="calendar" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
-      </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Vigencias</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Años fiscales y ciclos presupuestarios activos.</p>
-    </a>
+    @if (auth.hasPageAccess('clasificadores.vigencias')) {
+      <a routerLink="/clasificadores/vigencias"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+          <lucide-icon name="calendar" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+        </div>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Vigencias</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Años fiscales y ciclos presupuestarios activos.</p>
+      </a>
+    }
 
-    <a routerLink="/clasificadores/unidades-administrativas"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
-        <lucide-icon name="building-2" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-      </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Unidades Adm.</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Áreas y oficinas dependientes de una vigencia.</p>
-    </a>
+    @if (auth.hasPageAccess('clasificadores.unidades-administrativas')) {
+      <a routerLink="/clasificadores/unidades-administrativas"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
+          <lucide-icon name="building-2" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+        </div>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Unidades Adm.</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Áreas y oficinas dependientes de una vigencia.</p>
+      </a>
+    }
 
-    <a routerLink="/clasificadores/objetos-gasto"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
-        <lucide-icon name="tags" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
-      </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Objetos del Gasto</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Clasificación presupuestaria por objeto del gasto.</p>
-    </a>
+    @if (auth.hasPageAccess('clasificadores.objetos-gasto')) {
+      <a routerLink="/clasificadores/objetos-gasto"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+          <lucide-icon name="tags" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+        </div>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Objetos del Gasto</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Clasificación presupuestaria por objeto del gasto.</p>
+      </a>
+    }
 
-    <a routerLink="/clasificadores/catalogo-bienes"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
-        <lucide-icon name="package" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
-      </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Catálogo de Bienes</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Ítems subastables del sistema.</p>
-    </a>
+    @if (auth.hasPageAccess('clasificadores.catalogo-bienes')) {
+      <a routerLink="/clasificadores/catalogo-bienes"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+          <lucide-icon name="package" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+        </div>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Catálogo de Bienes</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Ítems subastables del sistema.</p>
+      </a>
+    }
 
-    <a routerLink="/clasificadores/categorias-programaticas"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
-        <lucide-icon name="folder-tree" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-      </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Categ. Programáticas</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Jerarquía de categorías programáticas.</p>
-    </a>
+    @if (auth.hasPageAccess('clasificadores.categorias-programaticas')) {
+      <a routerLink="/clasificadores/categorias-programaticas"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
+          <lucide-icon name="folder-tree" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+        </div>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Categ. Programáticas</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Jerarquía de categorías programáticas.</p>
+      </a>
+    }
 
-    <a routerLink="/clasificadores/monedas"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
-        <lucide-icon name="banknote" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
-      </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Monedas</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Catálogo de monedas para cotizaciones.</p>
-    </a>
+    @if (auth.hasPageAccess('clasificadores.monedas')) {
+      <a routerLink="/clasificadores/monedas"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+          <lucide-icon name="banknote" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+        </div>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Monedas</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Catálogo de monedas para cotizaciones.</p>
+      </a>
+    }
 
-    <a routerLink="/clasificadores/areas"
-       class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
-      <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
-        <lucide-icon name="network" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
-      </div>
-      <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Áreas / Oficinas</h3>
-      <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Sub-responsables por Unidad Administrativa.</p>
-    </a>
+    @if (auth.hasPageAccess('clasificadores.areas')) {
+      <a routerLink="/clasificadores/areas"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-6 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
+          <lucide-icon name="network" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+        </div>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Áreas / Oficinas</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Sub-responsables por Unidad Administrativa.</p>
+      </a>
+    }
   </div>
 </div>

@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-proveedores-home',
@@ -8,4 +9,6 @@ import { LucideAngularModule } from 'lucide-angular';
   imports: [RouterLink, LucideAngularModule],
   templateUrl: './home.component.html',
 })
-export class ProveedoresHomeComponent {}
+export class ProveedoresHomeComponent {
+  protected auth = inject(AuthService);
+}

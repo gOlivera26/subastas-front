@@ -1,7 +1,7 @@
 <div class="page-container max-w-[1200px]">
   <div class="mb-8">
     <h1 class="text-[22px] font-[590] tracking-tight text-[var(--color-porcelain)]">Seguridad</h1>
-    <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de roles, módulos y usuarios por organización.</p>
+    <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Gestión de roles, módulos y páginas del sistema.</p>
   </div>
 
   @if (successMessage(); as msg) {
@@ -11,17 +11,8 @@
     <div class="mb-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-[13px] text-red-400 animate-slide-up"><lucide-icon name="alert-circle" [size]="18"></lucide-icon>{{ msg }}</div>
   }
 
-  <!-- TABS -->
-  <div class="flex gap-1 mb-6 rounded-xl bg-[var(--color-graphite)]/50 p-1 w-fit">
-    <button (click)="activeTab.set('roles')" class="px-5 py-2 rounded-lg text-[13px] font-[590] transition-all"
-            [ngClass]="activeTab() === 'roles' ? 'bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'">Roles y módulos</button>
-    <button (click)="activeTab.set('usuarios')" class="px-5 py-2 rounded-lg text-[13px] font-[590] transition-all"
-            [ngClass]="activeTab() === 'usuarios' ? 'bg-[var(--color-deep-slate)] text-[var(--color-cyan-spark)]' : 'text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]'">Usuarios x Organización</button>
-  </div>
-
-  <!-- TAB: ROLES -->
-  @if (activeTab() === 'roles') {
-    <div>
+  <!-- ROLES -->
+  <div>
       <div class="mb-4 flex justify-end">
         <button (click)="openCreateRole()" class="inline-flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] px-4 py-2 text-[13px] font-[590] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-deep-slate)]">
           <lucide-icon name="plus" [size]="16"></lucide-icon>Nuevo Rol
@@ -35,7 +26,7 @@
       <app-smart-table
           [columns]="columns"
           [data]="roles()"
-          [actions]="actions"
+          [actions]="actions"
           [loading]="isLoading()"
           [pageSize]="999"
           (onAction)="handleTableAction($event)"
@@ -45,18 +36,6 @@
         }
       </div>
     </div>
-  }
-
-  <!-- TAB: USUARIOS X ORG -->
-  @if (activeTab() === 'usuarios') {
-    <div class="flex justify-center py-16">
-      <button (click)="openLinkModal()" class="rounded-2xl border border-dashed border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30 p-12 text-center transition-all hover:border-[var(--color-cyan-spark)]/50 hover:bg-[var(--color-deep-slate)] group w-full max-w-md">
-        <lucide-icon name="user-plus" [size]="32" class="mx-auto mb-3 text-[var(--color-storm-cloud)] group-hover:text-[var(--color-cyan-spark)]"></lucide-icon>
-        <p class="text-[14px] font-[590] text-[var(--color-porcelain)]">Asignar Usuario a Organización</p>
-        <p class="mt-1 text-[12px] text-[var(--color-storm-cloud)]">Vinculá un usuario existente a una organización.</p>
-      </button>
-    </div>
-  }
 </div>
 
 <!-- MODAL: ROLE CRUD -->
@@ -122,35 +101,6 @@
             }
           </div>
         }
-      </div>
-    </div>
-  </div>
-}
-
-<!-- MODAL: LINK USER TO ORG -->
-@if (isLinkModalOpen()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-label="Cuadro de diálogo">
-    <div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="isLinkModalOpen.set(false)"></div>
-    <div class="relative w-full max-w-md rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl animate-scale-in">
-      <div class="flex items-center justify-between border-b border-[var(--color-charcoal-grey)] px-6 py-4">
-        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)]">Asignar Usuario a Organización</h3>
-        <button (click)="isLinkModalOpen.set(false)" class="rounded-lg p-2 text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]"><lucide-icon name="x" [size]="18"></lucide-icon></button>
-      </div>
-      <div class="space-y-4 px-6 py-6">
-        <div>
-          <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Usuario</label>
-          <app-custom-select placeholder="Seleccionar usuario..." [options]="linkUserOptions()" [(value)]="linkForm.idUsuario"></app-custom-select>
-        </div>
-        <div>
-          <label class="mb-1.5 block text-[12px] font-[590] text-[var(--color-light-steel)]">Organización</label>
-          <app-custom-select placeholder="Seleccionar organización..." [options]="linkOrganizationOptions()" [(value)]="linkForm.idOrganizacion"></app-custom-select>
-        </div>
-      </div>
-      <div class="flex justify-end gap-3 border-t border-[var(--color-charcoal-grey)] px-6 py-4">
-        <button (click)="isLinkModalOpen.set(false)" class="rounded-xl border border-[var(--color-charcoal-grey)] px-5 py-2.5 text-[13px] text-[var(--color-storm-cloud)]">Cancelar</button>
-        <button (click)="linkUserToOrg()" [disabled]="isLinking()" class="rounded-xl bg-[var(--color-cyan-spark)] px-5 py-2.5 text-[13px] font-[590] text-black disabled:opacity-50">
-          @if (isLinking()) { <lucide-icon name="loader-2" [size]="16" class="animate-spin mr-2"></lucide-icon> } Asignar
-        </button>
       </div>
     </div>
   </div>

@@ -18,8 +18,8 @@ export class AdminLayoutComponent {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   protected authService = inject(AuthService);
-  private readonly sidebarStorageKey = 'sidebar-admin';
-  isSidebarOpen = signal(this.getInitialSidebarState(false));
+  private readonly sidebarStorageKey = 'owen-sidebar-open';
+  isSidebarOpen = signal(this.getInitialSidebarState(true));
   pageTitle = signal('');
   routeState = signal('initial');
   
@@ -89,7 +89,7 @@ export class AdminLayoutComponent {
       return;
     }
 
-    this.isSidebarOpen.set(this.getInitialSidebarState(false));
+    this.isSidebarOpen.set(this.getInitialSidebarState(true));
   }
 
   private getInitialSidebarState(defaultOpen: boolean): boolean {

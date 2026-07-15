@@ -1,28 +1,21 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { RoleService, Role, AppPage, ModuloConPaginas, RoleModule } from '../../../core/services/role.service';
-import { UserService, ActiveUser } from '../../../core/services/user.service';
-import { OrganizationService, Organization } from '../../../core/services/organization.service';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
 import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
-import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-seguridad',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, SmartTableComponent, CustomSelect],
+  imports: [CommonModule, FormsModule, LucideAngularModule, SmartTableComponent],
   templateUrl: './seguridad.component.html',
 })
 export class SeguridadComponent implements OnInit {
   private confirmation = inject(ConfirmationService);
   private roleService = inject(RoleService);
-  private userService = inject(UserService);
-  private orgService = inject(OrganizationService);
-
-  activeTab = signal<'roles' | 'usuarios'>('roles');
   isLoading = signal(true);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
@@ -39,11 +32,6 @@ export class SeguridadComponent implements OnInit {
   roleModules = signal<RoleModule[]>([]);
   modulosConPaginas = signal<ModuloConPaginas[]>([]);
   isPagesModalOpen = signal(false);
-
-  activeUsers = signal<ActiveUser[]>([]);
-  organizations = signal<Organization[]>([]);
-  isLinkModalOpen = signal(false);
-  linkForm = { idUsuario: '', idOrganizacion: 0, esPrincipal: true };
 
   columns: TableColumn[] = [
     { key: 'nombre', header: 'Nombre', sortable: true },
@@ -70,20 +58,8 @@ export class SeguridadComponent implements OnInit {
     }
   }
 
-  linkUserOptions = computed<SelectOption[]>(() => [
-    { label: 'Seleccionar usuario...', value: '' },
-    ...this.activeUsers().map(u => ({ label: u.nombreCompleto + ' — ' + u.email, value: u.idUsuario }))
-  ]);
-
-  linkOrganizationOptions = computed<SelectOption[]>(() => [
-    { label: 'Seleccionar organización...', value: 0 },
-    ...this.organizations().map(org => ({ label: org.nombre, value: org.idOrganizacion }))
-  ]);
-  isLinking = signal(false);
-
   ngOnInit() {
     this.loadRoles();
-    this.loadOrganizations();
   }
 
   loadRoles() {
@@ -96,9 +72,6 @@ export class SeguridadComponent implements OnInit {
       next: (res: any) => { if (res.success && res.data) this.modulosConPaginas.set(res.data); }
     });
   }
-
-  loadUsers() { this.userService.getActiveUsers(1, 100, '').subscribe({ next: (res: any) => { if (res.success && res.data) this.activeUsers.set(res.data); } }); }
-  loadOrganizations() { this.orgService.getActiveOrganizations().subscribe({ next: (res: any) => { if (res.success && res.data) this.organizations.set(res.data); } }); }
 
   openCreateRole() { this.isEditingRole.set(false); this.editingRoleId.set(null); this.roleForm = { nombre: '', descripcion: '' }; this.isRoleModalOpen.set(true); }
   openEditRole(role: Role) { this.isEditingRole.set(true); this.editingRoleId.set(role.id); this.roleForm = { nombre: role.nombre, descripcion: role.descripcion }; this.isRoleModalOpen.set(true); }
@@ -169,17 +142,6 @@ export class SeguridadComponent implements OnInit {
   }
 
   isPageAssigned(page: AppPage): boolean { return this.rolePages().some(p => p.id === page.id); }
-
-  openLinkModal() { this.loadUsers(); this.linkForm = { idUsuario: '', idOrganizacion: 0, esPrincipal: true }; this.isLinkModalOpen.set(true); }
-
-  linkUserToOrg() {
-    if (!this.linkForm.idUsuario || !this.linkForm.idOrganizacion) return;
-    this.isLinking.set(true);
-    this.userService.linkUser(this.linkForm.idUsuario, { tipoEntidad: 'GESTOR', idEntidad: this.linkForm.idOrganizacion }).subscribe({
-      next: (res: any) => { this.isLinking.set(false); if (res.success) { this.isLinkModalOpen.set(false); this.showSuccess('Asignado.'); } },
-      error: () => { this.isLinking.set(false); this.errorMessage.set('Error al asignar.'); }
-    });
-  }
 
   private showSuccess(msg: string) { this.successMessage.set(msg); setTimeout(() => this.successMessage.set(null), 3000); }
 }

@@ -18,7 +18,7 @@ export class ClasificadoresLayoutComponent {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   protected auth = inject(AuthService);
-  private readonly sidebarStorageKey = 'sidebar-clasificadores';
+  private readonly sidebarStorageKey = 'owen-sidebar-open';
   isSidebarOpen = signal(this.getInitialSidebarState(true));
   pageTitle = signal('');
   routeState = signal('initial');

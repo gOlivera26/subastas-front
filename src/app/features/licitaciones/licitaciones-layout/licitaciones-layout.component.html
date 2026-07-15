@@ -7,7 +7,7 @@
   <aside
     aria-label="Menú lateral"
     class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl lg:shadow-none overflow-hidden transition-[transform,width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] max-w-[calc(100vw-2rem)] will-change-transform lg:static lg:translate-x-0"
-    [ngClass]="isSidebarOpen() ? 'w-[min(18rem,calc(100vw-2rem))] translate-x-0 lg:w-72' : '-translate-x-full lg:translate-x-0 lg:w-[68px]'">
+    [ngClass]="isSidebarOpen() ? 'module-sidebar-expanded w-[min(18rem,calc(100vw-2rem))] translate-x-0 lg:w-72' : 'module-sidebar-collapsed -translate-x-full lg:translate-x-0 lg:w-[68px]'">
 
     <div class="flex h-16 shrink-0 items-center px-4 border-b border-[var(--color-charcoal-grey)]"
          [ngClass]="isSidebarOpen() ? 'justify-between' : 'justify-center'">
@@ -33,7 +33,7 @@
          routerLinkActive="nav-item-active"
          [routerLinkActiveOptions]="{exact: true}"
          (click)="closeSidebarOnMobile()"
-         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="sidebar-tooltip-link licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]" data-sidebar-tooltip="Inicio" title="Inicio">
         <lucide-icon name="home" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -45,7 +45,7 @@
         <a routerLink="/licitaciones/nota-pedido"
          routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="sidebar-tooltip-link licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]" data-sidebar-tooltip="Nota de Pedido" title="Nota de Pedido">
         <lucide-icon name="file-text" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -57,7 +57,7 @@
         <a routerLink="/licitaciones/subasta"
          routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="sidebar-tooltip-link licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]" data-sidebar-tooltip="Subasta" title="Subasta">
         <lucide-icon name="gavel" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -69,7 +69,7 @@
         <a routerLink="/licitaciones/informes"
          routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="sidebar-tooltip-link licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]" data-sidebar-tooltip="Informes" title="Informes">
         <lucide-icon name="bar-chart" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -81,7 +81,7 @@
         <a routerLink="/licitaciones/tablero"
          routerLinkActive="nav-item-active"
          (click)="closeSidebarOnMobile()"
-         class="licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+         class="sidebar-tooltip-link licitacion-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]" data-sidebar-tooltip="Tablero" title="Tablero">
         <lucide-icon name="layout-dashboard" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
@@ -96,7 +96,7 @@
          [class.hidden]="!isSidebarOpen()">Sistema</p>
 
       <a routerLink="/modulos" 
-         class="flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+         class="sidebar-tooltip-link flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors" data-sidebar-tooltip="Volver al Panel" title="Volver al Panel">
         <lucide-icon name="arrow-left" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"

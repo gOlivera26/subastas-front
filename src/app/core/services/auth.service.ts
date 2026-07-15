@@ -31,8 +31,13 @@ export class AuthService {
   hasPageAccess(keyName: string): boolean {
     const user = this.currentUser();
     if (!user) return false;
-    if (user.rol === 'SUPERADMIN') return true;
-    return user.paginas?.some(p => p.keyName === keyName) ?? false;
+
+    const paginas = user.paginas ?? [];
+    if (paginas.length > 0) {
+      return paginas.some(p => p.keyName === keyName);
+    }
+
+    return user.rol === 'SUPERADMIN';
   }
 
   login(email: string, password: string): Observable<OperationResponse<LoginResponse>> {
@@ -134,3 +139,4 @@ updateProfile(nombre: string, apellido: string, telefono: string): Observable<Op
       );
   }
 }
+
