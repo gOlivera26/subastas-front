@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy, inject, signal, computed, effect, ViewChild } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, inject, signal, computed, effect, ViewChild, TemplateRef, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -17,6 +17,10 @@ import { NotificationService } from '../../../core/services/notification.service
 import { TimeService } from '../../../core/services/time.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { Modal } from '../../../shared/ui/modal/modal';
+import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
+import { AppCalendar } from '../../../shared/ui/app-calendar/app-calendar';
+import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
+import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
 import { Moneda } from '../../../core/models/moneda.model';
 import { environment } from '../../../../environments/environment';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
@@ -38,7 +42,7 @@ export type ChartOptions = {
 @Component({
   selector: 'app-subasta-detalle',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule, LoadingSpinnerComponent, Modal, NgApexchartsModule],
+  imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule, LoadingSpinnerComponent, Modal, CustomSelect, AppCalendar, SmartTableComponent, NgApexchartsModule],
   templateUrl: './subasta-detalle.component.html',
 })
 export class SubastaDetalleComponent implements OnInit, OnDestroy {
@@ -122,6 +126,9 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
   get isPorRenglon(): boolean { return this.subasta()?.especificacion?.criterioAdjudicacion === 1; }
   get isDirecta(): boolean { return this.subasta()?.idTipoContratacion === 9; }
   get requiereGestionDocumentacion(): boolean { return this.subasta()?.idTipoContratacion === 8 || this.subasta()?.especificacion?.gestionDocumentacion === true; }
+  get muestraGestionDocumentacion(): boolean { return !!this.subasta(); }
+  get gestionDocumentacionTitulo(): string { return this.requiereGestionDocumentacion ? 'Requisito validador' : 'Documentación opcional'; }
+  get gestionDocumentacionDetalle(): string { return this.requiereGestionDocumentacion ? 'Debés adjuntarla para poder ofertar.' : 'Podés adjuntarla como respaldo; no bloquea tu oferta.'; }
 
   elementosOfertables = computed(() => {
     const s = this.subasta();
@@ -151,6 +158,59 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     fechaPagare: '', 
     archivo: null as File | null
   };
+
+  garantiaTipoTpl = viewChild<TemplateRef<any>>('garantiaTipoTpl');
+  garantiaDetalleTpl = viewChild<TemplateRef<any>>('garantiaDetalleTpl');
+  garantiaArchivoTpl = viewChild<TemplateRef<any>>('garantiaArchivoTpl');
+
+  tipoDocumentoOptions: SelectOption[] = [
+    { label: 'Póliza de Caución', value: '1' },
+    { label: 'Pagaré', value: '2' }
+  ];
+
+  monedaOptions = computed<SelectOption[]>(() =>
+    this.monedas().map(m => ({ label: m.nombre, value: String(m.idMoneda) }))
+  );
+
+  garantiaColumns: TableColumn[] = [
+    { header: 'Tipo', key: 'tipoDisplay', type: 'custom', sortable: true, searchFields: ['tipoDisplay', 'companiaAseguradora', 'nroPoliza'] },
+    { header: 'Detalle', key: 'detalleDisplay', type: 'custom', sortable: true, searchFields: ['detalleDisplay', 'companiaAseguradora', 'nroPoliza', 'fechaPagareDisplay'] },
+    { header: 'Monto', key: 'monto', type: 'currency', sortable: true },
+    { header: 'Archivo', key: 'archivo', type: 'custom' }
+  ];
+
+  garantiaActions: TableAction[] = [
+    { action: 'ver', icon: 'download', tooltip: 'Ver archivo', color: 'text-[var(--color-cyan-spark)] hover:text-[var(--color-porcelain)] hover:bg-[var(--color-cyan-spark)]/10', visible: row => !!row.urlArchivo },
+    { action: 'eliminar', icon: 'trash-2', tooltip: 'Eliminar documento', color: 'text-red-400 hover:text-red-300 hover:bg-red-500/10' }
+  ];
+
+  loadingGarantias = signal(false);
+
+  garantiaTemplates = computed(() => {
+    const templates: Record<string, TemplateRef<any>> = {};
+    const tipo = this.garantiaTipoTpl(); if (tipo) templates['tipoDisplay'] = tipo;
+    const detalle = this.garantiaDetalleTpl(); if (detalle) templates['detalleDisplay'] = detalle;
+    const archivo = this.garantiaArchivoTpl(); if (archivo) templates['archivo'] = archivo;
+    return templates;
+  });
+
+  garantiasTableData = computed(() => this.garantiasList().map(g => {
+    const tipoDisplay = g.idTipoDocumento === 1 ? 'Póliza' : 'Pagaré';
+    const fechaPagareDisplay = g.fechaPagare ? this.formatFechaCorta(g.fechaPagare) : '';
+    const detalleDisplay = g.idTipoDocumento === 1
+      ? [g.companiaAseguradora, g.nroPoliza ? `Póliza ${g.nroPoliza}` : ''].filter(Boolean).join(' · ')
+      : (fechaPagareDisplay ? `Confección ${fechaPagareDisplay}` : 'Pagaré sin fecha informada');
+
+    return {
+      ...g,
+      id: g.idGarantia,
+      tipoDisplay,
+      detalleDisplay,
+      fechaPagareDisplay,
+      monto: Number(g.montoCaucion || g.montoPagare || 0),
+      monedaDisplay: this.getMonedaNombre(g.idMoneda)
+    };
+  }));
 
   // Helper para desencapsular los valores numéricos extraños de la API
   getVal(campo: any): number {
@@ -563,6 +623,43 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     this.isGarantiasModalOpen.set(false); 
   }
 
+  onGarantiaTipoChange(value: any) {
+    this.garantiaForm.idTipoDocumento = value ?? '0';
+    this.garantiaForm.idMoneda = '0';
+    this.garantiaForm.companiaAseguradora = '';
+    this.garantiaForm.nroPoliza = '';
+    this.garantiaForm.montoCaucion = null;
+    this.garantiaForm.observacion = '';
+    this.garantiaForm.montoPagare = null;
+    this.garantiaForm.fechaPagare = '';
+    this.garantiaForm.archivo = null;
+  }
+
+  onGarantiaMonedaChange(value: any) {
+    this.garantiaForm.idMoneda = value ?? '0';
+  }
+
+  handleGarantiaAction(event: { action: string; row: any }) {
+    if (event.action === 'ver' && event.row?.urlArchivo) {
+      window.open(event.row.urlArchivo, '_blank', 'noopener');
+      return;
+    }
+    if (event.action === 'eliminar') {
+      this.eliminarGarantia(event.row.idGarantia);
+    }
+  }
+
+  getMonedaNombre(idMoneda: any): string {
+    const moneda = this.monedas().find(m => Number(m.idMoneda) === Number(idMoneda));
+    return moneda?.nombre || 'ARS';
+  }
+
+  formatFechaCorta(value: any): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
   resetGarantiaForm() { 
     this.garantiaForm = { 
       idTipoDocumento: '0', 
@@ -577,15 +674,18 @@ export class SubastaDetalleComponent implements OnInit, OnDestroy {
     }; 
   }
   
-  cargarGarantias() { 
-    this.cotService.getGarantias(this.idCotizacion()).subscribe({ 
-      next: (res: any) => { 
-        if (res.success && res.data) this.garantiasList.set(res.data); 
+  cargarGarantias() {
+    this.loadingGarantias.set(true);
+    this.cotService.getGarantias(this.idCotizacion()).subscribe({
+      next: (res: any) => {
+        this.loadingGarantias.set(false);
+        this.garantiasList.set(res.success && res.data ? res.data : []);
       },
       error: () => {
+        this.loadingGarantias.set(false);
         this.garantiasList.set([]);
       }
-    }); 
+    });
   }
   
   onFileGarantiaSelected(event: any) { 
