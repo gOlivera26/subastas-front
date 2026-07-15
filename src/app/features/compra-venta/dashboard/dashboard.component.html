@@ -1,10 +1,10 @@
-<div class="page-container max-w-[1400px]">
+﻿<div class="page-container max-w-[1400px]">
   <span class="hidden">{{ tick() }}</span>
 
   <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h1 class="text-[28px] sm:text-[32px] font-[590] tracking-tight text-[var(--color-porcelain)]">Dashboard</h1>
-      <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Subastas en tiempo real y próximos remates para inventario electrónico.</p>
+      <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Subastas en tiempo real y prÃ³ximos remates para inventario electrÃ³nico.</p>
     </div>
     @if (enCurso().length > 0) {
       <div class="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-neon-lime)]/10 border border-[var(--color-neon-lime)]/20 shadow-[0_0_15px_rgba(228,242,34,0.1)]">
@@ -13,6 +13,32 @@
       </div>
     }
   </div>
+
+  <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    @if (auth.hasPageAccess('reservas.subastas')) {
+      <a routerLink="/compra-venta/subastas"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-5 text-left transition-all hover:border-[var(--color-cyan-spark)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-cyan-spark)]/10">
+          <lucide-icon name="gavel" [size]="20" class="text-[var(--color-cyan-spark)]"></lucide-icon>
+        </div>
+        <p class="mb-1 text-[10px] font-[700] uppercase tracking-[0.22em] text-[var(--color-storm-cloud)]">Accesos del módulo</p>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-cyan-spark)]">Subastas</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Ingresá a la sala, revisá el estado y gestioná participación.</p>
+      </a>
+    }
+
+    @if (auth.hasPageAccess('reservas.mis-ofertas')) {
+      <a routerLink="/compra-venta/mis-ofertas"
+         class="group rounded-2xl border border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/50 p-5 text-left transition-all hover:border-[var(--color-neon-lime)]/30 hover:bg-[var(--color-deep-slate)]">
+        <div class="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-neon-lime)]/10">
+          <lucide-icon name="handshake" [size]="20" class="text-[var(--color-neon-lime)]"></lucide-icon>
+        </div>
+        <p class="mb-1 text-[10px] font-[700] uppercase tracking-[0.22em] text-[var(--color-storm-cloud)]">Accesos del módulo</p>
+        <h3 class="text-[16px] font-[590] text-[var(--color-porcelain)] group-hover:text-[var(--color-neon-lime)]">Mis Ofertas</h3>
+        <p class="mt-1 text-[13px] text-[var(--color-storm-cloud)]">Consultá tus ofertas presentadas y el historial de participación.</p>
+      </a>
+    }
+  </section>
 
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 border-b border-[var(--color-charcoal-grey)] pb-8">
     <div>
@@ -41,7 +67,7 @@
         <div class="rounded-3xl border border-dashed border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30 p-16 text-center h-[350px] flex flex-col justify-center items-center">
           <lucide-icon name="clock" [size]="48" class="mb-4 text-[var(--color-storm-cloud)] opacity-50"></lucide-icon>
           <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">No hay subastas activas</p>
-          <p class="mt-2 text-[14px] text-[var(--color-fog-grey)]">El mercado está en pausa. Revisa las próximas aperturas.</p>
+          <p class="mt-2 text-[14px] text-[var(--color-fog-grey)]">El mercado estÃ¡ en pausa. Revisa las prÃ³ximas aperturas.</p>
         </div>
       } @else {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -70,9 +96,11 @@
                 </div>
                 
                 <div class="flex flex-col gap-3">
-                  <a [routerLink]="['/compra-venta/subastas', sub.idCotizacion]" class="w-full rounded-xl bg-[var(--color-neon-lime)] py-3.5 text-center text-[14px] font-[600] text-black transition-all hover:brightness-110 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(228,242,34,0.2)]">
-                    <lucide-icon name="zap" [size]="18" class="fill-current"></lucide-icon> Ingresar a la Subasta
-                  </a>
+                  @if (auth.hasPageAccess('reservas.subastas')) {
+                    <a [routerLink]="['/compra-venta/subastas', sub.idCotizacion]" class="w-full rounded-xl bg-[var(--color-neon-lime)] py-3.5 text-center text-[14px] font-[600] text-black transition-all hover:brightness-110 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(228,242,34,0.2)]">
+                      <lucide-icon name="zap" [size]="18" class="fill-current"></lucide-icon> Ingresar a la Subasta
+                    </a>
+                  }
                 </div>
               </div>
             </div>
@@ -83,7 +111,7 @@
 
     <div class="lg:col-span-1">
       <div class="flex items-center gap-3 mb-5">
-        <h2 class="text-[20px] font-[590] text-[var(--color-porcelain)]">Próximas Subastas</h2>
+        <h2 class="text-[20px] font-[590] text-[var(--color-porcelain)]">PrÃ³ximas Subastas</h2>
       </div>
 
       @if (proximas().length === 0) {
@@ -132,7 +160,11 @@
     </ng-template>
 
     <ng-template #accionTpl let-row>
-      <div class="flex justify-end"><a [routerLink]="['/compra-venta/subastas', row.idCotizacion]" class="text-[13px] font-[600] tracking-wide text-[var(--color-neon-lime)] hover:underline">Ver</a></div>
+      <div class="flex justify-end">
+        @if (auth.hasPageAccess('reservas.subastas')) {
+          <a [routerLink]="['/compra-venta/subastas', row.idCotizacion]" class="text-[13px] font-[600] tracking-wide text-[var(--color-neon-lime)] hover:underline">Ver</a>
+        }
+      </div>
     </ng-template>
 
     <app-smart-table

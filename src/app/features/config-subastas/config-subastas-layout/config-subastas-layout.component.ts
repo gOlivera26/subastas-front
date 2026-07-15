@@ -14,7 +14,7 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 })
 export class ConfigSubastasLayoutComponent {
   auth = inject(AuthService);
-  private readonly sidebarStorageKey = 'sidebar-config-subastas';
+  private readonly sidebarStorageKey = 'owen-sidebar-open';
   isSidebarOpen = signal(this.getInitialSidebarState(true));
 
   toggleSidebar() {

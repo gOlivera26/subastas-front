@@ -5,56 +5,84 @@
   <aside
     aria-label="Menú lateral"
     class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl lg:shadow-none overflow-hidden transition-[transform,width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] max-w-[calc(100vw-2rem)] will-change-transform lg:static lg:translate-x-0"
-    [ngClass]="isSidebarOpen() ? 'w-[min(18rem,calc(100vw-2rem))] translate-x-0 lg:w-72' : '-translate-x-full lg:translate-x-0 lg:w-[68px]'">
+    [ngClass]="isSidebarOpen() ? 'module-sidebar-expanded w-[min(18rem,calc(100vw-2rem))] translate-x-0 lg:w-72' : 'module-sidebar-collapsed -translate-x-full lg:translate-x-0 lg:w-[68px]'">
     <div class="flex h-16 shrink-0 items-center px-4 border-b border-[var(--color-charcoal-grey)]"
          [ngClass]="isSidebarOpen() ? 'justify-between' : 'justify-center'">
-      <a routerLink="/compra-venta" class="flex items-center gap-3 transition-opacity hover:opacity-80 min-w-0">
+<a routerLink="/compra-venta" class="flex items-center gap-3 transition-opacity hover:opacity-80 min-w-0">
         <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-neon-lime)]/10 text-[var(--color-neon-lime)]">
           <lucide-icon name="gavel" [size]="18"></lucide-icon>
         </div>
         <span class="text-[15px] font-[590] tracking-tight text-[var(--color-porcelain)] truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()">Compra y Venta</span>
       </a>
+
       <button type="button" aria-label="Cerrar menú lateral" (click)="closeSidebar()" class="lg:hidden text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)]">
         <lucide-icon name="x" [size]="20"></lucide-icon>
       </button>
     </div>
+    
     <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
       <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] transition-opacity duration-300"
-         [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Mercado</p>
+         [class.opacity-0]="!isSidebarOpen()"
+         [class.hidden]="!isSidebarOpen()">Mercado</p>
 
-      <a routerLink="/compra-venta"
-         routerLinkActive="nav-item-active"
-         [routerLinkActiveOptions]="{exact: true}"
-         (click)="closeSidebarOnMobile()"
-         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="layout-dashboard" [size]="18" class="shrink-0"></lucide-icon>
-        <span class="truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Dashboard</span>
-      </a>
+      @if (auth.hasPageAccess('reservas.dashboard')) {
+        <a routerLink="/compra-venta"
+           routerLinkActive="nav-item-active"
+           [routerLinkActiveOptions]="{exact: true}"
+           (click)="closeSidebarOnMobile()"
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Dashboard"
+           title="Dashboard">
+          <lucide-icon name="layout-dashboard" [size]="18" class="shrink-0"></lucide-icon>
+          <span class="truncate transition-opacity duration-300"
+                [class.opacity-0]="!isSidebarOpen()"
+                [class.hidden]="!isSidebarOpen()">Dashboard</span>
+        </a>
+      }
 
-      <a routerLink="/compra-venta/subastas"
-         routerLinkActive="nav-item-active"
-         (click)="closeSidebarOnMobile()"
-         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="gavel" [size]="18" class="shrink-0"></lucide-icon>
-        <span class="truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Subastas</span>
-      </a>
+      @if (auth.hasPageAccess('reservas.subastas')) {
+        <a routerLink="/compra-venta/subastas"
+           routerLinkActive="nav-item-active"
+           (click)="closeSidebarOnMobile()"
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Subastas"
+           title="Subastas">
+          <lucide-icon name="gavel" [size]="18" class="shrink-0"></lucide-icon>
+          <span class="truncate transition-opacity duration-300"
+                [class.opacity-0]="!isSidebarOpen()"
+                [class.hidden]="!isSidebarOpen()">Subastas</span>
+        </a>
+      }
 
-      <a routerLink="/compra-venta/mis-ofertas"
-         routerLinkActive="nav-item-active"
-         (click)="closeSidebarOnMobile()"
-         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="handshake" [size]="18" class="shrink-0"></lucide-icon>
-        <span class="truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Mis Ofertas</span>
-      </a>
+      @if (auth.hasPageAccess('reservas.mis-ofertas')) {
+        <a routerLink="/compra-venta/mis-ofertas"
+           routerLinkActive="nav-item-active"
+           (click)="closeSidebarOnMobile()"
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Mis Ofertas"
+           title="Mis Ofertas">
+          <lucide-icon name="handshake" [size]="18" class="shrink-0"></lucide-icon>
+          <span class="truncate transition-opacity duration-300"
+                [class.opacity-0]="!isSidebarOpen()"
+                [class.hidden]="!isSidebarOpen()">Mis Ofertas</span>
+        </a>
+      }
 
       <div class="my-6 border-t border-[var(--color-charcoal-grey)] mx-3 transition-opacity duration-300"
            [class.opacity-0]="!isSidebarOpen()"></div>
       <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] transition-opacity duration-300"
-         [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Sistema</p>
-      <a routerLink="/modulos" class="flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+         [class.opacity-0]="!isSidebarOpen()"
+         [class.hidden]="!isSidebarOpen()">Sistema</p>
+
+      <a routerLink="/modulos"
+         class="sidebar-tooltip-link flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors"
+         data-sidebar-tooltip="Volver al Panel"
+         title="Volver al Panel">
         <lucide-icon name="arrow-left" [size]="18" class="shrink-0"></lucide-icon>
-        <span class="truncate transition-opacity duration-300" [class.opacity-0]="!isSidebarOpen()" [class.hidden]="!isSidebarOpen()">Volver al Panel</span>
+        <span class="truncate transition-opacity duration-300"
+              [class.opacity-0]="!isSidebarOpen()"
+              [class.hidden]="!isSidebarOpen()">Volver al Panel</span>
       </a>
     </nav>
   </aside>

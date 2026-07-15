@@ -4,7 +4,7 @@ import { HomeComponent } from './features/public/home/home.component';
 import { SubastasActivasComponent } from './features/subastas/subastas-activas/subastas-activas.component';
 import { SubastaPublicaDetalleComponent } from './features/subastas/subasta-publica-detalle/subasta-publica-detalle.component';
 import { LoginComponent } from './features/auth/login/login.component';
-import { authGuard } from './core/guards/auth.guard';
+import { authGuard, pageAccessChildGuard } from './core/guards/auth.guard';
 import { ModulosComponent } from './features/modulos/modulos.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { AdminLayoutComponent } from './features/admin/admin-layout/admin-layout.component';
@@ -63,11 +63,12 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminLayoutComponent,
     canActivate: [authGuard],
+    canActivateChild: [pageAccessChildGuard],
     children: [
-      { path: 'usuarios/pendientes', component: AdminUsuariosComponent, data: { state: 'pendientes', title: 'Aprobaciones' } }, 
-      { path: 'usuarios/activos', component: ActiveUsersComponent, data: { state: 'activos', title: 'Usuarios Activos' } },
-      { path: 'seguridad', component: SeguridadComponent, data: { state: 'seguridad', title: 'Seguridad' } },
-      { path: '', component: AdminHomeComponent, data: { state: 'admin-home', title: 'Inicio' } }
+      { path: 'usuarios/pendientes', component: AdminUsuariosComponent, data: { state: 'pendientes', title: 'Aprobaciones', pageKey: 'admin_usuarios.pendientes' } }, 
+      { path: 'usuarios/activos', component: ActiveUsersComponent, data: { state: 'activos', title: 'Usuarios Activos', pageKey: 'admin_usuarios.activos' } },
+      { path: 'seguridad', component: SeguridadComponent, data: { state: 'seguridad', title: 'Seguridad', pageKey: 'admin_usuarios.seguridad' } },
+      { path: '', component: AdminHomeComponent, data: { state: 'admin-home', title: 'Inicio', pageKey: 'admin.inicio' } }
     ]
   },
 
@@ -75,16 +76,17 @@ export const routes: Routes = [
     path: 'clasificadores',
     component: ClasificadoresLayoutComponent,
     canActivate: [authGuard],
+    canActivateChild: [pageAccessChildGuard],
     children: [
-      { path: '', component: ClasificadoresHomeComponent, data: { state: 'clasificadores-home', title: 'Inicio' } },
-      { path: 'organizaciones', component: OrganizacionesComponent, data: { state: 'organizaciones', title: 'Organizaciones' } },
-      { path: 'vigencias', component: VigenciasComponent, data: { state: 'vigencias', title: 'Vigencias' } },
-      { path: 'unidades-administrativas', component: UnidadesAdministrativasComponent, data: { state: 'unidades', title: 'Unidades Administrativas' } },
-      { path: 'objetos-gasto', component: ObjetosGastoComponent, data: { state: 'objetos-gasto', title: 'Objetos del Gasto' } },
-      { path: 'catalogo-bienes', component: CatalogoBienesComponent, data: { state: 'catalogo-bienes', title: 'Catálogo de Bienes' } },
-      { path: 'categorias-programaticas', component: CategoriasProgramaticasComponent, data: { state: 'categorias-programaticas', title: 'Categorías Programáticas' } },
-      { path: 'monedas', component: MonedasComponent, data: { state: 'monedas', title: 'Monedas' } },
-      { path: 'areas', component: AreasComponent, data: { state: 'areas', title: 'Áreas / Oficinas' } },
+      { path: '', component: ClasificadoresHomeComponent, data: { state: 'clasificadores-home', title: 'Inicio', pageKey: 'clasificadores.inicio' } },
+      { path: 'organizaciones', component: OrganizacionesComponent, data: { state: 'organizaciones', title: 'Organizaciones', pageKey: 'clasificadores.organizaciones' } },
+      { path: 'vigencias', component: VigenciasComponent, data: { state: 'vigencias', title: 'Vigencias', pageKey: 'clasificadores.vigencias' } },
+      { path: 'unidades-administrativas', component: UnidadesAdministrativasComponent, data: { state: 'unidades', title: 'Unidades Administrativas', pageKey: 'clasificadores.unidades-administrativas' } },
+      { path: 'objetos-gasto', component: ObjetosGastoComponent, data: { state: 'objetos-gasto', title: 'Objetos del Gasto', pageKey: 'clasificadores.objetos-gasto' } },
+      { path: 'catalogo-bienes', component: CatalogoBienesComponent, data: { state: 'catalogo-bienes', title: 'Catálogo de Bienes', pageKey: 'clasificadores.catalogo-bienes' } },
+      { path: 'categorias-programaticas', component: CategoriasProgramaticasComponent, data: { state: 'categorias-programaticas', title: 'Categorías Programáticas', pageKey: 'clasificadores.categorias-programaticas' } },
+      { path: 'monedas', component: MonedasComponent, data: { state: 'monedas', title: 'Monedas', pageKey: 'clasificadores.monedas' } },
+      { path: 'areas', component: AreasComponent, data: { state: 'areas', title: 'Áreas / Oficinas', pageKey: 'clasificadores.areas' } },
     ]
   },
 
@@ -92,10 +94,11 @@ export const routes: Routes = [
     path: 'proveedores',
     component: ProveedoresLayoutComponent,
     canActivate: [authGuard],
+    canActivateChild: [pageAccessChildGuard],
     children: [
-      { path: '', component: ProveedoresHomeComponent, data: { state: 'proveedores-home', title: 'Inicio' } },
-      { path: 'listado', component: ProveedoresComponent, data: { state: 'proveedores-listado', title: 'Listado de Proveedores' } },
-      { path: 'rubros-list', component: RubrosListComponent, data: { state: 'rubros', title: 'Rubros' } },
+      { path: '', component: ProveedoresHomeComponent, data: { state: 'proveedores-home', title: 'Inicio', pageKey: 'proveedores.inicio' } },
+      { path: 'listado', component: ProveedoresComponent, data: { state: 'proveedores-listado', title: 'Listado de Proveedores', pageKey: 'proveedores.listado' } },
+      { path: 'rubros-list', component: RubrosListComponent, data: { state: 'rubros', title: 'Rubros', pageKey: 'proveedores.rubros' } },
       { path: 'rubros-tree', redirectTo: 'rubros-list', pathMatch: 'full' }
     ]
   },
@@ -104,11 +107,12 @@ export const routes: Routes = [
     path: 'compra-venta',
     component: CompraVentaLayoutComponent,
     canActivate: [authGuard],
+    canActivateChild: [pageAccessChildGuard],
     children: [
-      { path: '', component: DashboardCompraVentaComponent, data: { state: 'compra-venta', title: 'Dashboard' } },
-      { path: 'subastas', component: SubastasComponent, data: { state: 'subastas', title: 'Subastas' } },
-      { path: 'subastas/:id', component: SubastaDetalleComponent, data: { state: 'subasta-detalle', title: 'Subasta en Vivo' } },
-      { path: 'mis-ofertas', component: MisOfertasComponent, data: { state: 'mis-ofertas', title: 'Mis Ofertas' } },
+      { path: '', component: DashboardCompraVentaComponent, data: { state: 'compra-venta', title: 'Dashboard', pageKey: 'reservas.dashboard' } },
+      { path: 'subastas', component: SubastasComponent, data: { state: 'subastas', title: 'Subastas', pageKey: 'reservas.subastas' } },
+      { path: 'subastas/:id', component: SubastaDetalleComponent, data: { state: 'subasta-detalle', title: 'Subasta en Vivo', pageKey: 'reservas.subastas' } },
+      { path: 'mis-ofertas', component: MisOfertasComponent, data: { state: 'mis-ofertas', title: 'Mis Ofertas', pageKey: 'reservas.mis-ofertas' } },
     ]
   },
 
@@ -116,13 +120,14 @@ export const routes: Routes = [
     path: 'licitaciones',
     component: LicitacionesLayoutComponent,
     canActivate: [authGuard],
+    canActivateChild: [pageAccessChildGuard],
     children: [
-      { path: '', component: LicitacionesHomeComponent, data: { state: 'licitaciones-home', title: 'Inicio' } },
-      { path: 'nota-pedido', component: NotaPedidoComponent, data: { state: 'nota-pedido', title: 'Nota de Pedido' } },
-      { path: 'subasta', component: SubastaComponent, data: { state: 'subasta', title: 'Subasta' } },
-      { path: 'subasta/crear', component: SubastaCrearComponent, data: { state: 'subasta-crear', title: 'Nueva Subasta' } },
-      { path: 'informes', component: InformesPlaceholderComponent, data: { state: 'informes', title: 'Informes' } },
-      { path: 'tablero', component: TableroComponent, data: { state: 'tablero', title: 'Tablero' } },
+      { path: '', component: LicitacionesHomeComponent, data: { state: 'licitaciones-home', title: 'Inicio', pageKey: 'licitaciones.inicio' } },
+      { path: 'nota-pedido', component: NotaPedidoComponent, data: { state: 'nota-pedido', title: 'Nota de Pedido', pageKey: 'licitaciones.nota-pedido' } },
+      { path: 'subasta', component: SubastaComponent, data: { state: 'subasta', title: 'Subasta', pageKey: 'licitaciones.subasta' } },
+      { path: 'subasta/crear', component: SubastaCrearComponent, data: { state: 'subasta-crear', title: 'Nueva Subasta', pageKey: 'licitaciones.subasta' } },
+      { path: 'informes', component: InformesPlaceholderComponent, data: { state: 'informes', title: 'Informes', pageKey: 'licitaciones.informes' } },
+      { path: 'tablero', component: TableroComponent, data: { state: 'tablero', title: 'Tablero', pageKey: 'licitaciones.tablero' } },
     ]
   },
 

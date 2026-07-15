@@ -47,7 +47,6 @@
                         <lucide-icon [name]="ent.tipo === 'PROVEEDOR' ? 'truck' : 'building-2'" [size]="17" class="shrink-0 text-[var(--color-light-steel)]"></lucide-icon>
                       }
                       <span class="min-w-0 flex-1 truncate">{{ ent.nombre }}</span>
-                      @if (isCurrentContext(ent.tipo, ent.id)) { <lucide-icon name="chevron-down" [size]="16" class="text-[var(--color-light-steel)]"></lucide-icon> }
                     </div>
                   </button>
                 }

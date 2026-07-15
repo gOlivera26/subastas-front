@@ -1434,3 +1434,64 @@ html:not(.dark) .subasta-create-selected-panel :where(thead, tbody, tr, th, td) 
 @media (forced-colors: active) {
   :where(a, button, input, select, textarea, [tabindex]:not([tabindex='-1'])):focus-visible { outline: 2px solid CanvasText !important; }
 }
+
+
+/* Collapsed sidebar contextual popovers */
+.module-sidebar-collapsed {
+  overflow: visible !important;
+  z-index: 70 !important;
+}
+
+.module-sidebar-collapsed nav {
+  overflow: visible !important;
+}
+
+.module-sidebar-collapsed .sidebar-tooltip-link {
+  justify-content: center;
+  overflow: visible !important;
+}
+
+.module-sidebar-collapsed .sidebar-tooltip-link[data-sidebar-tooltip]::before {
+  content: attr(data-sidebar-tooltip);
+  position: absolute;
+  left: calc(100% + 0.72rem);
+  top: 50%;
+  z-index: 99999;
+  max-width: 18rem;
+  transform: translate(-0.35rem, -50%) scale(0.98);
+  border: 1px solid color-mix(in srgb, var(--color-cyan-spark) 22%, transparent);
+  border-radius: 0.9rem;
+  background:
+    radial-gradient(circle at 0% 50%, color-mix(in srgb, var(--color-cyan-spark) 10%, transparent), transparent 68%),
+    color-mix(in srgb, var(--color-graphite) 96%, black 4%);
+  box-shadow: 0 18px 44px color-mix(in srgb, black 52%, transparent), inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
+  color: var(--color-porcelain);
+  font-size: 0.78rem;
+  font-weight: 680;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  opacity: 0;
+  padding: 0.62rem 0.78rem;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.module-sidebar-collapsed .sidebar-tooltip-link[data-sidebar-tooltip]::after {
+  right: 0.58rem;
+}
+
+.module-sidebar-collapsed .sidebar-tooltip-link[data-sidebar-tooltip]:hover::before,
+.module-sidebar-collapsed .sidebar-tooltip-link[data-sidebar-tooltip]:focus-visible::before {
+  opacity: 1;
+  transform: translate(0, -50%) scale(1);
+}
+
+html:not(.dark) .module-sidebar-collapsed .sidebar-tooltip-link[data-sidebar-tooltip]::before {
+  border-color: rgba(0, 162, 203, 0.18);
+  background:
+    radial-gradient(circle at 0% 50%, rgba(64, 181, 229, 0.14), transparent 68%),
+    rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 44px rgba(15, 43, 92, 0.16), inset 0 1px 0 white;
+  color: #102033;
+}

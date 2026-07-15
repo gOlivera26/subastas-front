@@ -15,10 +15,10 @@ import { routeFade } from '../../../core/animations/route-animations';
   animations: [routeFade],
 })
 export class ProveedoresLayoutComponent {
-  private authService = inject(AuthService);
+  protected authService = inject(AuthService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
-  private readonly sidebarStorageKey = 'sidebar-proveedores';
+  private readonly sidebarStorageKey = 'owen-sidebar-open';
   isSidebarOpen = signal(this.getInitialSidebarState(true));
   isUserMenuOpen = signal(false);
   isDarkMode = signal(document.documentElement.classList.contains('dark'));

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, TemplateRef, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +10,7 @@ import { TimeService } from '../../../core/services/time.service';
 import { CustomSelect, SelectOption } from '../../../shared/ui/custom-select/custom-select';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
 import { TableColumn } from '../../../shared/ui/smart-table/table.models';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard-compra-venta',
@@ -21,6 +22,7 @@ export class DashboardCompraVentaComponent implements OnInit, OnDestroy {
   private vigenciaService = inject(VigenciaService);
   private cotizacionService = inject(CotizacionService);
   private timeService = inject(TimeService);
+  protected auth = inject(AuthService);
   
   private timerInterval: any;
   tick = signal(0);
@@ -60,7 +62,7 @@ export class DashboardCompraVentaComponent implements OnInit, OnDestroy {
     { key: 'tipo', header: 'Tipo', sortable: true },
     { key: 'fechaInicio', header: 'Fecha', type: 'date', sortable: true },
     { key: 'estado', header: 'Estado', type: 'custom' },
-    { key: 'accion', header: 'Acción', type: 'custom' },
+    { key: 'accion', header: 'AcciÃ³n', type: 'custom' },
   ];
 
   ngOnInit() {
@@ -116,8 +118,8 @@ export class DashboardCompraVentaComponent implements OnInit, OnDestroy {
     const diff = new Date(startDate).getTime() - this.timeService.now();
     if (diff <= 0) return 'Hoy';
     const days = Math.ceil(diff / (1000 * 3600 * 24));
-    if (days === 1) return 'Mañana';
-    return `En ${days} días`;
+    if (days === 1) return 'MaÃ±ana';
+    return `En ${days} dÃ­as`;
   }
 
   onVigenciaChange(val: any) { this.selectedVigenciaId.set(+val); this.loadDashboard(); }

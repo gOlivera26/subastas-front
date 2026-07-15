@@ -7,7 +7,7 @@
   <aside
     aria-label="Menú lateral"
     class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)] shadow-2xl lg:shadow-none overflow-hidden transition-[transform,width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] max-w-[calc(100vw-2rem)] will-change-transform lg:static lg:translate-x-0"
-    [ngClass]="isSidebarOpen() ? 'w-[min(18rem,calc(100vw-2rem))] translate-x-0 lg:w-72' : '-translate-x-full lg:translate-x-0 lg:w-[68px]'">
+    [ngClass]="isSidebarOpen() ? 'module-sidebar-expanded w-[min(18rem,calc(100vw-2rem))] translate-x-0 lg:w-72' : 'module-sidebar-collapsed -translate-x-full lg:translate-x-0 lg:w-[68px]'">
 
     <div class="flex h-16 shrink-0 items-center px-4 border-b border-[var(--color-charcoal-grey)]"
          [ngClass]="isSidebarOpen() ? 'justify-between' : 'justify-center'">
@@ -23,77 +23,105 @@
       </button>
     </div>
 
+    
     <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
       <p class="px-3 mb-2 text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)] transition-opacity duration-300"
          [class.opacity-0]="!isSidebarOpen()"
-         [class.hidden]="!isSidebarOpen()">Catálogos</p>
+         [class.hidden]="!isSidebarOpen()">Maestros</p>
+
+      @if (auth.hasPageAccess('clasificadores.inicio')) {
+        <a routerLink="/clasificadores"
+           routerLinkActive="nav-item-active"
+           [routerLinkActiveOptions]="{exact: true}"
+           (click)="closeSidebarOnMobile()"
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Inicio"
+           title="Inicio">
+          <lucide-icon name="home" [size]="18" class="shrink-0"></lucide-icon>
+          <span class="truncate transition-opacity duration-300"
+                [class.opacity-0]="!isSidebarOpen()"
+                [class.hidden]="!isSidebarOpen()">Inicio</span>
+        </a>
+      }
 
       @if (auth.hasPageAccess('clasificadores.organizaciones')) {
         <a routerLink="/clasificadores/organizaciones"
-         routerLinkActive="nav-item-active"
-         (click)="closeSidebarOnMobile()"
-         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="building" [size]="18" class="shrink-0"></lucide-icon>
-        <span class="truncate transition-opacity duration-300"
-              [class.opacity-0]="!isSidebarOpen()"
-              [class.hidden]="!isSidebarOpen()">Organizaciones</span>
-      </a>
+           routerLinkActive="nav-item-active"
+           (click)="closeSidebarOnMobile()"
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Organizaciones"
+           title="Organizaciones">
+          <lucide-icon name="building" [size]="18" class="shrink-0"></lucide-icon>
+          <span class="truncate transition-opacity duration-300"
+                [class.opacity-0]="!isSidebarOpen()"
+                [class.hidden]="!isSidebarOpen()">Organizaciones</span>
+        </a>
       }
 
       @if (auth.hasPageAccess('clasificadores.vigencias')) {
         <a routerLink="/clasificadores/vigencias"
-         routerLinkActive="nav-item-active"
-         [routerLinkActiveOptions]="{exact: true}"
-         (click)="closeSidebarOnMobile()"
-         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="calendar" [size]="18" class="shrink-0"></lucide-icon>
-        <span class="truncate transition-opacity duration-300"
-              [class.opacity-0]="!isSidebarOpen()"
-              [class.hidden]="!isSidebarOpen()">Vigencias</span>
-      </a>
+           routerLinkActive="nav-item-active"
+           [routerLinkActiveOptions]="{exact: true}"
+           (click)="closeSidebarOnMobile()"
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Vigencias"
+           title="Vigencias">
+          <lucide-icon name="calendar" [size]="18" class="shrink-0"></lucide-icon>
+          <span class="truncate transition-opacity duration-300"
+                [class.opacity-0]="!isSidebarOpen()"
+                [class.hidden]="!isSidebarOpen()">Vigencias</span>
+        </a>
       }
 
       @if (auth.hasPageAccess('clasificadores.unidades-administrativas')) {
         <a routerLink="/clasificadores/unidades-administrativas"
-         routerLinkActive="nav-item-active"
-         (click)="closeSidebarOnMobile()"
-         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="building-2" [size]="18" class="shrink-0"></lucide-icon>
-        <span class="truncate transition-opacity duration-300"
-              [class.opacity-0]="!isSidebarOpen()"
-              [class.hidden]="!isSidebarOpen()">Unidades Adm.</span>
-      </a>
+           routerLinkActive="nav-item-active"
+           (click)="closeSidebarOnMobile()"
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Unidades Adm."
+           title="Unidades Adm.">
+          <lucide-icon name="building-2" [size]="18" class="shrink-0"></lucide-icon>
+          <span class="truncate transition-opacity duration-300"
+                [class.opacity-0]="!isSidebarOpen()"
+                [class.hidden]="!isSidebarOpen()">Unidades Adm.</span>
+        </a>
       }
 
       @if (auth.hasPageAccess('clasificadores.objetos-gasto')) {
         <a routerLink="/clasificadores/objetos-gasto"
-         routerLinkActive="nav-item-active"
-         (click)="closeSidebarOnMobile()"
-         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="tags" [size]="18" class="shrink-0"></lucide-icon>
-        <span class="truncate transition-opacity duration-300"
-              [class.opacity-0]="!isSidebarOpen()"
-              [class.hidden]="!isSidebarOpen()">Objetos del Gasto</span>
-      </a>
+           routerLinkActive="nav-item-active"
+           (click)="closeSidebarOnMobile()"
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Objetos del Gasto"
+           title="Objetos del Gasto">
+          <lucide-icon name="tags" [size]="18" class="shrink-0"></lucide-icon>
+          <span class="truncate transition-opacity duration-300"
+                [class.opacity-0]="!isSidebarOpen()"
+                [class.hidden]="!isSidebarOpen()">Objetos del Gasto</span>
+        </a>
       }
 
       @if (auth.hasPageAccess('clasificadores.catalogo-bienes')) {
         <a routerLink="/clasificadores/catalogo-bienes"
-         routerLinkActive="nav-item-active"
-         (click)="closeSidebarOnMobile()"
-         class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
-        <lucide-icon name="package" [size]="18" class="shrink-0"></lucide-icon>
-        <span class="truncate transition-opacity duration-300"
-              [class.opacity-0]="!isSidebarOpen()"
-                             [class.hidden]="!isSidebarOpen()">Catálogo de Bienes</span>
-      </a>
+           routerLinkActive="nav-item-active"
+           (click)="closeSidebarOnMobile()"
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Catálogo de Bienes"
+           title="Catálogo de Bienes">
+          <lucide-icon name="package" [size]="18" class="shrink-0"></lucide-icon>
+          <span class="truncate transition-opacity duration-300"
+                [class.opacity-0]="!isSidebarOpen()"
+                [class.hidden]="!isSidebarOpen()">Catálogo de Bienes</span>
+        </a>
       }
 
       @if (auth.hasPageAccess('clasificadores.categorias-programaticas')) {
         <a routerLink="/clasificadores/categorias-programaticas"
            routerLinkActive="nav-item-active"
            (click)="closeSidebarOnMobile()"
-           class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Categorías Programáticas"
+           title="Categorías Programáticas">
           <lucide-icon name="folder-tree" [size]="18" class="shrink-0"></lucide-icon>
           <span class="truncate transition-opacity duration-300"
                 [class.opacity-0]="!isSidebarOpen()"
@@ -105,7 +133,9 @@
         <a routerLink="/clasificadores/monedas"
            routerLinkActive="nav-item-active"
            (click)="closeSidebarOnMobile()"
-           class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Monedas"
+           title="Monedas">
           <lucide-icon name="banknote" [size]="18" class="shrink-0"></lucide-icon>
           <span class="truncate transition-opacity duration-300"
                 [class.opacity-0]="!isSidebarOpen()"
@@ -117,7 +147,9 @@
         <a routerLink="/clasificadores/areas"
            routerLinkActive="nav-item-active"
            (click)="closeSidebarOnMobile()"
-           class="app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]">
+           class="sidebar-tooltip-link app-nav-link flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-[14px] font-[510] text-[var(--color-light-steel)] transition-all hover:bg-[var(--color-deep-slate)]/50 hover:text-[var(--color-porcelain)]"
+           data-sidebar-tooltip="Áreas / Oficinas"
+           title="Áreas / Oficinas">
           <lucide-icon name="network" [size]="18" class="shrink-0"></lucide-icon>
           <span class="truncate transition-opacity duration-300"
                 [class.opacity-0]="!isSidebarOpen()"
@@ -131,8 +163,10 @@
          [class.opacity-0]="!isSidebarOpen()"
          [class.hidden]="!isSidebarOpen()">Sistema</p>
 
-      <a routerLink="/modulos" 
-         class="flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors">
+      <a routerLink="/modulos"
+         class="sidebar-tooltip-link flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-[510] text-[var(--color-storm-cloud)] hover:text-[var(--color-porcelain)] transition-colors"
+         data-sidebar-tooltip="Volver al Panel"
+         title="Volver al Panel">
         <lucide-icon name="arrow-left" [size]="18" class="shrink-0"></lucide-icon>
         <span class="truncate transition-opacity duration-300"
               [class.opacity-0]="!isSidebarOpen()"
