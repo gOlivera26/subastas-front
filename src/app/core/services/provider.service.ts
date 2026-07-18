@@ -16,8 +16,10 @@ export interface ProviderListDto {
   cuit: string;
   cup: string;
   emailInstitucional: string;
+  idTipoPersona: number;
   tipoPersona: string;
   hasConstanciaAfip: boolean;
+  urlConstanciaAfip?: string;
   rubrosCount: number;
   domiciliosCount: number;
 }
@@ -164,6 +166,11 @@ export interface ProvinciaDto {
   nombre: string;
 }
 
+export interface TipoPersonaDto {
+  id: number;
+  descripcion: string;
+}
+
 export interface AfipPersonDataDto {
   nombre: string;
   tipoPersona: string;
@@ -246,6 +253,14 @@ export class ProviderService {
 
   getProvincias(): Observable<OperationResponse<ProvinciaDto[]>> {
     return this.http.get<OperationResponse<ProvinciaDto[]>>(`${this.domicilioUrl}/provincias`);
+  }
+
+  getTiposPersona(): Observable<OperationResponse<TipoPersonaDto[]>> {
+    return this.http.get<OperationResponse<TipoPersonaDto[]>>(`${this.domicilioUrl}/tipos-persona`);
+  }
+
+  downloadConstanciaAfip(providerId: number): Observable<Blob> {
+    return this.http.get(`${this.providerUrl}/${providerId}/constancia-afip`, { responseType: 'blob' });
   }
 
   getRubros(page: number = 1, pageSize: number = 20, q?: string, sortBy?: string, sortDirection?: string): Observable<OperationResponse<{ data: RubroListDto[], total: number }>> {

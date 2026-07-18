@@ -2,7 +2,7 @@ import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } f
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { ProviderService, ProviderListDto, CreateProviderDto, UpdateProviderDto, RubroTreeDto, DomicilioDto, CreateDomicilioDto, UpdateDomicilioDto, TipoDomicilioDto, ProvinciaDto, AfipPersonDataDto } from '../../../core/services/provider.service';
+import { ProviderService, ProviderListDto, CreateProviderDto, UpdateProviderDto, RubroTreeDto, DomicilioDto, CreateDomicilioDto, UpdateDomicilioDto, TipoDomicilioDto, ProvinciaDto, AfipPersonDataDto, TipoPersonaDto } from '../../../core/services/provider.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { SmartTableComponent } from '../../../shared/ui/smart-table/smart-table';
 import { TableAction, TableColumn } from '../../../shared/ui/smart-table/table.models';
@@ -65,6 +65,7 @@ export class ProveedoresComponent implements OnInit {
   domiciliosLoading = signal(false);
   tiposDomicilio = signal<TipoDomicilioDto[]>([]);
   provincias = signal<ProvinciaDto[]>([]);
+  tiposPersona = signal<TipoPersonaDto[]>([]);
   domicilioForm = {
     idTipoDomicilio: 0,
     calle: '',
@@ -81,6 +82,9 @@ export class ProveedoresComponent implements OnInit {
 
   afipData = signal<AfipPersonDataDto | null>(null);
   afipCuit = signal('');
+
+  createFile = signal<File | null>(null);
+  editFile = signal<File | null>(null);
 
   columns: TableColumn[] = [
     { key: 'razonSocial', header: 'Razón Social', type: 'custom', sortable: true },
@@ -254,6 +258,8 @@ export class ProveedoresComponent implements OnInit {
 
   openCreateModal() {
     this.createForm = { razonSocial: '', cuit: '', cup: '', emailInstitucional: '', emailAlternativo: '', idTipoPersona: 1 };
+    this.createFile.set(null);
+    this.loadTiposPersona();
     this.isCreateModalOpen.set(true);
   }
 
@@ -265,8 +271,10 @@ export class ProveedoresComponent implements OnInit {
       cup: provider.cup,
       emailInstitucional: provider.emailInstitucional,
       emailAlternativo: '',
-      idTipoPersona: 1,
+      idTipoPersona: provider.idTipoPersona,
     };
+    this.editFile.set(null);
+    this.loadTiposPersona();
     this.isEditModalOpen.set(true);
   }
 
@@ -278,14 +286,35 @@ export class ProveedoresComponent implements OnInit {
     this.loadingAction.set('Creando...');
     this.providerService.createProvider(this.createForm as CreateProviderDto).subscribe({
       next: (res) => {
-        if (res.success) {
-          this.success.set('Proveedor creado exitosamente');
-          this.isCreateModalOpen.set(false);
-          this.loadProviders();
+        if (res.success && res.data) {
+          const newId = res.data.id;
+          const file = this.createFile();
+          if (file && newId) {
+            this.loadingAction.set('Subiendo constancia...');
+            this.providerService.uploadConstanciaAfip(newId, file).subscribe({
+              next: () => {
+                this.success.set('Proveedor creado y constancia subida');
+                this.isCreateModalOpen.set(false);
+                this.loadProviders();
+                this.loadingAction.set(null);
+              },
+              error: () => {
+                this.error.set('Proveedor creado pero falló la subida de la constancia');
+                this.isCreateModalOpen.set(false);
+                this.loadProviders();
+                this.loadingAction.set(null);
+              }
+            });
+          } else {
+            this.success.set('Proveedor creado exitosamente');
+            this.isCreateModalOpen.set(false);
+            this.loadProviders();
+            this.loadingAction.set(null);
+          }
         } else {
           this.error.set(res.message);
+          this.loadingAction.set(null);
         }
-        this.loadingAction.set(null);
       },
       error: () => {
         this.error.set('Error al crear proveedor');
@@ -303,18 +332,59 @@ export class ProveedoresComponent implements OnInit {
     this.providerService.updateProvider(this.editForm as UpdateProviderDto).subscribe({
       next: (res) => {
         if (res.success) {
-          this.success.set('Proveedor actualizado exitosamente');
-          this.isEditModalOpen.set(false);
-          this.loadProviders();
+          const file = this.editFile();
+          if (file) {
+            this.loadingAction.set('Subiendo constancia...');
+            this.providerService.uploadConstanciaAfip(this.editForm.id, file).subscribe({
+              next: () => {
+                this.success.set('Proveedor actualizado y constancia subida');
+                this.isEditModalOpen.set(false);
+                this.loadProviders();
+                this.loadingAction.set(null);
+              },
+              error: () => {
+                this.error.set('Proveedor actualizado pero falló la subida de la constancia');
+                this.isEditModalOpen.set(false);
+                this.loadProviders();
+                this.loadingAction.set(null);
+              }
+            });
+          } else {
+            this.success.set('Proveedor actualizado exitosamente');
+            this.isEditModalOpen.set(false);
+            this.loadProviders();
+            this.loadingAction.set(null);
+          }
         } else {
           this.error.set(res.message);
+          this.loadingAction.set(null);
         }
-        this.loadingAction.set(null);
       },
       error: () => {
         this.error.set('Error al actualizar proveedor');
         this.loadingAction.set(null);
       }
+    });
+  }
+
+  onFileSelected(event: any, mode: 'create' | 'edit') {
+    const file = event.target.files[0];
+    if (file) {
+      if (mode === 'create') this.createFile.set(file);
+      else this.editFile.set(file);
+    }
+  }
+
+  downloadConstancia(providerId: number) {
+    this.providerService.downloadConstanciaAfip(providerId).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `constancia-afip-${providerId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
     });
   }
 
@@ -423,6 +493,12 @@ export class ProveedoresComponent implements OnInit {
     });
     this.providerService.getProvincias().subscribe({
       next: (res) => { if (res.success && res.data) this.provincias.set(res.data); }
+    });
+  }
+
+  loadTiposPersona() {
+    this.providerService.getTiposPersona().subscribe({
+      next: (res) => { if (res.success && res.data) this.tiposPersona.set(res.data); }
     });
   }
 

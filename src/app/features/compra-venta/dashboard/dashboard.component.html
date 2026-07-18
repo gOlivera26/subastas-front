@@ -4,7 +4,7 @@
   <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h1 class="text-[28px] sm:text-[32px] font-[590] tracking-tight text-[var(--color-porcelain)]">Dashboard</h1>
-      <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Subastas en tiempo real y prÃ³ximos remates para inventario electrÃ³nico.</p>
+      <p class="text-[14px] text-[var(--color-storm-cloud)] mt-1">Subastas en tiempo real y proximos remates para inventario electrónico.</p>
     </div>
     @if (enCurso().length > 0) {
       <div class="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-neon-lime)]/10 border border-[var(--color-neon-lime)]/20 shadow-[0_0_15px_rgba(228,242,34,0.1)]">
@@ -67,7 +67,7 @@
         <div class="rounded-3xl border border-dashed border-[var(--color-charcoal-grey)] bg-[var(--color-graphite)]/30 p-16 text-center h-[350px] flex flex-col justify-center items-center">
           <lucide-icon name="clock" [size]="48" class="mb-4 text-[var(--color-storm-cloud)] opacity-50"></lucide-icon>
           <p class="text-[16px] font-[590] text-[var(--color-porcelain)]">No hay subastas activas</p>
-          <p class="mt-2 text-[14px] text-[var(--color-fog-grey)]">El mercado estÃ¡ en pausa. Revisa las prÃ³ximas aperturas.</p>
+          <p class="mt-2 text-[14px] text-[var(--color-fog-grey)]">El mercado estÃ¡ en pausa. Revisa las proximas aperturas.</p>
         </div>
       } @else {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -111,7 +111,7 @@
 
     <div class="lg:col-span-1">
       <div class="flex items-center gap-3 mb-5">
-        <h2 class="text-[20px] font-[590] text-[var(--color-porcelain)]">PrÃ³ximas Subastas</h2>
+        <h2 class="text-[20px] font-[590] text-[var(--color-porcelain)]">Proximas Subastas</h2>
       </div>
 
       @if (proximas().length === 0) {

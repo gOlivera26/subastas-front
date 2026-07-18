@@ -8,10 +8,6 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <button (click)="openAfipModal()" class="flex items-center gap-2 rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-deep-slate)] px-3 sm:px-4 py-2.5 text-[13px] sm:text-[14px] font-[510] text-[var(--color-porcelain)] transition-all hover:bg-[var(--color-charcoal-grey)]">
-          <lucide-icon name="search" [size]="16"></lucide-icon>
-          <span class="hidden sm:inline">Verificar AFIP</span>
-        </button>
         <button (click)="openCreateModal()" class="flex items-center gap-2 rounded-xl bg-[var(--color-cyan-spark)] px-3 sm:px-5 py-2.5 text-[13px] sm:text-[14px] font-[590] text-[var(--color-pitch-black)] transition-all hover:brightness-110">
           <lucide-icon name="plus" [size]="16"></lucide-icon>
           <span class="hidden sm:inline">Nuevo Proveedor</span>
@@ -60,10 +56,10 @@
 
       <ng-template #hasConstanciaAfipTpl let-row>
         @if (row.hasConstanciaAfip) {
-          <span class="flex items-center justify-center gap-1.5 text-[var(--color-neon-lime)]">
-            <lucide-icon name="check-circle" [size]="16"></lucide-icon>
-            <span class="text-[13px]">Sí</span>
-          </span>
+          <button (click)="downloadConstancia(row.id)" class="flex items-center justify-center gap-1.5 text-[var(--color-neon-lime)] hover:text-[var(--color-neon-lime)]/80 transition-colors">
+            <lucide-icon name="download" [size]="16"></lucide-icon>
+            <span class="text-[13px]">PDF</span>
+          </button>
         } @else {
           <span class="text-[var(--color-storm-cloud)] text-[13px]">No</span>
         }
@@ -117,6 +113,14 @@
             <input [(ngModel)]="createForm.cup" name="createCup" type="text"
               class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
           </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Tipo de Persona *</label>
+            <select [(ngModel)]="createForm.idTipoPersona" name="createTipoPersona" required
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+              <option [value]="0">Seleccionar tipo</option>
+              @for (t of tiposPersona(); track t.id) { <option [value]="t.id">{{ t.descripcion }}</option> }
+            </select>
+          </div>
           <div class="col-span-2">
             <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Email Institucional *</label>
             <input [(ngModel)]="createForm.emailInstitucional" name="createEmail" type="email" required
@@ -126,6 +130,11 @@
             <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Email Alternativo</label>
             <input [(ngModel)]="createForm.emailAlternativo" name="createEmailAlt" type="email"
               class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-cyan-spark)] outline-none transition-all">
+          </div>
+          <div class="col-span-2">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Constancia AFIP (PDF)</label>
+            <input type="file" accept=".pdf" (change)="onFileSelected($event, 'create')"
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-2 text-[13px] text-[var(--color-fog-grey)] file:mr-4 file:rounded-lg file:border-0 file:bg-[var(--color-deep-slate)] file:px-3 file:py-1.5 file:text-[var(--color-porcelain)] file:cursor-pointer">
           </div>
         </div>
         <div class="flex gap-3">
@@ -176,6 +185,14 @@
             <input [(ngModel)]="editForm.cup" name="editCup" type="text"
               class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
           </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Tipo de Persona *</label>
+            <select [(ngModel)]="editForm.idTipoPersona" name="editTipoPersona" required
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+              <option [value]="0">Seleccionar tipo</option>
+              @for (t of tiposPersona(); track t.id) { <option [value]="t.id">{{ t.descripcion }}</option> }
+            </select>
+          </div>
           <div class="col-span-2">
             <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Email Institucional *</label>
             <input [(ngModel)]="editForm.emailInstitucional" name="editEmail" type="email" required
@@ -185,6 +202,14 @@
             <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Email Alternativo</label>
             <input [(ngModel)]="editForm.emailAlternativo" name="editEmailAlt" type="email"
               class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-3 text-[14px] text-[var(--color-porcelain)] focus:border-[var(--color-aether-blue)] outline-none transition-all">
+          </div>
+          <div class="col-span-2">
+            <label class="mb-1.5 block text-[10px] font-[590] uppercase tracking-widest text-[var(--color-storm-cloud)]">Constancia AFIP (PDF)</label>
+            <input type="file" accept=".pdf" (change)="onFileSelected($event, 'edit')"
+              class="w-full rounded-xl border border-[var(--color-charcoal-grey)] bg-[var(--color-pitch-black)]/80 px-4 py-2 text-[13px] text-[var(--color-fog-grey)] file:mr-4 file:rounded-lg file:border-0 file:bg-[var(--color-deep-slate)] file:px-3 file:py-1.5 file:text-[var(--color-porcelain)] file:cursor-pointer">
+            @if (selectedProvider()?.hasConstanciaAfip) {
+              <p class="mt-2 text-[11px] text-[var(--color-neon-lime)]">✓ Ya tiene una constancia cargada. Subir una nueva la reemplazará.</p>
+            }
           </div>
         </div>
         <div class="flex gap-3">
